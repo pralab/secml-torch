@@ -3,3 +3,4 @@ torchvision
 scikit-learn
 tensorflow
 foolbox
+git+https://github.com/RobustBench/robustbench.git
