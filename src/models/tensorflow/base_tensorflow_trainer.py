@@ -7,6 +7,3 @@ class BaseTensorflowTrainer(BaseTrainer):
 
 	def train(self, model, dataloader):
 		pass
-
-	def test(self, model, dataloader):
-		pass

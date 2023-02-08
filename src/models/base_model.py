@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Callable
 
 import torch
+from torch.utils.data import DataLoader
 
 from src.models.preprocessing.identity_preprocessing import IdentityPreprocessing
 from src.models.preprocessing.preprocessing import Preprocessing
@@ -32,7 +33,7 @@ class BaseModel(ABC):
 		...
 
 	@abstractmethod
-	def train(self, dataloader: torch.Tensor):
+	def train(self, dataloader: DataLoader):
 		...
 
 	def __call__(self, x: torch.Tensor) -> torch.Tensor:

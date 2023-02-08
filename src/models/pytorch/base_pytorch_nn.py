@@ -1,4 +1,5 @@
 import torch
+from torch.utils.data import DataLoader
 
 from src.models.base_model import BaseModel
 from src.models.preprocessing.preprocessing import Preprocessing
@@ -8,13 +9,16 @@ from src.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 class BasePytorchClassifier(BaseModel):
 
 	def __init__(self, model: torch.nn.Module, preprocessing: Preprocessing = None,
-				 trainer: BasePyTorchTrainer = None):
+	             trainer: BasePyTorchTrainer = None):
 		super().__init__(preprocessing=preprocessing)
 		self._model: torch.nn.Module = model
 		self._trainer = trainer
 
+	def get_device(self):
+		return next(self._model.parameters()).device
+
 	def predict(self, x: torch.Tensor) -> torch.Tensor:
-		scores = self._model(x)
+		scores = self.decision_function(x)
 		labels = torch.argmax(scores, dim=-1)
 		return labels
 
@@ -29,6 +33,7 @@ class BasePytorchClassifier(BaseModel):
 		-------
 		output of decision function
 		"""
+		x = x.to(device=self.get_device())
 		return self._model(x)
 
 	def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
@@ -53,7 +58,7 @@ class BasePytorchClassifier(BaseModel):
 		grad = x.grad
 		return grad
 
-	def train(self, dataloader: torch.Tensor):
+	def train(self, dataloader: DataLoader):
 		if self._trainer is None:
 			raise ValueError("Cannot train without a trainer.")
 		return self._trainer.train(self._model, dataloader)
