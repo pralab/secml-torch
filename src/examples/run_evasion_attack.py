@@ -1,6 +1,4 @@
-import torch
 import torchvision.datasets
-from torch.optim import Adam
 from torch.utils.data import DataLoader, Subset
 from src.adv.backends import Backends
 from src.adv.evasion.pgd import PGD
@@ -8,7 +6,6 @@ from src.adv.evasion.threat_models import ThreatModels
 
 from src.metrics.classification import Accuracy
 from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from src.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 
 from robustbench.utils import load_model
 
