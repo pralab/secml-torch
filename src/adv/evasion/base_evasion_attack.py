@@ -10,25 +10,30 @@ from src.models.base_model import BaseModel
 
 class BaseEvasionAttackCreator(ABC):
 
-	def get_implementation(self, backend: str) -> Callable:
+	@classmethod
+	def get_implementation(cls, backend: str) -> Callable:
 		implementations = {
-			Backends.FOOLBOX: self.get_foolbox_implementation,
-			Backends.NATIVE: self.get_native_implementation,
+			Backends.FOOLBOX: cls.get_foolbox_implementation,
+			Backends.NATIVE: cls.get_native_implementation,
 		}
 		if backend not in implementations:
 			raise NotImplementedError('Unsupported or not-implemented backend.')
-		return implementations[backend]
+		return implementations[backend]()
 
-	@classmethod
-	def check_threat_model_available(cls, threat_model: str):
+	@staticmethod
+	def check_threat_model_available(threat_model: str):
 		if not ThreatModels.is_threat_model_available(threat_model):
 			raise NotImplementedError('Unsupported or not-implemented threat model.')
 
-	def get_foolbox_implementation(self):
+	@staticmethod
+	def get_foolbox_implementation():
 		raise NotImplementedError('Foolbox implementation not available.')
 
-	def get_native_implementation(self):
+	@staticmethod
+	def get_native_implementation():
 		raise NotImplementedError('Native implementation not available.')
+
+class BaseEvasionAttack:
 
 	@abstractmethod
 	def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:

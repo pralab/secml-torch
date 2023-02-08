@@ -6,5 +6,4 @@ class ThreatModels:
 
 	@classmethod
 	def is_threat_model_available(cls, threat_model):
-		is_available = getattr(ThreatModels, threat_model, None)
-		return is_available is not None
+		return threat_model in (cls.L0, cls.L1, cls.L2, cls.LINF)

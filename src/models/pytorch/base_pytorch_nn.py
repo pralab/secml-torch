@@ -14,6 +14,10 @@ class BasePytorchClassifier(BaseModel):
 		self._model: torch.nn.Module = model
 		self._trainer = trainer
 
+	@property
+	def model(self):
+		return self._model
+
 	def get_device(self):
 		return next(self._model.parameters()).device
 
