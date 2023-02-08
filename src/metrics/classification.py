@@ -23,7 +23,7 @@ class Accuracy(object):
 
 	def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
 		self._num_samples += y_true.shape[0]
-		self._accumulated_accuracy += torch.sum(y_pred.type(y_true.dtype) == y_true)
+		self._accumulated_accuracy += torch.sum(y_pred.type(y_true.dtype).cpu() == y_true.cpu())
 
 	def compute(self):
 		return self._accumulated_accuracy / self._num_samples

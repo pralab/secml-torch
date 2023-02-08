@@ -1,14 +1,14 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 from typing import Callable
 
 from torch.utils.data import DataLoader
 
 from src.adv.backends import Backends
-from src.adv.evasion.threat_models import ThreatModels
+from src.adv.evasion.perturbation_models import PerturbationModels
 from src.models.base_model import BaseModel
 
 
-class BaseEvasionAttackCreator(ABC):
+class BaseEvasionAttackCreator:
 
 	@classmethod
 	def get_implementation(cls, backend: str) -> Callable:
@@ -21,8 +21,8 @@ class BaseEvasionAttackCreator(ABC):
 		return implementations[backend]()
 
 	@staticmethod
-	def check_threat_model_available(threat_model: str):
-		if not ThreatModels.is_threat_model_available(threat_model):
+	def check_perturbation_model_available(perturbation_model: str):
+		if not PerturbationModels.is_perturbation_model_available(perturbation_model):
 			raise NotImplementedError('Unsupported or not-implemented threat model.')
 
 	@staticmethod
@@ -32,6 +32,7 @@ class BaseEvasionAttackCreator(ABC):
 	@staticmethod
 	def get_native_implementation():
 		raise NotImplementedError('Native implementation not available.')
+
 
 class BaseEvasionAttack:
 
