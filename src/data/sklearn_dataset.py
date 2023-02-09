@@ -4,10 +4,11 @@ from torch.utils.data.dataset import T_co
 
 
 class SklearnDataset(Dataset):
-
     def __init__(self, x: np.ndarray, y: np.ndarray):
         if x.shape[0] != y.shape[0]:
-            raise ValueError(f'x and y must have the same number of rows (mismatch {x.shape} and {y.shape})')
+            raise ValueError(
+                f"x and y must have the same number of rows (mismatch {x.shape} and {y.shape})"
+            )
         self._x: np.ndarray = x
         self._y: np.ndarray = y
 

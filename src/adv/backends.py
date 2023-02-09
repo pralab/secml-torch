@@ -1,3 +1,3 @@
 class Backends:
-	FOOLBOX = 'foolbox'
-	NATIVE = 'native'
+    FOOLBOX = "foolbox"
+    NATIVE = "native"

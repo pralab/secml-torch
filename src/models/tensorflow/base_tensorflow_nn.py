@@ -7,60 +7,64 @@ from src.models.tensorflow.base_tensorflow_trainer import BaseTensorflowTrainer
 
 
 class BaseTensorflowClassifier(BaseModel):
-	def __init__(self, model: tf.keras.Model, preprocessing: Preprocessing = None,
-				 trainer: BaseTensorflowTrainer = None):
-		super().__init__(preprocessing=preprocessing)
-		self._model = model
-		self._trainer = trainer
+    def __init__(
+        self,
+        model: tf.keras.Model,
+        preprocessing: Preprocessing = None,
+        trainer: BaseTensorflowTrainer = None,
+    ):
+        super().__init__(preprocessing=preprocessing)
+        self._model = model
+        self._trainer = trainer
 
-	def predict(self, x: torch.Tensor) -> torch.Tensor:
-		"""
-		TODO
-		Parameters
-		----------
-		x :
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        TODO
+        Parameters
+        ----------
+        x :
 
-		Returns
-		-------
+        Returns
+        -------
 
-		"""
-		pass
+        """
+        pass
 
-	def decision_function(self, x: torch.Tensor) -> torch.Tensor:
-		"""
-		TODO
-		Parameters
-		----------
-		x :
+    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        TODO
+        Parameters
+        ----------
+        x :
 
-		Returns
-		-------
+        Returns
+        -------
 
-		"""
-		pass
+        """
+        pass
 
-	def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
-		"""
-		TODO
-		Parameters
-		----------
-		x :
+    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+        """
+        TODO
+        Parameters
+        ----------
+        x :
 
-		Returns
-		-------
+        Returns
+        -------
 
-		"""
-		pass
+        """
+        pass
 
-	def train(self, dataloader: torch.Tensor):
-		"""
-		TODO
-		Parameters
-		----------
-		dataloader :
+    def train(self, dataloader: torch.Tensor):
+        """
+        TODO
+        Parameters
+        ----------
+        dataloader :
 
-		Returns
-		-------
+        Returns
+        -------
 
-		"""
-		pass
+        """
+        pass

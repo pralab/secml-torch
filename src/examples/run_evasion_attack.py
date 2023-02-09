@@ -9,10 +9,11 @@ from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 from robustbench.utils import load_model
 
-net = load_model(model_name='Rony2019Decoupling', dataset='cifar10', threat_model='L2')
-net.to('mps')
-test_dataset = torchvision.datasets.CIFAR10(transform=torchvision.transforms.ToTensor(), train=False, root='.',
-                                            download=True)
+net = load_model(model_name="Rony2019Decoupling", dataset="cifar10", threat_model="L2")
+net.to("mps")
+test_dataset = torchvision.datasets.CIFAR10(
+    transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
+)
 test_dataset = Subset(test_dataset, list(range(5)))
 test_data_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
@@ -24,8 +25,15 @@ accuracy = Accuracy()(model, test_data_loader)
 print(accuracy)
 
 # Create and run attack
-attack = PGD(perturbation_model=PerturbationModels.LINF, epsilon=0.5, num_steps=50, step_size=0.05, random_start=False,
-             y_target=None, backend=Backends.FOOLBOX)
+attack = PGD(
+    perturbation_model=PerturbationModels.LINF,
+    epsilon=0.5,
+    num_steps=50,
+    step_size=0.05,
+    random_start=False,
+    y_target=None,
+    backend=Backends.FOOLBOX,
+)
 adv_ds = attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples
