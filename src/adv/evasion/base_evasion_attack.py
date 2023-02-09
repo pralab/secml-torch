@@ -20,7 +20,7 @@ class BaseEvasionAttackCreator:
         return implementations[backend]()
 
     @staticmethod
-    def check_perturbation_model_available(perturbation_model: str):
+    def check_perturbation_model_available(perturbation_model: str) -> bool:
         if not PerturbationModels.is_perturbation_model_available(perturbation_model):
             raise NotImplementedError("Unsupported or not-implemented threat model.")
 
