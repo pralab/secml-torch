@@ -1,4 +1,5 @@
 from typing import Union, List, Type
+from kiwisolver import Constraint
 
 import torch.nn
 from torch.utils.data import DataLoader
@@ -12,37 +13,6 @@ class Manipulation:
         raise NotImplementedError("Abstract manipulation.")
 
 
-class Constraint:
-    def __call__(self, x, delta, epsilon):
-        ...
-
-
-class L2Constraint(Constraint):
-    def __init__(self, center, radius):
-
-
-    def project(self, x):
-        return torch.nn.functional.Normalize(x, p=2) * self.radius
-
-
-class LpConstraint(Constraint):
-    def __init__(self, center, radius, p):
-        self.p
-        self.center = center
-        self.radius = radius
-
-    def _project(self, x):
-        ...
-
-    def __call__(self, x):
-        x = x + self.center
-        norm = torch.norm(x, p=p)
-        if norm > self.radius:
-            delta = self.project(x)
-        return delta
-
-
-
 class Initializer:
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         return torch.zeros_like(x)
@@ -53,13 +23,20 @@ class GradientProcessing:
         ...
 
 
-
 class CompositeEvasionAttack(BaseEvasionAttack):
-
-    def __init__(self, y_target: Union[int, None], num_steps: int, step_size: float,
-                 loss_function: Union[str, torch.nn.Module], optimizer_cls: Union[str, Type[torch.nn.Module]],
-                 manipulation_function: Manipulation, domain_constraints: List[Constraint], perturbation_constraints: List[Constraint], initializer: Initializer,
-                 gradient_processing: GradientProcessing):
+    def __init__(
+        self,
+        y_target: Union[int, None],
+        num_steps: int,
+        step_size: float,
+        loss_function: Union[str, torch.nn.Module],
+        optimizer_cls: Union[str, Type[torch.nn.Module]],
+        manipulation_function: Manipulation,
+        domain_constraints: List[Constraint],
+        perturbation_constraints: List[Constraint],
+        initializer: Initializer,
+        gradient_processing: GradientProcessing,
+    ):
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size
@@ -78,13 +55,18 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
         for samples, labels in data_loader:
-            target = torch.zeros_like(labels) + self.y_target if self.y_target is not None else labels
+            target = (
+                torch.zeros_like(labels) + self.y_target
+                if self.y_target is not None
+                else labels
+            )
             multiplier = 1 if self.y_target is not None else -1
             delta = self.initializer(samples)
             optimizer = self.optimizer_cls([delta])
             x_adv = self.manipulation_function(samples, delta)
             for i in range(self.num_steps):
-                loss = self.loss_function(x_adv, target) * multiplier
+                scores = model.decision_function(x_adv)
+                loss = self.loss_function(scores, target) * multiplier
                 loss.backward()
                 gradient = delta.grad
                 gradient = self.gradient_processing(gradient)
