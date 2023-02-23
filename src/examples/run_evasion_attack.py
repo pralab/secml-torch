@@ -32,7 +32,7 @@ attack = PGD(
     step_size=0.05,
     random_start=False,
     y_target=None,
-    backend=Backends.FOOLBOX,
+    backend=Backends.NATIVE,
 )
 adv_ds = attack(model, test_data_loader)
 

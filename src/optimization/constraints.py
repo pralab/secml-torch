@@ -1,11 +1,21 @@
+import math
 from abc import abstractmethod
 
 import torch
 
 
 class Constraint:
-    def __call__(self, x, *args, **kwargs):
+    def __call__(self, x: torch.Tensor, *args, **kwargs):
         ...
+
+
+class ClipConstraint(Constraint):
+    def __init__(self, lb=0, ub=1):
+        self.lb = lb
+        self.ub = ub
+
+    def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        return torch.clip(x, min=self.lb, max=self.ub)
 
 
 class LpConstraint(Constraint):
@@ -15,34 +25,39 @@ class LpConstraint(Constraint):
         self.radius = radius
 
     @abstractmethod
-    def _project(self, x):
+    def project(self, x: torch.Tensor) -> torch.Tensor:
         ...
 
-    def __call__(self, x):
+    def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+        flat_shape = (x.shape[0], math.prod(x.shape[1:]))
+        original_shape = x.shape
         x = x + self.center
-        norm = torch.norm(x, p=self.p)
-        if norm > self.radius:
-            delta = self.project(x)
+        norm = torch.linalg.norm(x.view(flat_shape), ord=self.p, dim=1)
+        normalized_rows = (norm > self.radius).view(-1, 1)
+        delta = self.project(x).view(flat_shape) * normalized_rows + x.view(flat_shape) * torch.logical_not(normalized_rows)
+        delta = delta.view(original_shape)
         return delta
 
 
-class L2Constraint(Constraint):
+class L2Constraint(LpConstraint):
     def __init__(self, center, radius):
         super().__init__(center=center, radius=radius, p=2)
 
     def project(self, x):
-        return torch.nn.functional.Normalize(x, p=2) * self.radius
+        projection = torch.nn.functional.Normalize(x, p=2) * self.radius
+        return projection
 
 
-class LInfConstraint(Constraint):
+class LInfConstraint(LpConstraint):
     def __init__(self, center, radius):
-        super().__init__(center=center, radius=radius, p=torch.int)
+        super().__init__(center=center, radius=radius, p=float('inf'))
 
     def project(self, x):
-        return torch.clip(x, min=-self.radius, max=self.radius)
+        projection = torch.clip(x, min=-self.radius, max=self.radius)
+        return projection
 
 
-class L1Constraint(Constraint):
+class L1Constraint(LpConstraint):
     def __init__(self, center, radius) -> None:
         super().__init__(center=center, radius=radius, p=1)
 
@@ -89,4 +104,5 @@ class L1Constraint(Constraint):
         theta = (cumsum[torch.arange(x.shape[0]), rho.cpu() - 1] - self.radius) / rho
         proj = (torch.abs(x) - theta.unsqueeze(1)).clamp(min=0)
         x = mask * x + (1 - mask) * proj * torch.sign(x)
-        return x.view(original_shape)
+        x = x.view(original_shape)
+        return x
