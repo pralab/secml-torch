@@ -1,9 +1,12 @@
 from typing import Optional, List
 
 import torch
+from torch.optim import Adam
 
-from src.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS, SGD, AdditiveManipulation, \
-    GradientNormalizerProcessing, Initializer
+from src.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS, SGD
+from src.manipulations.manipulation import AdditiveManipulation
+from src.optimization.initializer import Initializer
+from src.optimization.gradient_processing import LinearProjectionGradientProcessing
 from src.adv.evasion.foolbox import BaseFoolboxEvasionAttack
 
 from src.adv.evasion.perturbation_models import PerturbationModels
@@ -113,14 +116,20 @@ class PGDNative(CompositeEvasionAttack):
             PerturbationModels.L2: L2Constraint,
             PerturbationModels.LINF: LInfConstraint
         }
-        initializer = Initializer() if random_start else Initializer()
+        initializer = Initializer()
+        if random_start:
+            raise NotImplementedError("Random start in LP ball not yet implemented.")
         # TODO add random init with different LP norms
         self.epsilon = epsilon
+        gradient_processing = LinearProjectionGradientProcessing(perturbation_model)
+        perturbation_constraints = [perturbation_models[perturbation_model]]
+        domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
+        manipulation_function = AdditiveManipulation()
         super().__init__(y_target=y_target, num_steps=num_steps, step_size=step_size, loss_function=CE_LOSS,
-                         optimizer_cls=SGD, manipulation_function=AdditiveManipulation(),
-                         domain_constraints=[ClipConstraint(lb=lb, ub=ub)],
-                         perturbation_constraints=[perturbation_models[perturbation_model]],
-                         gradient_processing=GradientNormalizerProcessing(perturbation_model),
+                         optimizer_cls=SGD, manipulation_function=manipulation_function,
+                         domain_constraints=domain_constraints,
+                         perturbation_constraints=perturbation_constraints,
+                         gradient_processing=gradient_processing,
                          initializer=initializer)
 
     def init_perturbation_constraints(self, center: torch.Tensor) -> List[Constraint]:

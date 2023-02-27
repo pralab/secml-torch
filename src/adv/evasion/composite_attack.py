@@ -1,69 +1,16 @@
-import math
 from typing import Union, List, Type
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam, SGD
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
 from src.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from src.adv.evasion.perturbation_models import PerturbationModels
+from src.manipulations.manipulation import Manipulation
 from src.models.base_model import BaseModel
 from src.optimization.constraints import Constraint
-
-
-class Manipulation:
-    def __call__(self, x: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Abstract manipulation.")
-
-
-class AdditiveManipulation(Manipulation):
-    def __call__(self, x: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
-        x_adv = x + delta
-        return x_adv
-
-
-class Initializer:
-    def __call__(self, x: torch.Tensor) -> torch.Tensor:
-        init = torch.zeros_like(x)
-        return init
-
-
-class RandomLpInitializer(Initializer):
-    def __init__(self, center, radius, p):
-        raise NotImplementedError("Not yet implemented")
-
-    def __call__(self, x: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Not yet implemented")
-
-
-class GradientProcessing:
-    def __call__(self, grad: torch.Tensor) -> torch.Tensor:
-        ...
-
-
-class GradientNormalizerProcessing(GradientProcessing):
-    def __init__(self, perturbation_model: str = PerturbationModels.L2):
-        perturbations_models = {
-            PerturbationModels.L1: 1,
-            PerturbationModels.L2: 2,
-            PerturbationModels.LINF: float('inf')
-        }
-        if perturbation_model not in perturbations_models:
-            raise ValueError(
-                f"{perturbation_model} not included in normalizers. Available: {perturbations_models.values()}")
-        self.p = perturbations_models[perturbation_model]
-
-    def __call__(self, grad: torch.Tensor) -> torch.Tensor:
-        original_shape = grad.shape
-        flat_shape = (grad.shape[0], math.prod(grad.shape[1:]))
-        grad = grad.view(flat_shape)
-        norm = torch.linalg.norm(grad, ord=self.p, dim=1)
-        norm[norm == 0] = 1  # TODO manage zero gradient here
-        normalized_grad = torch.div(grad, norm.view(-1, 1))
-        normalized_grad = normalized_grad.view(original_shape)
-        return normalized_grad
-
+from src.optimization.gradient_processing import GradientProcessing
+from src.optimization.initializer import Initializer
 
 CE_LOSS = 'ce_loss'
 LOGITS_LOSS = 'logits_loss'
@@ -129,31 +76,45 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         raise NotImplementedError("Must be implemented accordingly")
 
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
+        adversarials = []
+        original_labels = []
+        multiplier = 1 if self.y_target is not None else -1
         for samples, labels in data_loader:
             target = (
                 torch.zeros_like(labels) + self.y_target
                 if self.y_target is not None
                 else labels
             )
-            multiplier = 1 if self.y_target is not None else -1
-            delta = self.initializer(samples)
+
+            delta = self.initializer(samples.data)
             delta.requires_grad = True
             optimizer = self.optimizer_cls([delta], lr=self.step_size)
             perturbation_constraints = self.init_perturbation_constraints(samples)
             x_adv = self.manipulation_function(samples, delta)
             for i in range(self.num_steps):
-                optimizer.zero_grad()
                 scores = model.decision_function(x_adv)
                 target = target.to(scores.device)
                 loss = self.loss_function(scores, target) * multiplier
+                optimizer.zero_grad()
                 loss.backward()
                 gradient = delta.grad
                 gradient = self.gradient_processing(gradient)
                 delta.grad.data = gradient.data
                 optimizer.step()
                 for constraint in perturbation_constraints:
-                    delta = constraint(delta)
-
+                    delta.data = constraint(delta.data)
                 x_adv = self.manipulation_function(samples, delta)
                 for constraint in self.domain_constraints:
-                    x_adv = constraint(x_adv)
+                    x_adv.data = constraint(x_adv.data)
+                adversarials.append(x_adv)
+                original_labels.append(labels)
+                # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
+                #TODO check best according to custom metric
+
+        adversarials = torch.vstack(adversarials)
+        original_labels = torch.hstack(original_labels)
+        adversarial_dataset = TensorDataset(adversarials, original_labels)
+        adversarial_loader = DataLoader(
+            adversarial_dataset, batch_size=data_loader.batch_size
+        )
+        return adversarial_loader
