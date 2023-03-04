@@ -47,4 +47,24 @@ class SVM(BaseSklearnModel):
         )
         super().__init__(model, preprocessing)
         self._pytorch_model = SklearnLayer(self)
+ 
+    @property
+    def kernel(self):
+        return self._model.kernel
+    
+    @property
+    def alpha(self):
+        return self._model.dual_coef_ if self._model.kernel is not None else None
+
+    @property
+    def n_classes(self):
+        return len(self._model.classes_)
+
+    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+        y = y.detach().cpu().numpy()
+        v = self.coef_ if self.kernel is None else self.alpha
+        if self.n_classes > 2:
+            return y.dot(v)
+        else:
+            return y[0] * -v + y[1] * v
 
