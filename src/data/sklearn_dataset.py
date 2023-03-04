@@ -4,6 +4,10 @@ from torch.utils.data.dataset import T_co
 
 
 class SklearnDataset(Dataset):
+    """
+    Wraps a scikit-learn dataset into a PyTorch dataset.
+    """
+
     def __init__(self, x: np.ndarray, y: np.ndarray):
         if x.shape[0] != y.shape[0]:
             raise ValueError(

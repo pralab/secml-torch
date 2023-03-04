@@ -5,7 +5,7 @@ import sklearn
 import torch
 from torch.utils.data import DataLoader
 
-from src.data.sklearn_dataset import SklearnDataset
+from src.data.sklearn_dataloader import SklearnDataLoader
 from src.models.base_model import BaseModel
 from src.models.preprocessing.preprocessing import Preprocessing
 
@@ -33,11 +33,8 @@ class BaseSklearnModel(BaseModel):
         )
 
     def train(self, dataloader: DataLoader):
-        if not isinstance(dataloader.dataset, SklearnDataset):
-            raise ValueError(
-                f"Internal dataset is not SklearnDataset, but {type(dataloader.dataset)}"
-            )
-        x, y = dataloader.dataset.x, dataloader.dataset.y
+        loader = SklearnDataLoader(dataloader)
+        x, y = loader.x, loader.y
         self._model.fit(x, y)
         return self
 
