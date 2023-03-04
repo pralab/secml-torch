@@ -3,8 +3,6 @@ from src.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from foolbox.attacks.base import Attack
 from torch.utils.data import DataLoader
 from src.models.base_model import BaseModel
-from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from src.models.base_model import BaseModel
 from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
 import torch
@@ -28,9 +26,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         super().__init__()
 
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
-        # TODO get here the correct model if not pytorch
-        if not isinstance(model, BasePytorchClassifier):
-            raise NotImplementedError("Model type not supported.")
+        model = self.get_model(model)
         device = model.get_device()
         foolbox_model = PyTorchModel(model.model, (self.lb, self.ub), device=device)
         adversarials = []

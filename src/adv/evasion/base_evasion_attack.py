@@ -6,6 +6,8 @@ from torch.utils.data import DataLoader
 from src.adv.backends import Backends
 from src.adv.evasion.perturbation_models import PerturbationModels
 from src.models.base_model import BaseModel
+from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from src.models.sklearn.svm import SVM
 
 
 class BaseEvasionAttackCreator:
@@ -47,3 +49,8 @@ class BaseEvasionAttack:
         :rtype: DataLoader
         """
         ...
+
+    def get_model(self, model):
+        if isinstance(model, SVM):
+            return BasePytorchClassifier(model._pytorch_model)
+        return model

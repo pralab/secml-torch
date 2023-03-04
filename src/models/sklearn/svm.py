@@ -5,6 +5,8 @@ from src.models.preprocessing.preprocessing import Preprocessing
 from src.models.sklearn.base_sklearn_model import BaseSklearnModel
 from sklearn.svm import SVC
 
+from src.models.sklearn.sklearn_layer import SklearnLayer
+
 
 class SVM(BaseSklearnModel):
     def __init__(
@@ -44,4 +46,5 @@ class SVM(BaseSklearnModel):
             random_state=random_state,
         )
         super().__init__(model, preprocessing)
+        self._pytorch_model = SklearnLayer(self)
 

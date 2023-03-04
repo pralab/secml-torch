@@ -22,7 +22,11 @@ class BasePytorchClassifier(BaseModel):
         return self._model
 
     def get_device(self):
-        return next(self._model.parameters()).device
+        try:
+            return next(self._model.parameters()).device
+        except StopIteration:
+            # probably sklearn wrapped module
+            return "cpu"
 
     def predict(self, x: torch.Tensor) -> torch.Tensor:
         scores = self.decision_function(x)
