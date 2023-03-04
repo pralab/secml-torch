@@ -20,7 +20,6 @@ class SklearnDataLoader:
         for i, (samples, labels) in enumerate(self._dataloader):
             start_index = i * self._batch_size
             end_index = min((i + 1) * self._batch_size, self._n_samples)
-            print(start_index, end_index)
             self.x[start_index:end_index] = samples.detach().cpu().numpy()
             self.y[start_index:end_index] = labels.detach().cpu().numpy()
         self.x = self.x.reshape(self._n_samples, -1)
