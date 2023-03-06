@@ -30,23 +30,12 @@ class LpConstraint(Constraint):
 
     def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         # x = x + self.center
-        norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
-        to_normalize = (norm > self.radius).view(-1, 1)
-        delta = self.project(x).flatten(start_dim=1) * to_normalize + x.flatten(start_dim=1) * torch.logical_not(
-            to_normalize)
-        delta = delta.view(x.shape)
-
-        # with torch.no_grad():
-        #     diff = evasion.x_adv.data - samples
-        #
-        #     diff = diff.flatten(start_dim=1)
-        #
-        #     diff_norm = diff.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        #     diff.mul_(eps.unsqueeze(1) / diff_norm).clamp_(max=1)
-        #     diff = diff.reshape(evasion.x_adv.shape)
-        #
-        #     evasion.x_adv.copy_((diff + samples).clamp_(0, 1))
-
+        with torch.no_grad():
+            norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
+            to_normalize = (norm > self.radius).view(-1, 1)
+            proj_delta = self.project(x).flatten(start_dim=1)
+            delta = proj_delta * to_normalize + x.flatten(start_dim=1) * torch.logical_not(to_normalize)
+            delta = delta.view(x.shape)
         return delta
 
 
@@ -57,7 +46,8 @@ class L2Constraint(LpConstraint):
     def project(self, x):
         flat_x = x.flatten(start_dim=1)
         diff_norm = flat_x.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        flat_x.mul_(self.radius / diff_norm).clamp_(max=1)
+        flat_x = flat_x / diff_norm * self.radius
+        # flat_x.mul_(self.radius / diff_norm).clamp_(max=1)
         x = flat_x.reshape(x.shape)
         return x
 
@@ -67,9 +57,9 @@ class LInfConstraint(LpConstraint):
         super().__init__(center=center, radius=radius, p=float('inf'))
 
     def project(self, x):
-        x = x + self.center
-        x = x.clamp_(-self.radius, self.radius)
-        x = x - self.center
+        # x = x + self.center
+        x = x.clamp(min=-self.radius, max=self.radius)
+        # x = x - self.center
         return x
 
 
@@ -110,7 +100,7 @@ class L1Constraint(LpConstraint):
             John Duchi, Shai Shalev-Shwartz, Yoram Singer, and Tushar Chandra.
             International Conference on Machine Learning (ICML 2008)
         """
-        x = x + self.center
+        # x = x + self.center
         original_shape = x.shape
         x = x.view(x.shape[0], -1)
         mask = (torch.norm(x, p=1, dim=1) < self.radius).float().unsqueeze(1)

@@ -21,12 +21,11 @@ def attack_linf_pytorch_optim(model, samples, labels, optimizer, steps=100,
         loss = -torch.nn.functional.cross_entropy(out, labels)
         optimizer.zero_grad()
         loss.backward()
-        print(loss)
         x_adv.grad = x_adv.grad.sign()
         optimizer.step()
 
         diff = x_adv.data - samples
-        diff = (diff).clamp_(-eps, +eps)
+        diff = diff.clamp_(-eps, +eps)
         x_adv.detach().copy_((diff + samples).clamp_(0, 1))
     return x_adv
 
@@ -48,7 +47,7 @@ accuracy = Accuracy()(model, test_data_loader)
 print(accuracy)
 
 # Create and run attack
-epsilon = 0.5
+epsilon = 100
 num_steps = 50
 step_size = 0.05
 perturbation_model = PerturbationModels.LINF

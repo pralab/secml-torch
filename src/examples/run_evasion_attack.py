@@ -31,7 +31,7 @@ epsilon = 0.5
 num_steps = 50
 step_size = 0.05
 perturbation_model = PerturbationModels.LINF
-y_target = None
+y_target = torch.Tensor([9]).to(device)
 native_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
@@ -54,7 +54,7 @@ foolbox_attack = PGD(
     num_steps=num_steps,
     step_size=step_size,
     random_start=False,
-    y_target=None,
+    y_target=y_target,
     backend=Backends.FOOLBOX,
 )
 f_adv_ds = foolbox_attack(model, test_data_loader)

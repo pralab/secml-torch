@@ -81,7 +81,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         multiplier = 1 if self.y_target is not None else -1
         for samples, labels in data_loader:
             target = (
-                torch.zeros_like(labels) + self.y_target
+                torch.zeros_like(labels).to(self.y_target) + self.y_target
                 if self.y_target is not None
                 else labels
             )
@@ -94,7 +94,8 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             for i in range(self.num_steps):
                 scores = model.decision_function(x_adv)
                 target = target.to(scores.device)
-                loss = self.loss_function(scores, target) * multiplier
+                loss = self.loss_function(scores, target)
+                loss = loss * multiplier
                 optimizer.zero_grad()
                 loss.backward()
                 gradient = delta.grad
