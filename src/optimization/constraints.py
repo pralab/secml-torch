@@ -9,6 +9,7 @@ class Constraint:
         ...
 
 
+
 class ClipConstraint(Constraint):
     def __init__(self, lb=0, ub=1):
         self.lb = lb
@@ -19,7 +20,8 @@ class ClipConstraint(Constraint):
 
 
 class LpConstraint(Constraint):
-    def __init__(self, center, radius, p):
+    def __init__(self, center=0, radius=0, p=torch.inf):
+        # TODO consider swapping order of the parameters to get eps as first arg
         self.p = p
         self.center = center
         self.radius = radius
@@ -29,18 +31,21 @@ class LpConstraint(Constraint):
         ...
 
     def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
-        # x = x + self.center
+        x = x + self.center
         with torch.no_grad():
             norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
             to_normalize = (norm > self.radius).view(-1, 1)
             proj_delta = self.project(x).flatten(start_dim=1)
-            delta = proj_delta * to_normalize + x.flatten(start_dim=1) * torch.logical_not(to_normalize)
+            delta = torch.where(to_normalize, proj_delta, x.flatten(start_dim=1))
             delta = delta.view(x.shape)
         return delta
 
+    def __repr__(self) -> str:
+        return f"L{self.p} constraint with {'nonzero' if self.center!=0 else 'zero'} center with radius {self.radius}."
 
 class L2Constraint(LpConstraint):
-    def __init__(self, center, radius):
+    def __init__(self, center=0, radius=0):
+        # TODO consider swapping to accept radius as first positional arg
         super().__init__(center=center, radius=radius, p=2)
 
     def project(self, x):
@@ -53,7 +58,7 @@ class L2Constraint(LpConstraint):
 
 
 class LInfConstraint(LpConstraint):
-    def __init__(self, center, radius):
+    def __init__(self, center=0, radius=0):
         super().__init__(center=center, radius=radius, p=float('inf'))
 
     def project(self, x):
@@ -64,7 +69,7 @@ class LInfConstraint(LpConstraint):
 
 
 class L1Constraint(LpConstraint):
-    def __init__(self, center, radius) -> None:
+    def __init__(self, center=0, radius=0) -> None:
         super().__init__(center=center, radius=radius, p=1)
 
     def project(self, x):

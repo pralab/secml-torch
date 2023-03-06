@@ -89,7 +89,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             delta = self.initializer(samples.data)
             delta.requires_grad = True
             optimizer = self.optimizer_cls([delta], lr=self.step_size)
-            perturbation_constraints = self.init_perturbation_constraints(samples)
+            perturbation_constraints = self.init_perturbation_constraints()
             x_adv = self.manipulation_function(samples, delta)
             for i in range(self.num_steps):
                 scores = model.decision_function(x_adv)
@@ -98,19 +98,17 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 loss = loss * multiplier
                 optimizer.zero_grad()
                 loss.backward()
-                gradient = delta.grad
-                gradient = self.gradient_processing(gradient)
-                delta.grad.data = gradient.data
+                delta.grad.data = self.gradient_processing(delta.grad.data)
                 optimizer.step()
                 for constraint in perturbation_constraints:
                     delta.data = constraint(delta.data)
-                x_adv = self.manipulation_function(samples, delta)
+                x_adv.data = self.manipulation_function(samples.data, delta.data)
                 for constraint in self.domain_constraints:
                     x_adv.data = constraint(x_adv.data)
-
+                delta.data = x_adv.data - samples.data
+            
             adversarials.append(x_adv)
             original_labels.append(labels)
-            # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
             #TODO check best according to custom metric
 
         adversarials = torch.vstack(adversarials)

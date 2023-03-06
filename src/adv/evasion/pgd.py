@@ -132,5 +132,5 @@ class PGDNative(CompositeEvasionAttack):
                          gradient_processing=gradient_processing,
                          initializer=initializer)
 
-    def init_perturbation_constraints(self, center: torch.Tensor) -> List[Constraint]:
-        return [p(center, self.epsilon) for p in self.perturbation_constraints]
+    def init_perturbation_constraints(self) -> List[Constraint]:
+        return [p(radius=self.epsilon) for p in self.perturbation_constraints]
