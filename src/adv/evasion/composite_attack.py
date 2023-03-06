@@ -106,10 +106,11 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 x_adv = self.manipulation_function(samples, delta)
                 for constraint in self.domain_constraints:
                     x_adv.data = constraint(x_adv.data)
-                adversarials.append(x_adv)
-                original_labels.append(labels)
-                # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
-                #TODO check best according to custom metric
+
+            adversarials.append(x_adv)
+            original_labels.append(labels)
+            # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
+            #TODO check best according to custom metric
 
         adversarials = torch.vstack(adversarials)
         original_labels = torch.hstack(original_labels)
