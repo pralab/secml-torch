@@ -105,7 +105,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 x_adv.data = self.manipulation_function(samples.data, delta.data)
                 for constraint in self.domain_constraints:
                     x_adv.data = constraint(x_adv.data)
-                delta.data = x_adv.data - samples.data
+                delta.data = self.manipulation_function.invert(samples.data, x_adv.data)
             
             adversarials.append(x_adv)
             original_labels.append(labels)
