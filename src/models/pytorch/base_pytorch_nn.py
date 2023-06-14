@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from src.models.base_model import BaseModel
-from src.models.preprocessing.preprocessing import Preprocessing
+from src.models.data_processing.data_processing import DataProcessing
 from src.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 
 
@@ -10,10 +10,11 @@ class BasePytorchClassifier(BaseModel):
     def __init__(
         self,
         model: torch.nn.Module,
-        preprocessing: Preprocessing = None,
+        preprocessing: DataProcessing = None,
+        postprocessing: DataProcessing = None,
         trainer: BasePyTorchTrainer = None,
     ):
-        super().__init__(preprocessing=preprocessing)
+        super().__init__(preprocessing=preprocessing, postprocessing=postprocessing)
         self._model: torch.nn.Module = model
         self._trainer = trainer
 
@@ -29,7 +30,7 @@ class BasePytorchClassifier(BaseModel):
         labels = torch.argmax(scores, dim=-1)
         return labels
 
-    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
+    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
         """
         Returns the decision function of the model.
         Parameters
