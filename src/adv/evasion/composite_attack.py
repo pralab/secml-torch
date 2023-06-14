@@ -71,44 +71,42 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
         super().__init__()
 
-    def init_perturbation_constraints(self, center: torch.Tensor) -> List[Constraint]:
+    def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")
 
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
         adversarials = []
         original_labels = []
         multiplier = 1 if self.y_target is not None else -1
+        perturbation_constraints = self.init_perturbation_constraints()
         for samples, labels in data_loader:
             target = (
                 torch.zeros_like(labels) + self.y_target
                 if self.y_target is not None
                 else labels
-            )
-
+            ).type(labels.dtype)
             delta = self.initializer(samples.data)
             delta.requires_grad = True
             optimizer = self.optimizer_cls([delta], lr=self.step_size)
-            perturbation_constraints = self.init_perturbation_constraints(samples)
             x_adv = self.manipulation_function(samples, delta)
             for i in range(self.num_steps):
                 scores = model.decision_function(x_adv)
                 target = target.to(scores.device)
-                loss = self.loss_function(scores, target) * multiplier
+                loss = self.loss_function(scores, target)
+                loss = loss * multiplier
                 optimizer.zero_grad()
                 loss.backward()
-                gradient = delta.grad
-                gradient = self.gradient_processing(gradient)
-                delta.grad.data = gradient.data
+                delta.grad.data = self.gradient_processing(delta.grad.data)
                 optimizer.step()
                 for constraint in perturbation_constraints:
                     delta.data = constraint(delta.data)
-                x_adv = self.manipulation_function(samples, delta)
+                x_adv.data = self.manipulation_function(samples.data, delta.data)
                 for constraint in self.domain_constraints:
                     x_adv.data = constraint(x_adv.data)
-                adversarials.append(x_adv)
-                original_labels.append(labels)
-                # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
-                # TODO check best according to custom metric
+                delta.data = self.manipulation_function.invert(samples.data, x_adv.data)
+
+            adversarials.append(x_adv)
+            original_labels.append(labels)
 
         adversarials = torch.vstack(adversarials)
         original_labels = torch.hstack(original_labels)

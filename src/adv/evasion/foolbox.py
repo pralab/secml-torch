@@ -40,7 +40,12 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             if self.y_target is None:
                 criterion = Misclassification(labels)
             else:
-                criterion = TargetedMisclassification(self.y_target)
+                target = (
+                    torch.zeros_like(labels) + self.y_target
+                    if self.y_target is not None
+                    else labels
+                ).type(labels.dtype)
+                criterion = TargetedMisclassification(target)
             _, advx, _ = self.foolbox_attack(
                 model=foolbox_model,
                 inputs=samples,

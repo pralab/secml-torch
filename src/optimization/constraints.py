@@ -19,7 +19,7 @@ class ClipConstraint(Constraint):
 
 
 class LpConstraint(Constraint):
-    def __init__(self, center, radius, p):
+    def __init__(self, radius=0, center=0, p=torch.inf):
         self.p = p
         self.center = center
         self.radius = radius
@@ -29,58 +29,46 @@ class LpConstraint(Constraint):
         ...
 
     def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
-        # x = x + self.center
-        norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
-        to_normalize = (norm > self.radius).view(-1, 1)
-        delta = self.project(x).flatten(start_dim=1) * to_normalize + x.flatten(
-            start_dim=1
-        ) * torch.logical_not(to_normalize)
-        delta = delta.view(x.shape)
-
-        # with torch.no_grad():
-        #     diff = evasion.x_adv.data - samples
-        #
-        #     diff = diff.flatten(start_dim=1)
-        #
-        #     diff_norm = diff.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        #     diff.mul_(eps.unsqueeze(1) / diff_norm).clamp_(max=1)
-        #     diff = diff.reshape(evasion.x_adv.shape)
-        #
-        #     evasion.x_adv.copy_((diff + samples).clamp_(0, 1))
-
+        x = x + self.center
+        with torch.no_grad():
+            norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
+            to_normalize = (norm > self.radius).view(-1, 1)
+            proj_delta = self.project(x).flatten(start_dim=1)
+            delta = torch.where(to_normalize, proj_delta, x.flatten(start_dim=1))
+            delta = delta.view(x.shape)
         return delta
+
+    def __repr__(self) -> str:
+        return f"L{self.p} constraint with {'nonzero' if self.center!=0 else 'zero'} center with radius {self.radius}."
 
 
 class L2Constraint(LpConstraint):
-    def __init__(self, center, radius):
-        super().__init__(center=center, radius=radius, p=2)
+    def __init__(self, radius=0, center=0):
+        super().__init__(radius=radius, center=center, p=2)
 
     def project(self, x):
         flat_x = x.flatten(start_dim=1)
         diff_norm = flat_x.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        flat_x.mul_(self.radius / diff_norm).clamp_(max=1)
+        flat_x = flat_x / diff_norm * self.radius
         x = flat_x.reshape(x.shape)
         return x
 
 
 class LInfConstraint(LpConstraint):
-    def __init__(self, center, radius):
-        super().__init__(center=center, radius=radius, p=float("inf"))
+    def __init__(self, radius=0, center=0):
+        super().__init__(radius=radius, center=center, p=float("inf"))
 
     def project(self, x):
-        x = x + self.center
-        x = x.clamp_(-self.radius, self.radius)
-        x = x - self.center
+        x = x.clamp(min=-self.radius, max=self.radius)
         return x
 
 
 class L1Constraint(LpConstraint):
-    def __init__(self, center, radius) -> None:
-        super().__init__(center=center, radius=radius, p=1)
+    def __init__(self, radius=0, center=0) -> None:
+        super().__init__(radius=radius, center=center, p=1)
 
     def project(self, x):
         """
-        TODO fix docstring to our format
         Compute Euclidean projection onto the L1 ball for a batch.
         Source: https://gist.github.com/tonyduan/1329998205d88c566588e57e3e2c0c55
 
@@ -111,7 +99,6 @@ class L1Constraint(LpConstraint):
             John Duchi, Shai Shalev-Shwartz, Yoram Singer, and Tushar Chandra.
             International Conference on Machine Learning (ICML 2008)
         """
-        x = x + self.center
         original_shape = x.shape
         x = x.view(x.shape[0], -1)
         mask = (torch.norm(x, p=1, dim=1) < self.radius).float().unsqueeze(1)
