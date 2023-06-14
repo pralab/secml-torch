@@ -125,7 +125,6 @@ class PGDNative(CompositeEvasionAttack):
         initializer = Initializer()
         if random_start:
             raise NotImplementedError("Random start in LP ball not yet implemented.")
-        # TODO add random init with different LP norms
         self.epsilon = epsilon
         gradient_processing = LinearProjectionGradientProcessing(perturbation_model)
         perturbation_constraints = [perturbation_models[perturbation_model]]

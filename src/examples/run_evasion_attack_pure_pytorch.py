@@ -12,8 +12,9 @@ from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from robustbench.utils import load_model
 
 
-def attack_linf_pytorch_optim(model, samples, labels, optimizer, steps=100,
-                              step_size=0.05, eps=0.3, device='cpu'):
+def attack_linf_pytorch_optim(
+    model, samples, labels, optimizer, steps=100, step_size=0.05, eps=0.3, device="cpu"
+):
     x_adv = samples.clone().detach().to(device).requires_grad_()
     optimizer = optimizer([x_adv], lr=step_size)
     for _ in range(steps):
@@ -67,13 +68,21 @@ native_adv_ds = native_attack(model, test_data_loader)
 n_robust_accuracy = Accuracy()(model, native_adv_ds)
 print(n_robust_accuracy)
 
-print('OTHER ATTACK')
+print("OTHER ATTACK")
 
 advs = []
 advlb = []
 for data, labels in test_data_loader:
-    x_adv = attack_linf_pytorch_optim(model, data.to(device), labels.to(device), SGD, num_steps, step_size, epsilon,
-                                      'mps')
+    x_adv = attack_linf_pytorch_optim(
+        model,
+        data.to(device),
+        labels.to(device),
+        SGD,
+        num_steps,
+        step_size,
+        epsilon,
+        "mps",
+    )
     advs.append(x_adv)
     advlb.append(labels)
 advlb = torch.cat(advlb)
@@ -86,6 +95,9 @@ print(f_robust_accuracy)
 native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))
 
-distance = torch.linalg.norm(native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
-                             ord=float('inf'), dim=1)
+distance = torch.linalg.norm(
+    native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
+    ord=float("inf"),
+    dim=1,
+)
 print(distance)

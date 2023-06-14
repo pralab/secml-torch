@@ -11,7 +11,7 @@ from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from robustbench.utils import load_model
 
 net = load_model(model_name="Rony2019Decoupling", dataset="cifar10", threat_model="L2")
-device = "mps"
+device = "cpu"
 net.to(device)
 test_dataset = torchvision.datasets.CIFAR10(
     transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
@@ -28,10 +28,10 @@ print(accuracy)
 
 # Create and run attack
 epsilon = 0.5
-num_steps = 50
-step_size = 0.05
+num_steps = 10
+step_size = 0.005
 perturbation_model = PerturbationModels.LINF
-y_target = torch.Tensor([9]).to(device)
+y_target = None
 native_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
@@ -67,11 +67,22 @@ native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))
 real_data, real_labels = next(iter(test_data_loader))
 
-distance = torch.linalg.norm(native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
-                             ord=float('inf'), dim=1)
+distance = torch.linalg.norm(
+    native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
+    ord=float("inf"),
+    dim=1,
+)
 print("Solutions are :", distance, "linf distant")
 
-real_native = torch.linalg.norm(torch.flatten(real_data.to(device) - native_data.to(device), start_dim=1), ord=float('inf'), dim=1)
-real_fb = torch.linalg.norm(torch.flatten(real_data.to(device) - f_data.to(device), start_dim=1), ord=float('inf'), dim=1)
+real_native = torch.linalg.norm(
+    torch.flatten(real_data.to(device) - native_data.to(device), start_dim=1),
+    ord=float("inf"),
+    dim=1,
+)
+real_fb = torch.linalg.norm(
+    torch.flatten(real_data.to(device) - f_data.to(device), start_dim=1),
+    ord=float("inf"),
+    dim=1,
+)
 
 print(real_native, real_fb)

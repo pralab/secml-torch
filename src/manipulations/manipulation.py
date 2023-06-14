@@ -3,10 +3,10 @@ import torch
 
 class Manipulation:
     def __call__(self, x: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Abstract manipulation.")
+        raise NotImplementedError("Manipulation not implemented.")
 
     def invert(self, x: torch.Tensor, x_adv: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Abstract inversion.")
+        raise NotImplementedError("Inversion not available.")
 
 
 class AdditiveManipulation(Manipulation):

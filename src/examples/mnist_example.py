@@ -9,8 +9,8 @@ from src.adv.evasion.perturbation_models import PerturbationModels
 from src.metrics.classification import Accuracy
 from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
-from robustbench.utils import load_model
 from torch import nn
+
 
 class SmallCNN(nn.Module):
     def __init__(self, drop=0.5):
@@ -21,27 +21,35 @@ class SmallCNN(nn.Module):
 
         activ = nn.ReLU(True)
 
-        self.feature_extractor = nn.Sequential(OrderedDict([
-            ('conv1', nn.Conv2d(self.num_channels, 32, 3)),
-            ('relu1', activ),
-            ('conv2', nn.Conv2d(32, 32, 3)),
-            ('relu2', activ),
-            ('maxpool1', nn.MaxPool2d(2, 2)),
-            ('conv3', nn.Conv2d(32, 64, 3)),
-            ('relu3', activ),
-            ('conv4', nn.Conv2d(64, 64, 3)),
-            ('relu4', activ),
-            ('maxpool2', nn.MaxPool2d(2, 2)),
-        ]))
+        self.feature_extractor = nn.Sequential(
+            OrderedDict(
+                [
+                    ("conv1", nn.Conv2d(self.num_channels, 32, 3)),
+                    ("relu1", activ),
+                    ("conv2", nn.Conv2d(32, 32, 3)),
+                    ("relu2", activ),
+                    ("maxpool1", nn.MaxPool2d(2, 2)),
+                    ("conv3", nn.Conv2d(32, 64, 3)),
+                    ("relu3", activ),
+                    ("conv4", nn.Conv2d(64, 64, 3)),
+                    ("relu4", activ),
+                    ("maxpool2", nn.MaxPool2d(2, 2)),
+                ]
+            )
+        )
 
-        self.classifier = nn.Sequential(OrderedDict([
-            ('fc1', nn.Linear(64 * 4 * 4, 200)),
-            ('relu1', activ),
-            ('drop', nn.Dropout(drop)),
-            ('fc2', nn.Linear(200, 200)),
-            ('relu2', activ),
-            ('fc3', nn.Linear(200, self.num_labels)),
-        ]))
+        self.classifier = nn.Sequential(
+            OrderedDict(
+                [
+                    ("fc1", nn.Linear(64 * 4 * 4, 200)),
+                    ("relu1", activ),
+                    ("drop", nn.Dropout(drop)),
+                    ("fc2", nn.Linear(200, 200)),
+                    ("relu2", activ),
+                    ("fc3", nn.Linear(200, self.num_labels)),
+                ]
+            )
+        )
 
         for m in self.modules():
             if isinstance(m, (nn.Conv2d)):
@@ -58,6 +66,7 @@ class SmallCNN(nn.Module):
         features = self.feature_extractor(input)
         logits = self.classifier(features.view(-1, 64 * 4 * 4))
         return logits
+
 
 net = SmallCNN()
 model_weigths = torch.load("models/mnist/mnist_smallcnn_standard.pth")
@@ -83,7 +92,7 @@ epsilon = 0.3
 num_steps = 1
 step_size = 0.05
 perturbation_model = PerturbationModels.LINF
-y_target = None # torch.tensor([9]).to(device)
+y_target = None
 native_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
@@ -119,12 +128,9 @@ native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))
 real_data, real_labels = next(iter(test_data_loader))
 
-distance = torch.linalg.norm(native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
-                             ord=float('inf'), dim=1)
+distance = torch.linalg.norm(
+    native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
+    ord=float("inf"),
+    dim=1,
+)
 print("Solutions are :", distance, "linf distant")
-
-# real_native = torch.linalg.norm(torch.flatten(real_data.to(device) - native_data.to(device), start_dim=1), ord=float('inf'), dim=1)
-# real_fb = torch.linalg.norm(torch.flatten(real_data.to(device) - f_data.to(device), start_dim=1), ord=float('inf'), dim=1)
-
-
-# print(real_native, real_fb)
