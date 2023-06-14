@@ -21,22 +21,28 @@ from foolbox.attacks.projected_gradient_descent import (
     LinfProjectedGradientDescentAttack,
 )
 
-from src.optimization.constraints import ClipConstraint, L1Constraint, L2Constraint, LInfConstraint, Constraint
+from src.optimization.constraints import (
+    ClipConstraint,
+    L1Constraint,
+    L2Constraint,
+    LInfConstraint,
+    Constraint,
+)
 
 
 class PGD(BaseEvasionAttackCreator):
     def __new__(
-            cls,
-            perturbation_model: str,
-            epsilon: float,
-            num_steps: int,
-            step_size: float,
-            random_start: bool,
-            y_target: Optional[int] = None,
-            lb: float = 0.0,
-            ub: float = 1.0,
-            backend: str = Backends.FOOLBOX,
-            **kwargs
+        cls,
+        perturbation_model: str,
+        epsilon: float,
+        num_steps: int,
+        step_size: float,
+        random_start: bool,
+        y_target: Optional[int] = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        backend: str = Backends.FOOLBOX,
+        **kwargs
     ):
         cls.check_perturbation_model_available(perturbation_model)
         implementation = cls.get_implementation(backend)
@@ -63,16 +69,16 @@ class PGD(BaseEvasionAttackCreator):
 
 class PGDFoolbox(BaseFoolboxEvasionAttack):
     def __init__(
-            self,
-            perturbation_model: str,
-            epsilon: float,
-            num_steps: int,
-            step_size: float,
-            random_start: bool,
-            y_target: Optional[int] = None,
-            lb: float = 0.0,
-            ub: float = 1.0,
-            **kwargs
+        self,
+        perturbation_model: str,
+        epsilon: float,
+        num_steps: int,
+        step_size: float,
+        random_start: bool,
+        y_target: Optional[int] = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        **kwargs
     ) -> None:
         perturbation_models = {
             PerturbationModels.L1: L1ProjectedGradientDescentAttack,
@@ -100,21 +106,21 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
 
 class PGDNative(CompositeEvasionAttack):
     def __init__(
-            self,
-            perturbation_model: str,
-            epsilon: float,
-            num_steps: int,
-            step_size: float,
-            random_start: bool,
-            y_target: Optional[int] = None,
-            lb: float = 0.0,
-            ub: float = 1.0,
-            **kwargs
+        self,
+        perturbation_model: str,
+        epsilon: float,
+        num_steps: int,
+        step_size: float,
+        random_start: bool,
+        y_target: Optional[int] = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        **kwargs
     ) -> None:
         perturbation_models = {
             PerturbationModels.L1: L1Constraint,
             PerturbationModels.L2: L2Constraint,
-            PerturbationModels.LINF: LInfConstraint
+            PerturbationModels.LINF: LInfConstraint,
         }
         initializer = Initializer()
         if random_start:
@@ -125,12 +131,18 @@ class PGDNative(CompositeEvasionAttack):
         perturbation_constraints = [perturbation_models[perturbation_model]]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation()
-        super().__init__(y_target=y_target, num_steps=num_steps, step_size=step_size, loss_function=CE_LOSS,
-                         optimizer_cls=SGD, manipulation_function=manipulation_function,
-                         domain_constraints=domain_constraints,
-                         perturbation_constraints=perturbation_constraints,
-                         gradient_processing=gradient_processing,
-                         initializer=initializer)
+        super().__init__(
+            y_target=y_target,
+            num_steps=num_steps,
+            step_size=step_size,
+            loss_function=CE_LOSS,
+            optimizer_cls=SGD,
+            manipulation_function=manipulation_function,
+            domain_constraints=domain_constraints,
+            perturbation_constraints=perturbation_constraints,
+            gradient_processing=gradient_processing,
+            initializer=initializer,
+        )
 
     def init_perturbation_constraints(self) -> List[Constraint]:
         return [p(radius=self.epsilon) for p in self.perturbation_constraints]

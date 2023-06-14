@@ -7,17 +7,20 @@ from torch.utils.data import DataLoader
 
 from src.data.sklearn_dataset import SklearnDataset
 from src.models.base_model import BaseModel
-from src.models.preprocessing.preprocessing import Preprocessing
+from src.models.data_processing.data_processing import DataProcessing
 
 
 class BaseSklearnModel(BaseModel):
     def __init__(
-        self, model: sklearn.base.BaseEstimator, preprocessing: Preprocessing = None
+        self,
+        model: sklearn.base.BaseEstimator,
+        preprocessing: DataProcessing = None,
+        postprocessing: DataProcessing = None,
     ):
-        super().__init__(preprocessing=preprocessing)
+        super().__init__(preprocessing=preprocessing, postprocessing=postprocessing)
         self._model: sklearn.base.BaseEstimator = model
 
-    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
+    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
         if hasattr(self._model, "decision_function"):
             return self.to_tensor(self._model.decision_function(self.to_2d_numpy(x)))
         elif hasattr(self._model, "predict_proba"):

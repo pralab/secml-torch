@@ -2,7 +2,7 @@ import tensorflow as tf
 import torch
 
 from src.models.base_model import BaseModel
-from src.models.preprocessing.preprocessing import Preprocessing
+from src.models.data_processing.data_processing import DataProcessing
 from src.models.tensorflow.base_tensorflow_trainer import BaseTensorflowTrainer
 
 
@@ -10,10 +10,11 @@ class BaseTensorflowClassifier(BaseModel):
     def __init__(
         self,
         model: tf.keras.Model,
-        preprocessing: Preprocessing = None,
+        preprocessing: DataProcessing = None,
+        postprocessing: DataProcessing = None,
         trainer: BaseTensorflowTrainer = None,
     ):
-        super().__init__(preprocessing=preprocessing)
+        super().__init__(preprocessing=preprocessing, postprocessing=postprocessing)
         self._model = model
         self._trainer = trainer
 
@@ -30,7 +31,7 @@ class BaseTensorflowClassifier(BaseModel):
         """
         pass
 
-    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
+    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
         """
         TODO
         Parameters
