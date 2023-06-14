@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 import torch
 
 
-class Preprocessing(ABC):
+class DataProcessing(ABC):
     @abstractmethod
-    def preprocess(self, x: torch.Tensor) -> torch.Tensor:
+    def process(self, x: torch.Tensor) -> torch.Tensor:
         ...
 
     def invert(self, x: torch.Tensor) -> torch.Tensor:
         ...
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
-        return self.preprocess(x)
+        return self.process(x)
