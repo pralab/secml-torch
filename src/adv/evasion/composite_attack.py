@@ -12,35 +12,32 @@ from src.optimization.constraints import Constraint
 from src.optimization.gradient_processing import GradientProcessing
 from src.optimization.initializer import Initializer
 
-CE_LOSS = 'ce_loss'
-LOGITS_LOSS = 'logits_loss'
+CE_LOSS = "ce_loss"
+LOGITS_LOSS = "logits_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
 }
 
-ADAM = 'adam'
-StochasticGD = 'sgd'
+ADAM = "adam"
+StochasticGD = "sgd"
 
-OPTIMIZERS = {
-    ADAM: Adam,
-    StochasticGD: SGD
-}
+OPTIMIZERS = {ADAM: Adam, StochasticGD: SGD}
 
 
 class CompositeEvasionAttack(BaseEvasionAttack):
     def __init__(
-            self,
-            y_target: Union[int, None],
-            num_steps: int,
-            step_size: float,
-            loss_function: Union[str, torch.nn.Module],
-            optimizer_cls: Union[str, Type[torch.nn.Module]],
-            manipulation_function: Manipulation,
-            domain_constraints: List[Constraint],
-            perturbation_constraints: List[Type[Constraint]],
-            initializer: Initializer,
-            gradient_processing: GradientProcessing,
+        self,
+        y_target: Union[int, None],
+        num_steps: int,
+        step_size: float,
+        loss_function: Union[str, torch.nn.Module],
+        optimizer_cls: Union[str, Type[torch.nn.Module]],
+        manipulation_function: Manipulation,
+        domain_constraints: List[Constraint],
+        perturbation_constraints: List[Type[Constraint]],
+        initializer: Initializer,
+        gradient_processing: GradientProcessing,
     ):
         self.y_target = y_target
         self.num_steps = num_steps
@@ -51,7 +48,8 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 self.loss_function = LOSS_FUNCTIONS[loss_function]()
             else:
                 raise ValueError(
-                    f"{loss_function} not in list of init from string. Use one among {LOSS_FUNCTIONS.values()}")
+                    f"{loss_function} not in list of init from string. Use one among {LOSS_FUNCTIONS.values()}"
+                )
         else:
             self.loss_function = loss_function
 
@@ -60,7 +58,8 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 self.optimizer_cls = OPTIMIZERS[optimizer_cls]
             else:
                 raise ValueError(
-                    f"{optimizer_cls} not in list of init from string. Use one among {OPTIMIZERS.values()}")
+                    f"{optimizer_cls} not in list of init from string. Use one among {OPTIMIZERS.values()}"
+                )
         else:
             self.optimizer_cls = optimizer_cls
 
@@ -109,7 +108,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 adversarials.append(x_adv)
                 original_labels.append(labels)
                 # print('NORM : ', delta.flatten(start_dim=1).norm(p=float('inf')))
-                #TODO check best according to custom metric
+                # TODO check best according to custom metric
 
         adversarials = torch.vstack(adversarials)
         original_labels = torch.hstack(original_labels)

@@ -16,17 +16,18 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         perturbations_models = {
             PerturbationModels.L1: 1,
             PerturbationModels.L2: 2,
-            PerturbationModels.LINF: float('inf')
+            PerturbationModels.LINF: float("inf"),
         }
         if perturbation_model not in perturbations_models:
             raise ValueError(
-                f"{perturbation_model} not included in normalizers. Available: {perturbations_models.values()}")
+                f"{perturbation_model} not included in normalizers. Available: {perturbations_models.values()}"
+            )
         self.p = perturbations_models[perturbation_model]
 
     def __call__(self, grad: torch.Tensor) -> torch.Tensor:
         if self.p == 2:
             grad = normalize(grad.data, p=self.p, dim=0)
             return grad
-        if self.p == float('inf'):
+        if self.p == float("inf"):
             return torch.sign(grad)
         raise NotImplementedError("Only L2 and LInf norms implemented now")

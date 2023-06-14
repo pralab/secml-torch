@@ -32,8 +32,9 @@ class LpConstraint(Constraint):
         # x = x + self.center
         norm = torch.linalg.norm(x.flatten(start_dim=1), ord=self.p, dim=1)
         to_normalize = (norm > self.radius).view(-1, 1)
-        delta = self.project(x).flatten(start_dim=1) * to_normalize + x.flatten(start_dim=1) * torch.logical_not(
-            to_normalize)
+        delta = self.project(x).flatten(start_dim=1) * to_normalize + x.flatten(
+            start_dim=1
+        ) * torch.logical_not(to_normalize)
         delta = delta.view(x.shape)
 
         # with torch.no_grad():
@@ -64,7 +65,7 @@ class L2Constraint(LpConstraint):
 
 class LInfConstraint(LpConstraint):
     def __init__(self, center, radius):
-        super().__init__(center=center, radius=radius, p=float('inf'))
+        super().__init__(center=center, radius=radius, p=float("inf"))
 
     def project(self, x):
         x = x + self.center
