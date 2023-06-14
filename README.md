@@ -2,7 +2,7 @@
 New version of SecML
 
 ### Implement new functionalities
-1. Create a card inside the project, by specifying what will be implemented (not how), and convert it to an issue (Fig.1). *Please be clear and concise*.
+1. Create a card inside the project, by specifying what will be implemented (not how), and convert it to an issue. *Please be clear and concise*.
 2. Create a new branch from main that will be used to implement the new functionality. Please provide a meaningful name while creating the new branch.
 Do it from the GitHub web interface to avoid creating non-updated branches.
 **If you create the branch locally, remember to pull the latest commit before branching!**
