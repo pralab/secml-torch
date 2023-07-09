@@ -1,12 +1,12 @@
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
-from src.adv.backends import Backends
-from src.adv.evasion.pgd import PGD
-from src.adv.evasion.perturbation_models import PerturbationModels
+from secml2.adv.backends import Backends
+from secml2.adv.evasion.pgd import PGD
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
-from src.metrics.classification import Accuracy
-from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secml2.metrics.classification import Accuracy
+from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 from robustbench.utils import load_model
 

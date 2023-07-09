@@ -3,7 +3,7 @@ import math
 import torch.linalg
 from torch.nn.functional import normalize
 
-from src.adv.evasion.perturbation_models import PerturbationModels
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 
 class GradientProcessing:
