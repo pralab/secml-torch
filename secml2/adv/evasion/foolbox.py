@@ -35,8 +35,6 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             raise NotImplementedError("Model type not supported.")
         device = model.get_device()
         foolbox_model = PyTorchModel(model.model, (self.lb, self.ub), device=device)
-        adversarials = []
-        original_labels = []
         if self.y_target is None:
             criterion = Misclassification(labels)
         else:
