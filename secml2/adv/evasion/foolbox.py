@@ -27,37 +27,27 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         self.y_target = y_target
         super().__init__()
 
-    def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
+    def _run(
+        self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
+    ) -> torch.Tensor:
         # TODO get here the correct model if not pytorch
         if not isinstance(model, BasePytorchClassifier):
             raise NotImplementedError("Model type not supported.")
         device = model.get_device()
         foolbox_model = PyTorchModel(model.model, (self.lb, self.ub), device=device)
-        adversarials = []
-        original_labels = []
-        for samples, labels in data_loader:
-            samples, labels = samples.to(device), labels.to(device)
-            if self.y_target is None:
-                criterion = Misclassification(labels)
-            else:
-                target = (
-                    torch.zeros_like(labels) + self.y_target
-                    if self.y_target is not None
-                    else labels
-                ).type(labels.dtype)
-                criterion = TargetedMisclassification(target)
-            _, advx, _ = self.foolbox_attack(
-                model=foolbox_model,
-                inputs=samples,
-                criterion=criterion,
-                epsilons=self.epsilon,
-            )
-            adversarials.append(advx)
-            original_labels.append(labels)
-        adversarials = torch.vstack(adversarials)
-        original_labels = torch.hstack(original_labels)
-        adversarial_dataset = TensorDataset(adversarials, original_labels)
-        adversarial_loader = DataLoader(
-            adversarial_dataset, batch_size=data_loader.batch_size
+        if self.y_target is None:
+            criterion = Misclassification(labels)
+        else:
+            target = (
+                torch.zeros_like(labels) + self.y_target
+                if self.y_target is not None
+                else labels
+            ).type(labels.dtype)
+            criterion = TargetedMisclassification(target)
+        _, advx, _ = self.foolbox_attack(
+            model=foolbox_model,
+            inputs=samples,
+            criterion=criterion,
+            epsilons=self.epsilon,
         )
-        return adversarial_loader
+        return advx

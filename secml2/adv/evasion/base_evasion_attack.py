@@ -1,7 +1,8 @@
 from abc import abstractmethod
 from typing import Callable
 
-from torch.utils.data import DataLoader
+import torch
+from torch.utils.data import DataLoader, TensorDataset
 
 from secml2.adv.backends import Backends
 from secml2.adv.evasion.perturbation_models import PerturbationModels
@@ -45,5 +46,24 @@ class BaseEvasionAttack:
         :type data_loader: DataLoader
         :return: Data loader with adversarial examples and original labels
         :rtype: DataLoader
+        """
+        adversarials = []
+        original_labels = []
+        for samples, labels in data_loader:
+            x_adv = self._run(model, samples, labels)
+            adversarials.append(x_adv)
+            original_labels.append(labels)
+        adversarials = torch.vstack(adversarials)
+        original_labels = torch.hstack(original_labels)
+        adversarial_dataset = TensorDataset(adversarials, original_labels)
+        adversarial_loader = DataLoader(
+            adversarial_dataset, batch_size=data_loader.batch_size
+        )
+        return adversarial_loader
+
+    def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):
+        """
+        Compute the attack against the model, using the input data (batch).
+        It returns the batch of adversarial examples.
         """
         ...

@@ -24,7 +24,7 @@ model = BasePytorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_data_loader)
-print(accuracy)
+print("Accuracy:", accuracy.item())
 
 # Create and run attack
 epsilon = 0.5
@@ -45,7 +45,7 @@ native_adv_ds = native_attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples
 n_robust_accuracy = Accuracy()(model, native_adv_ds)
-print(n_robust_accuracy)
+print("Robust Accuracy (PGD Native): ", n_robust_accuracy.item())
 
 # Create and run attack
 foolbox_attack = PGD(
@@ -61,28 +61,4 @@ f_adv_ds = foolbox_attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples
 f_robust_accuracy = Accuracy()(model, f_adv_ds)
-print(f_robust_accuracy)
-
-native_data, native_labels = next(iter(native_adv_ds))
-f_data, f_labels = next(iter(f_adv_ds))
-real_data, real_labels = next(iter(test_data_loader))
-
-distance = torch.linalg.norm(
-    native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
-    ord=float("inf"),
-    dim=1,
-)
-print("Solutions are :", distance, "linf distant")
-
-real_native = torch.linalg.norm(
-    torch.flatten(real_data.to(device) - native_data.to(device), start_dim=1),
-    ord=float("inf"),
-    dim=1,
-)
-real_fb = torch.linalg.norm(
-    torch.flatten(real_data.to(device) - f_data.to(device), start_dim=1),
-    ord=float("inf"),
-    dim=1,
-)
-
-print(real_native, real_fb)
+print("Robust Accuracy (PGD Foolbox): ", n_robust_accuracy.item())
