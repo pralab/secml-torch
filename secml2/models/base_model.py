@@ -4,7 +4,9 @@ from typing import Callable
 import torch
 from torch.utils.data import DataLoader
 
-from secml2.models.data_processing.identity_data_processing import IdentityDataProcessing
+from secml2.models.data_processing.identity_data_processing import (
+    IdentityDataProcessing,
+)
 from secml2.models.data_processing.data_processing import DataProcessing
 
 
