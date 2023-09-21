@@ -13,7 +13,7 @@ from secml2.optimization.gradient_processing import GradientProcessing
 from secml2.optimization.initializer import Initializer
 
 CE_LOSS = "ce_loss"
-LOGITS_LOSS = "logits_loss"
+LOGIT_LOSS = "logits_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
