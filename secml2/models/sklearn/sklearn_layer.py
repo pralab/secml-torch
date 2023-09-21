@@ -69,4 +69,4 @@ class SklearnLayer(nn.Module):
     def forward(self, x):
         x = x.reshape(x.shape[0], -1)
         x = self.sklearn_autograd(x, self._clf)
-        return x
+        return as_tensor(x)

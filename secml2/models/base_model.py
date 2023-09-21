@@ -31,15 +31,28 @@ class BaseModel(ABC):
             postprocessing if postprocessing is not None else IdentityDataProcessing()
         )
 
-    @abstractmethod
+    @property
+    def model(self):
+        return self._model
+    
     def predict(self, x: torch.Tensor) -> torch.Tensor:
-        ...
+        scores = self.decision_function(x)
+        labels = torch.argmax(scores, dim=-1)
+        return labels
 
     def decision_function(self, x: torch.Tensor) -> torch.Tensor:
         x = self._preprocessing(x)
         x = self._decision_function(x)
         x = self._postprocessing(x)
         return x
+
+    def get_device(self):
+        try:
+            return next(self._model.parameters()).device
+        except StopIteration:
+            # probably sklearn wrapped module
+            return "cpu"
+
 
     @abstractmethod
     def _decision_function(self, x: torch.Tensor) -> torch.Tensor:

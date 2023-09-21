@@ -1,10 +1,10 @@
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
-from src.adv.backends import Backends
-from src.adv.evasion.pgd import PGD
-from src.adv.evasion.perturbation_models import PerturbationModels
-from src.metrics.classification import Accuracy
-from src.models.sklearn.svm import SVM
+from secml2.adv.backends import Backends
+from secml2.adv.evasion.pgd import PGD
+from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.metrics.classification import Accuracy
+from secml2.models.sklearn.svm import SVM
 
 
 model = SVM()
@@ -43,8 +43,9 @@ attack = PGD(
     step_size=step_size,
     random_start=False,
     y_target=None,
-    backend=Backends.FOOLBOX,
+    backend=Backends.NATIVE,
 )
+
 f_adv_ds = attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples

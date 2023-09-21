@@ -18,22 +18,6 @@ class BasePytorchClassifier(BaseModel):
         self._model: torch.nn.Module = model
         self._trainer = trainer
 
-    @property
-    def model(self):
-        return self._model
-
-    def get_device(self):
-        try:
-            return next(self._model.parameters()).device
-        except StopIteration:
-            # probably sklearn wrapped module
-            return "cpu"
-
-    def predict(self, x: torch.Tensor) -> torch.Tensor:
-        scores = self.decision_function(x)
-        labels = torch.argmax(scores, dim=-1)
-        return labels
-
     def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
         """
         Returns the decision function of the model.

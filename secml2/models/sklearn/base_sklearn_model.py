@@ -1,60 +1,57 @@
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 import sklearn
 import torch
 from torch.utils.data import DataLoader
 
-from secml2.data.sklearn_dataset import SklearnDataset
+from secml2.data.sklearn_dataloader import SklearnDataLoader
 from secml2.models.base_model import BaseModel
-from secml2.models.preprocessing.preprocessing import Preprocessing
+from secml2.models.data_processing.data_processing import DataProcessing
+from secml2.models.sklearn.sklearn_layer import SklearnLayer, as_array, as_tensor
 
 
 class BaseSklearnModel(BaseModel):
     def __init__(
-        self, model: sklearn.base.BaseEstimator, preprocessing: Preprocessing = None
+        self, model: sklearn.base.BaseEstimator, preprocessing: DataProcessing = None
     ):
         super().__init__(preprocessing=preprocessing)
-        self._model: sklearn.base.BaseEstimator = model
+        self._clf = model
+        self._model = SklearnLayer(model)
 
-    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
-        if hasattr(self._model, "decision_function"):
-            return self.to_tensor(self._model.decision_function(self.to_2d_numpy(x)))
-        elif hasattr(self._model, "predict_proba"):
-            return self.to_tensor(self._model.predict_proba(self.to_2d_numpy(x)))
+    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
+        if hasattr(self._clf, "decision_function"):
+            return self.to_tensor(self._clf.decision_function(self.to_2d_numpy(x)))
+        elif hasattr(self._clf, "predict_proba"):
+            return self.to_tensor(self._clf.predict_proba(self.to_2d_numpy(x)))
         raise AttributeError(
             "This model has neither decision_function nor predict_proba."
         )
 
-    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+    def _gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
         raise NotImplementedError(
             "Custom sklearn model do not implement gradients. "
             "Use specific class or create subclass with custom definition."
         )
+    
+    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+        return self.to_tensor(self._gradient(x))
 
     def train(self, dataloader: DataLoader):
-        if not isinstance(dataloader.dataset, SklearnDataset):
-            raise ValueError(
-                f"Internal dataset is not SklearnDataset, but {type(dataloader.dataset)}"
-            )
+        if not isinstance(dataloader.dataset, SklearnDataLoader):
+            dataloader = SklearnDataLoader(dataloader)
         x, y = dataloader.dataset.x, dataloader.dataset.y
-        self._model.fit(x, y)
+        self._clf.fit(x, y)
         return self
-
-    def predict(self, x: torch.Tensor) -> torch.Tensor:
-        x_numpy = self.to_2d_numpy(x)
-        y = self._model.predict(x_numpy)
-        y = self.to_tensor(y)
-        return y
 
     @classmethod
     def to_numpy(cls, x: torch.Tensor) -> np.ndarray:
-        return x.detach().cpu().numpy()
+        return as_array(x)
 
     @classmethod
     def to_tensor(cls, x: np.ndarray) -> torch.Tensor:
-        return torch.tensor(x)
+        return as_tensor(x)
 
     @classmethod
     def to_2d_numpy(cls, x: torch.Tensor) -> np.ndarray:
-        return x.view(x.shape[0], -1).cpu().detach().numpy()
+        return as_array(x.view(x.shape[0], -1))

@@ -1,11 +1,11 @@
 from typing import Any
 
 import torch
-from src.models.preprocessing.preprocessing import Preprocessing
-from src.models.sklearn.base_sklearn_model import BaseSklearnModel
+from secml2.models.data_processing.data_processing import DataProcessing
+from secml2.models.sklearn.base_sklearn_model import BaseSklearnModel
 from sklearn.svm import SVC
 
-from src.models.sklearn.sklearn_layer import SklearnLayer
+from secml2.models.sklearn.sklearn_layer import SklearnLayer
 
 
 class SVM(BaseSklearnModel):
@@ -26,7 +26,7 @@ class SVM(BaseSklearnModel):
         decision_function_shape: str = "ovr",
         break_ties: bool = False,
         random_state: Any | None = None,
-        preprocessing: Preprocessing = None,
+        preprocessing: DataProcessing = None,
     ):
         model = SVC(
             C=C,
@@ -50,21 +50,20 @@ class SVM(BaseSklearnModel):
  
     @property
     def kernel(self):
-        return self._model.kernel
+        return self._model._clf.kernel
     
     @property
     def alpha(self):
-        return self._model.dual_coef_ if self._model.kernel is not None else None
+        return self._model._clf.dual_coef_ if self.kernel is not None else None
 
     @property
     def n_classes(self):
-        return len(self._model.classes_)
+        return len(self._model._clf.classes_)
 
-    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+    def _gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
         y = y.detach().cpu().numpy()
         v = self.coef_ if self.kernel is None else self.alpha
         if self.n_classes > 2:
             return y.dot(v)
         else:
             return y[0] * -v + y[1] * v
-
