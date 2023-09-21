@@ -3,9 +3,9 @@ from typing import Callable
 
 from torch.utils.data import DataLoader
 
-from src.adv.backends import Backends
-from src.adv.evasion.perturbation_models import PerturbationModels
-from src.models.base_model import BaseModel
+from secml2.adv.backends import Backends
+from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.models.base_model import BaseModel
 
 
 class BaseEvasionAttackCreator:

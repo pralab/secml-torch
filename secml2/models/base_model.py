@@ -4,8 +4,10 @@ from typing import Callable
 import torch
 from torch.utils.data import DataLoader
 
-from src.models.data_processing.identity_data_processing import IdentityDataProcessing
-from src.models.data_processing.data_processing import DataProcessing
+from secml2.models.data_processing.identity_data_processing import (
+    IdentityDataProcessing,
+)
+from secml2.models.data_processing.data_processing import DataProcessing
 
 
 class BaseModel(ABC):

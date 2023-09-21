@@ -2,15 +2,15 @@ from typing import Union, List, Type
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
-from torch.optim import Adam, SGD
+from torch.optim import Adam, SGD, Optimizer
 from torch.utils.data import DataLoader, TensorDataset
 
-from src.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from src.manipulations.manipulation import Manipulation
-from src.models.base_model import BaseModel
-from src.optimization.constraints import Constraint
-from src.optimization.gradient_processing import GradientProcessing
-from src.optimization.initializer import Initializer
+from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secml2.manipulations.manipulation import Manipulation
+from secml2.models.base_model import BaseModel
+from secml2.optimization.constraints import Constraint
+from secml2.optimization.gradient_processing import GradientProcessing
+from secml2.optimization.initializer import Initializer
 
 CE_LOSS = "ce_loss"
 LOGITS_LOSS = "logits_loss"
@@ -32,7 +32,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         num_steps: int,
         step_size: float,
         loss_function: Union[str, torch.nn.Module],
-        optimizer_cls: Union[str, Type[torch.nn.Module]],
+        optimizer_cls: Union[str, Type[Optimizer]],
         manipulation_function: Manipulation,
         domain_constraints: List[Constraint],
         perturbation_constraints: List[Type[Constraint]],

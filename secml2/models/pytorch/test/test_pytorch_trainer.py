@@ -1,7 +1,7 @@
 from torch.optim import Adam
 
-from src.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
-from src.models.pytorch.test.base_pytorch import BasePytorchTests
+from secml2.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secml2.models.pytorch.test.base_pytorch import BasePytorchTests
 
 
 class TestPytorchTrainer(BasePytorchTests):

@@ -1,6 +1,6 @@
 import torch
 
-from src.models.data_processing.data_processing import DataProcessing
+from secml2.models.data_processing.data_processing import DataProcessing
 
 
 class IdentityDataProcessing(DataProcessing):

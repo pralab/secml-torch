@@ -1,9 +1,9 @@
 import torch
 from torch.optim import Adam
 
-from src.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from src.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
-from src.models.pytorch.test.base_pytorch import BasePytorchTests
+from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secml2.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secml2.models.pytorch.test.base_pytorch import BasePytorchTests
 
 
 class TestPytorchNN(BasePytorchTests):

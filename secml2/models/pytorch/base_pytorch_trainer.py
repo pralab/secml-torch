@@ -2,7 +2,7 @@ import torch.nn
 from torch.optim.lr_scheduler import _LRScheduler  # noqa
 from torch.utils.data import DataLoader
 
-from src.models.base_trainer import BaseTrainer
+from secml2.models.base_trainer import BaseTrainer
 
 
 class BasePyTorchTrainer(BaseTrainer):

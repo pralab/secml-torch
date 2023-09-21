@@ -3,15 +3,15 @@ from typing import Optional, List
 import torch
 from torch.optim import Adam
 
-from src.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS, SGD
-from src.manipulations.manipulation import AdditiveManipulation
-from src.optimization.initializer import Initializer
-from src.optimization.gradient_processing import LinearProjectionGradientProcessing
-from src.adv.evasion.foolbox import BaseFoolboxEvasionAttack
+from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS, SGD
+from secml2.manipulations.manipulation import AdditiveManipulation
+from secml2.optimization.initializer import Initializer
+from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
+from secml2.adv.evasion.foolbox import BaseFoolboxEvasionAttack
 
-from src.adv.evasion.perturbation_models import PerturbationModels
-from src.adv.backends import Backends
-from src.adv.evasion.base_evasion_attack import (
+from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.adv.backends import Backends
+from secml2.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
 
@@ -21,7 +21,7 @@ from foolbox.attacks.projected_gradient_descent import (
     LinfProjectedGradientDescentAttack,
 )
 
-from src.optimization.constraints import (
+from secml2.optimization.constraints import (
     ClipConstraint,
     L1Constraint,
     L2Constraint,
