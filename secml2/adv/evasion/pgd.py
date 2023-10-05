@@ -1,26 +1,19 @@
 from typing import Optional, List
 
-import torch
-from torch.optim import Adam
-
-from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS, SGD
-from secml2.manipulations.manipulation import AdditiveManipulation
-from secml2.optimization.initializer import Initializer
-from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
-from secml2.adv.evasion.foolbox import BaseFoolboxEvasionAttack
-
-from secml2.adv.evasion.perturbation_models import PerturbationModels
-from secml2.adv.backends import Backends
-from secml2.adv.evasion.base_evasion_attack import (
-    BaseEvasionAttackCreator,
-)
-
 from foolbox.attacks.projected_gradient_descent import (
     L1ProjectedGradientDescentAttack,
     L2ProjectedGradientDescentAttack,
     LinfProjectedGradientDescentAttack,
 )
 
+from secml2.adv.backends import Backends
+from secml2.adv.evasion.base_evasion_attack import (
+    BaseEvasionAttackCreator,
+)
+from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
+from secml2.adv.evasion.foolbox import BaseFoolboxEvasionAttack
+from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.manipulations.manipulation import AdditiveManipulation
 from secml2.optimization.constraints import (
     ClipConstraint,
     L1Constraint,
@@ -28,6 +21,9 @@ from secml2.optimization.constraints import (
     LInfConstraint,
     Constraint,
 )
+from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
+from secml2.optimization.initializer import Initializer
+from secml2.optimization.optimizer_factory import OptimizerFactory
 
 
 class PGD(BaseEvasionAttackCreator):
@@ -135,7 +131,7 @@ class PGDNative(CompositeEvasionAttack):
             num_steps=num_steps,
             step_size=step_size,
             loss_function=CE_LOSS,
-            optimizer_cls=SGD,
+            optimizer_cls=OptimizerFactory.create_sgd(step_size),
             manipulation_function=manipulation_function,
             domain_constraints=domain_constraints,
             perturbation_constraints=perturbation_constraints,

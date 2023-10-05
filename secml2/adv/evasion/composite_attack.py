@@ -2,9 +2,8 @@ from typing import Union, List, Type
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
-from torch.optim import Adam, SGD, Optimizer
-from torch.utils.data import DataLoader, TensorDataset
-
+from torch.optim import Optimizer
+from functools import partial
 from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secml2.manipulations.manipulation import Manipulation
 from secml2.models.base_model import BaseModel
@@ -19,11 +18,6 @@ LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
 }
 
-ADAM = "adam"
-StochasticGD = "sgd"
-
-OPTIMIZERS = {ADAM: Adam, StochasticGD: SGD}
-
 
 class CompositeEvasionAttack(BaseEvasionAttack):
     def __init__(
@@ -32,7 +26,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         num_steps: int,
         step_size: float,
         loss_function: Union[str, torch.nn.Module],
-        optimizer_cls: Union[str, Type[Optimizer]],
+        optimizer_cls: Union[str, Type[partial[Optimizer]]],
         manipulation_function: Manipulation,
         domain_constraints: List[Constraint],
         perturbation_constraints: List[Type[Constraint]],
@@ -54,14 +48,9 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             self.loss_function = loss_function
 
         if isinstance(optimizer_cls, str):
-            if optimizer_cls in OPTIMIZERS:
-                self.optimizer_cls = OPTIMIZERS[optimizer_cls]
-            else:
-                raise ValueError(
-                    f"{optimizer_cls} not in list of init from string. Use one among {OPTIMIZERS.values()}"
-                )
-        else:
-            self.optimizer_cls = optimizer_cls
+            optimizer_cls = OptimizerFactory.create_from_name(optimizer_cls, lr=step_size)
+
+        self.optimizer_cls = optimizer_cls
 
         self.manipulation_function = manipulation_function
         self.perturbation_constraints = perturbation_constraints
@@ -73,6 +62,9 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
     def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")
+
+    def create_optimizer(self, delta: torch.Tensor) -> Optimizer:
+        return self.optimizer_cls([delta])
 
     def _run(
         self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
@@ -87,7 +79,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         ).type(labels.dtype)
         delta = self.initializer(samples.data)
         delta.requires_grad = True
-        optimizer = self.optimizer_cls([delta], lr=self.step_size)
+        optimizer = self.create_optimizer(delta)
         x_adv = self.manipulation_function(samples, delta)
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
