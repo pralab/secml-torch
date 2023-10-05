@@ -16,7 +16,8 @@ class OptimizerFactory:
         if optimizer_name == StochasticGD:
             return OptimizerFactory.create_sgd(lr)
         raise ValueError(
-            f"No optimizer known as {optimizer_name}, or not implemented yet. Available: {list(OptimizerFactory.OPTIMIZERS.keys())} ")
+            f"No optimizer known as {optimizer_name}, or not implemented yet. Available: {list(OptimizerFactory.OPTIMIZERS.keys())} "
+        )
 
     @staticmethod
     def create_adam(lr: float):
