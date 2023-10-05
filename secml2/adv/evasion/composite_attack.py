@@ -48,7 +48,9 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             self.loss_function = loss_function
 
         if isinstance(optimizer_cls, str):
-            optimizer_cls = OptimizerFactory.create_from_name(optimizer_cls, lr=step_size)
+            optimizer_cls = OptimizerFactory.create_from_name(
+                optimizer_cls, lr=step_size
+            )
 
         self.optimizer_cls = optimizer_cls
 
