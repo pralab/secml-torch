@@ -13,7 +13,7 @@ class OptimizerFactory:
     def create_from_name(optimizer_name, lr: float, **kwargs):
         if optimizer_name == ADAM:
             return OptimizerFactory.create_adam(lr)
-        if optimizer_name == SGD:
+        if optimizer_name == StochasticGD:
             return OptimizerFactory.create_sgd(lr)
 
     @staticmethod

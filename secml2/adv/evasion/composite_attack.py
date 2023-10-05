@@ -10,6 +10,7 @@ from secml2.models.base_model import BaseModel
 from secml2.optimization.constraints import Constraint
 from secml2.optimization.gradient_processing import GradientProcessing
 from secml2.optimization.initializer import Initializer
+from secml2.optimization.optimizer_factory import OptimizerFactory
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logits_loss"
