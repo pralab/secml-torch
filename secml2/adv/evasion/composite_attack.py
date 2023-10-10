@@ -66,8 +66,8 @@ class CompositeEvasionAttack(BaseEvasionAttack):
     def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")
 
-    def create_optimizer(self, delta: torch.Tensor) -> Optimizer:
-        return self.optimizer_cls([delta])
+    def create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
+        return self.optimizer_cls([delta], **kwargs)
 
     def _run(
         self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
