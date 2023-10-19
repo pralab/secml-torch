@@ -24,6 +24,7 @@ from secml2.optimization.constraints import (
 from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
+from secml2.trackers.tracker import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):
@@ -38,6 +39,7 @@ class PGD(BaseEvasionAttackCreator):
         lb: float = 0.0,
         ub: float = 1.0,
         backend: str = Backends.FOOLBOX,
+        trackers: list[Tracker] = None,
         **kwargs
     ):
         cls.check_perturbation_model_available(perturbation_model)
@@ -74,6 +76,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
+        trackers: list[Tracker] = None,
         **kwargs
     ) -> None:
         perturbation_models = {
@@ -111,6 +114,7 @@ class PGDNative(CompositeEvasionAttack):
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
+        trackers: list[Tracker] = None,
         **kwargs
     ) -> None:
         perturbation_models = {
@@ -126,9 +130,6 @@ class PGDNative(CompositeEvasionAttack):
         perturbation_constraints = [perturbation_models[perturbation_model]]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation()
-        trackers = None
-        if "trackers" in kwargs:
-            trackers = kwargs["trackers"]
         super().__init__(
             y_target=y_target,
             num_steps=num_steps,
