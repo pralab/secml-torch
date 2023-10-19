@@ -126,6 +126,9 @@ class PGDNative(CompositeEvasionAttack):
         perturbation_constraints = [perturbation_models[perturbation_model]]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation()
+        trackers = None
+        if "trackers" in kwargs:
+            trackers = kwargs["trackers"]
         super().__init__(
             y_target=y_target,
             num_steps=num_steps,
@@ -137,6 +140,7 @@ class PGDNative(CompositeEvasionAttack):
             perturbation_constraints=perturbation_constraints,
             gradient_processing=gradient_processing,
             initializer=initializer,
+            trackers=trackers,
         )
 
     def init_perturbation_constraints(self) -> List[Constraint]:

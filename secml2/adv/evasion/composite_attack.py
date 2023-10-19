@@ -11,6 +11,7 @@ from secml2.optimization.constraints import Constraint
 from secml2.optimization.gradient_processing import GradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
+from secml2.trackers.tracker import Tracker, TensorboardTracker
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logits_loss"
@@ -33,11 +34,12 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         perturbation_constraints: List[Type[Constraint]],
         initializer: Initializer,
         gradient_processing: GradientProcessing,
+        trackers: list[Tracker] = None,
     ):
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size
-
+        self.trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
                 self.loss_function = LOSS_FUNCTIONS[loss_function]()
@@ -99,4 +101,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             for constraint in self.domain_constraints:
                 x_adv.data = constraint(x_adv.data)
             delta.data = self.manipulation_function.invert(samples.data, x_adv.data)
+            if self.trackers is not None:
+                for tracker in self.trackers:
+                    tracker.track(i, loss, scores, delta)
         return x_adv
