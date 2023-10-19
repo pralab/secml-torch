@@ -10,6 +10,8 @@ from foolbox.criteria import Misclassification, TargetedMisclassification
 import torch
 from torch.utils.data import TensorDataset
 
+from secml2.trackers.tracker import Tracker
+
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
     def __init__(
@@ -19,6 +21,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
+        trackers: list[Tracker] = None,
     ) -> None:
         self.foolbox_attack = foolbox_attack
         self.lb = lb
@@ -44,6 +47,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
                 else labels
             ).type(labels.dtype)
             criterion = TargetedMisclassification(target)
+        # TODO decide if we should integrate trackers inside Foolbox
         _, advx, _ = self.foolbox_attack(
             model=foolbox_model,
             inputs=samples,

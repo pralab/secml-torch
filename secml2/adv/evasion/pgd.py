@@ -100,6 +100,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
             y_target=y_target,
             lb=lb,
             ub=ub,
+            trackers=trackers,
         )
 
 
