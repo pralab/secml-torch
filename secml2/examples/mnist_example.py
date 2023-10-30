@@ -1,7 +1,9 @@
 from collections import OrderedDict
+import os
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
+from robustbench.utils import download_gdrive
 from secml2.adv.backends import Backends
 from secml2.adv.evasion.pgd import PGD
 from secml2.adv.evasion.perturbation_models import PerturbationModels
@@ -69,7 +71,14 @@ class SmallCNN(nn.Module):
 
 
 net = SmallCNN()
-model_weigths = torch.load("models/mnist/mnist_smallcnn_standard.pth")
+model_folder = "models/mnist"
+model_weights_path = os.path.join("mnist_smallcnn_standard.pth")
+if not os.path.exists(model_weights_path):
+    os.makedirs(model_folder, exist_ok=True)
+    MODEL_ID = '12HLUrWgMPF_ApVSsWO4_UHsG9sxdb1VJ'
+    download_gdrive(MODEL_ID, model_weights_path)
+
+model_weigths = torch.load(model_weights_path)
 net.eval()
 net.load_state_dict(model_weigths)
 device = "cpu"
