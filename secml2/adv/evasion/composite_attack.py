@@ -66,11 +66,15 @@ class CompositeEvasionAttack(BaseEvasionAttack):
     def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")
 
-    def create_optimizer(self, delta: torch.Tensor) -> Optimizer:
-        return self.optimizer_cls([delta])
+    def create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
+        return self.optimizer_cls([delta], **kwargs)
 
     def _run(
-        self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
+        self,
+        model: BaseModel,
+        samples: torch.Tensor,
+        labels: torch.Tensor,
+        **optim_kwargs,
     ) -> torch.Tensor:
         multiplier = 1 if self.y_target is not None else -1
         perturbation_constraints = self.init_perturbation_constraints()
@@ -82,7 +86,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         ).type(labels.dtype)
         delta = self.initializer(samples.data)
         delta.requires_grad = True
-        optimizer = self.create_optimizer(delta)
+        optimizer = self.create_optimizer(delta, **optim_kwargs)
         x_adv = self.manipulation_function(samples, delta)
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
