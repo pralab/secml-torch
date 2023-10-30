@@ -87,7 +87,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
         optimizer = self.create_optimizer(delta, **optim_kwargs)
         x_adv = self.manipulation_function(samples, delta)
-        
+
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
             target = target.to(scores.device)
