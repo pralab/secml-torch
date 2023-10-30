@@ -86,7 +86,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         delta.requires_grad = True
 
         optimizer = self.create_optimizer(delta, **optim_kwargs)
-        x_adv = self.manipulation_function(samples, delta)
+        x_adv, delta = self.manipulation_function(samples, delta)
 
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
