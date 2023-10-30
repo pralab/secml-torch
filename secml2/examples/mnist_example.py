@@ -75,7 +75,7 @@ model_folder = "models/mnist"
 model_weights_path = os.path.join("mnist_smallcnn_standard.pth")
 if not os.path.exists(model_weights_path):
     os.makedirs(model_folder, exist_ok=True)
-    MODEL_ID = '12HLUrWgMPF_ApVSsWO4_UHsG9sxdb1VJ'
+    MODEL_ID = "12HLUrWgMPF_ApVSsWO4_UHsG9sxdb1VJ"
     download_gdrive(MODEL_ID, model_weights_path)
 
 model_weigths = torch.load(model_weights_path)
