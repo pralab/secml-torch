@@ -123,9 +123,14 @@ class PGDNative(CompositeEvasionAttack):
             raise NotImplementedError("Random start in LP ball not yet implemented.")
         self.epsilon = epsilon
         gradient_processing = LinearProjectionGradientProcessing(perturbation_model)
-        perturbation_constraints = [perturbation_models[perturbation_model]]
+        perturbation_constraints = [
+            perturbation_models[perturbation_model](radius=self.epsilon)
+        ]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
-        manipulation_function = AdditiveManipulation()
+        manipulation_function = AdditiveManipulation(
+            domain_constraints=domain_constraints,
+            perturbation_constraints=perturbation_constraints,
+        )
         super().__init__(
             y_target=y_target,
             num_steps=num_steps,
@@ -138,6 +143,3 @@ class PGDNative(CompositeEvasionAttack):
             gradient_processing=gradient_processing,
             initializer=initializer,
         )
-
-    def init_perturbation_constraints(self) -> List[Constraint]:
-        return [p(radius=self.epsilon) for p in self.perturbation_constraints]

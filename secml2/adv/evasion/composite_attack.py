@@ -77,8 +77,6 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         **optim_kwargs,
     ) -> torch.Tensor:
         multiplier = 1 if self.y_target is not None else -1
-        perturbation_constraints = self.init_perturbation_constraints()
-
         target = (
             torch.zeros_like(labels) + self.y_target
             if self.y_target is not None
@@ -86,8 +84,10 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         ).type(labels.dtype)
         delta = self.initializer(samples.data)
         delta.requires_grad = True
+
         optimizer = self.create_optimizer(delta, **optim_kwargs)
-        x_adv = self.manipulation_function(samples, delta)
+        x_adv, delta = self.manipulation_function(samples, delta)
+
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
             target = target.to(scores.device)
@@ -97,10 +97,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             loss.backward()
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
-            for constraint in perturbation_constraints:
-                delta.data = constraint(delta.data)
-            x_adv.data = self.manipulation_function(samples.data, delta.data)
-            for constraint in self.domain_constraints:
-                x_adv.data = constraint(x_adv.data)
-            delta.data = self.manipulation_function.invert(samples.data, x_adv.data)
+            x_adv.data, delta.data = self.manipulation_function(
+                samples.data, delta.data
+            )
         return x_adv
