@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from foolbox.attacks.base import Attack
@@ -28,6 +29,11 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         self.ub = ub
         self.epsilon = epsilon
         self.y_target = y_target
+        self.trackers = trackers
+        if trackers is not None:
+            logging.warning(
+                "Trackers are not implemented on Foolbox backend. No information will be stored."
+            )
         super().__init__()
 
     def _run(

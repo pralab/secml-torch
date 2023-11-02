@@ -53,6 +53,7 @@ class PGD(BaseEvasionAttackCreator):
             y_target=y_target,
             lb=lb,
             ub=ub,
+            trackers=trackers,
             **kwargs
         )
 
