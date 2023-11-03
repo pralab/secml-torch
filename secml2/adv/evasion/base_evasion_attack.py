@@ -35,7 +35,6 @@ class BaseEvasionAttackCreator:
 
 
 class BaseEvasionAttack:
-    @abstractmethod
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
         """
         Compute the attack against the model, using the input data.
@@ -61,6 +60,7 @@ class BaseEvasionAttack:
         )
         return adversarial_loader
 
+    @abstractmethod
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):
         """
         Compute the attack against the model, using the input data (batch).
