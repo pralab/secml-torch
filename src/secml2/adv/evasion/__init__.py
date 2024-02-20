@@ -3,4 +3,4 @@ try:
 except ImportError:
     pass  # foolbox is an extra component and requires the foolbox library
 else:
-    from .foolbox_pgd import *
+    from .foolbox_attacks import *
