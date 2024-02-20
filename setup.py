@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
-with open("README.md", 'r') as f:
-    long_description=f.read()
+with open("README.md", "r") as f:
+    long_description = f.read()
 
 setup(
     name="secml2",
@@ -19,5 +19,5 @@ setup(
     extras_require={
         "foolbox": ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
     },
-    python_requires=">=3.7"
+    python_requires=">=3.7",
 )
