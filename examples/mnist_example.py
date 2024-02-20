@@ -14,75 +14,32 @@ from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from torch import nn
 
 
-class SmallCNN(nn.Module):
-    def __init__(self, drop=0.5):
-        super(SmallCNN, self).__init__()
+class MNISTNet(torch.nn.Module):
+    def __init__(self):
+        super(MNISTNet, self).__init__()
+        self.fc1 = torch.nn.Linear(784, 200)
+        self.fc2 = torch.nn.Linear(200, 200)
+        self.fc3 = torch.nn.Linear(200, 10)
 
-        self.num_channels = 1
-        self.num_labels = 10
-
-        activ = nn.ReLU(True)
-
-        self.feature_extractor = nn.Sequential(
-            OrderedDict(
-                [
-                    ("conv1", nn.Conv2d(self.num_channels, 32, 3)),
-                    ("relu1", activ),
-                    ("conv2", nn.Conv2d(32, 32, 3)),
-                    ("relu2", activ),
-                    ("maxpool1", nn.MaxPool2d(2, 2)),
-                    ("conv3", nn.Conv2d(32, 64, 3)),
-                    ("relu3", activ),
-                    ("conv4", nn.Conv2d(64, 64, 3)),
-                    ("relu4", activ),
-                    ("maxpool2", nn.MaxPool2d(2, 2)),
-                ]
-            )
-        )
-
-        self.classifier = nn.Sequential(
-            OrderedDict(
-                [
-                    ("fc1", nn.Linear(64 * 4 * 4, 200)),
-                    ("relu1", activ),
-                    ("drop", nn.Dropout(drop)),
-                    ("fc2", nn.Linear(200, 200)),
-                    ("relu2", activ),
-                    ("fc3", nn.Linear(200, self.num_labels)),
-                ]
-            )
-        )
-
-        for m in self.modules():
-            if isinstance(m, (nn.Conv2d)):
-                nn.init.kaiming_normal_(m.weight)
-                if m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-        nn.init.constant_(self.classifier.fc3.weight, 0)
-        nn.init.constant_(self.classifier.fc3.bias, 0)
-
-    def forward(self, input):
-        features = self.feature_extractor(input)
-        logits = self.classifier(features.view(-1, 64 * 4 * 4))
-        return logits
+    def forward(self, x):
+        x = x.flatten(1)
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        return self.fc3(x)
 
 
-net = SmallCNN()
+device = "cpu"
+net = MNISTNet()
 model_folder = "models/mnist"
-model_weights_path = os.path.join("mnist_smallcnn_standard.pth")
+model_weights_path = os.path.join("mnist_model.pt")
 if not os.path.exists(model_weights_path):
     os.makedirs(model_folder, exist_ok=True)
-    MODEL_ID = "12HLUrWgMPF_ApVSsWO4_UHsG9sxdb1VJ"
+    MODEL_ID = "12h1tXK442jHSE7wtsPpt8tU8f04R4nHM"
     download_gdrive(MODEL_ID, model_weights_path)
 
-model_weigths = torch.load(model_weights_path)
+model_weigths = torch.load(model_weights_path, map_location=device)
 net.eval()
 net.load_state_dict(model_weigths)
-device = "cpu"
-net.to(device)
 test_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
 )

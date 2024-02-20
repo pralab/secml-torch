@@ -22,8 +22,9 @@ class MNISTNet(torch.nn.Module):
         return self.fc3(x)
 
 
+device = "cpu"
 net = MNISTNet()
-net.to("cpu")
+net.to(device)
 optimizer = Adam(lr=1e-3, params=net.parameters())
 training_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(), train=True, root=".", download=True
@@ -42,3 +43,5 @@ model.train(training_data_loader)
 # Test MNIST model
 accuracy = Accuracy()(model, test_data_loader)
 print(accuracy)
+
+torch.save(model.model.state_dict(), "mnist_model.pt")
