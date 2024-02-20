@@ -1,4 +1,3 @@
-
 from typing import Optional
 from secml2.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secml2.adv.evasion.perturbation_models import PerturbationModels
@@ -8,6 +7,7 @@ from foolbox.attacks.projected_gradient_descent import (
     L2ProjectedGradientDescentAttack,
     LinfProjectedGradientDescentAttack,
 )
+
 
 class PGDFoolbox(BaseFoolboxEvasionAttack):
     def __init__(

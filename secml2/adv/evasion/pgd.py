@@ -59,6 +59,7 @@ class PGD(BaseEvasionAttackCreator):
     def get_native_implementation():
         return PGDNative
 
+
 class PGDNative(CompositeEvasionAttack):
     def __init__(
         self,
