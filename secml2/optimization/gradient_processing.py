@@ -1,5 +1,3 @@
-import math
-
 import torch.linalg
 from torch.nn.functional import normalize
 
@@ -7,8 +5,7 @@ from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 
 class GradientProcessing:
-    def __call__(self, grad: torch.Tensor) -> torch.Tensor:
-        ...
+    def __call__(self, grad: torch.Tensor) -> torch.Tensor: ...
 
 
 class LinearProjectionGradientProcessing(GradientProcessing):

@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import Tuple
 
 import torch
 
@@ -24,12 +25,13 @@ class Manipulation(ABC):
             delta = constraint(delta)
         return delta
 
-    def _apply_manipulation(self, x: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
-        ...
+    def _apply_manipulation(
+        self, x: torch.Tensor, delta: torch.Tensor
+    ) -> torch.Tensor: ...
 
     def __call__(
         self, x: torch.Tensor, delta: torch.Tensor
-    ) -> (torch.Tensor, torch.Tensor):
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         delta.data = self._apply_perturbation_constraints(delta.data)
         x_adv, delta = self._apply_manipulation(x, delta)
         x_adv.data = self._apply_domain_constraints(x_adv.data)
@@ -39,5 +41,5 @@ class Manipulation(ABC):
 class AdditiveManipulation(Manipulation):
     def _apply_manipulation(
         self, x: torch.Tensor, delta: torch.Tensor
-    ) -> (torch.Tensor, torch.Tensor):
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         return x + delta, delta
