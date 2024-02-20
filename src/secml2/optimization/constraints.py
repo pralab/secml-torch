@@ -4,8 +4,7 @@ import torch
 
 
 class Constraint:
-    def __call__(self, x: torch.Tensor, *args, **kwargs):
-        ...
+    def __call__(self, x: torch.Tensor, *args, **kwargs): ...
 
 
 class ClipConstraint(Constraint):
@@ -24,8 +23,7 @@ class LpConstraint(Constraint):
         self.radius = radius
 
     @abstractmethod
-    def project(self, x: torch.Tensor) -> torch.Tensor:
-        ...
+    def project(self, x: torch.Tensor) -> torch.Tensor: ...
 
     def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         x = x + self.center

@@ -25,8 +25,9 @@ class Manipulation(ABC):
             delta = constraint(delta)
         return delta
 
-    def _apply_manipulation(self, x: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
-        ...
+    def _apply_manipulation(
+        self, x: torch.Tensor, delta: torch.Tensor
+    ) -> torch.Tensor: ...
 
     def __call__(
         self, x: torch.Tensor, delta: torch.Tensor
