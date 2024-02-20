@@ -27,6 +27,7 @@ class MNISTNet(torch.nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
+
 device = "cpu"
 net = MNISTNet()
 model_folder = "models/mnist"
