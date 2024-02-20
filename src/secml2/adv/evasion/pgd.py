@@ -1,6 +1,13 @@
 from typing import Optional
 
+from foolbox.attacks import (
+    L1ProjectedGradientDescentAttack,
+    L2ProjectedGradientDescentAttack,
+    LinfProjectedGradientDescentAttack,
+)
+
 from secml2.adv.backends import Backends
+from secml2.adv.evasion import BaseFoolboxEvasionAttack
 from secml2.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )

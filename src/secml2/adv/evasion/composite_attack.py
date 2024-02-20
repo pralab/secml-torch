@@ -99,12 +99,13 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             loss.backward()
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
-            for constraint in perturbation_constraints:
+            for constraint in self.perturbation_constraints:
                 delta.data = constraint(delta.data)
-            x_adv.data = self.manipulation_function(samples.data, delta.data)
+            x_adv.data, delta.data = self.manipulation_function(
+                samples.data, delta.data
+            )
             for constraint in self.domain_constraints:
                 x_adv.data = constraint(x_adv.data)
-            delta.data = self.manipulation_function.invert(samples.data, x_adv.data)
             if self.trackers is not None:
                 for tracker in self.trackers:
                     tracker.track(i, loss, scores, delta)
