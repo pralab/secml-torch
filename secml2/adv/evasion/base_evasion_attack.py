@@ -25,8 +25,16 @@ class BaseEvasionAttackCreator:
         if not PerturbationModels.is_perturbation_model_available(perturbation_model):
             raise NotImplementedError("Unsupported or not-implemented threat model.")
 
+    def get_foolbox_implementation(self):
+            try:
+                import foolbox
+            except ImportError:
+                raise ImportError("Foolbox extra not installed.")
+            else:
+                return self._get_foolbox_implementation()
+
     @staticmethod
-    def get_foolbox_implementation():
+    def _get_foolbox_implementation():
         raise NotImplementedError("Foolbox implementation not available.")
 
     @staticmethod

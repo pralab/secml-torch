@@ -1,14 +1,12 @@
 from typing import Optional
 from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from foolbox.attacks.base import Attack
-from torch.utils.data import DataLoader
 from secml2.models.base_model import BaseModel
 from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secml2.models.base_model import BaseModel
 from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
 import torch
-from torch.utils.data import TensorDataset
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
