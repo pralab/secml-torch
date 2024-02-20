@@ -27,12 +27,13 @@ setup(
     name="secml2",
     version="1.0.0",
     description="SecML 2.0 Library",
-    classifiers=[_f for _f in CLASSIFIERS.split('\n') if _f],
+    classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     long_description=long_description,
     long_description_context_type="text/markdown",
     package_dir={"": "src"},
-    packages=find_packages(where="src", 
-                           exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
+    packages=find_packages(
+        where="src", exclude=["*.tests", "*.tests.*", "tests.*", "tests"]
+    ),
     include_package_data=True,
     url="",
     license="MIT",
