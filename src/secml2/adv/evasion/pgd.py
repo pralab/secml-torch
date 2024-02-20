@@ -5,7 +5,6 @@ from secml2.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
 from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
-from secml2.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secml2.adv.evasion.perturbation_models import PerturbationModels
 from secml2.manipulations.manipulation import AdditiveManipulation
 from secml2.optimization.constraints import (
