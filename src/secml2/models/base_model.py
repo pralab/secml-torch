@@ -32,7 +32,8 @@ class BaseModel(ABC):
         )
 
     @abstractmethod
-    def predict(self, x: torch.Tensor) -> torch.Tensor: ...
+    def predict(self, x: torch.Tensor) -> torch.Tensor:
+        ...
 
     def decision_function(self, x: torch.Tensor) -> torch.Tensor:
         x = self._preprocessing(x)
@@ -41,13 +42,16 @@ class BaseModel(ABC):
         return x
 
     @abstractmethod
-    def _decision_function(self, x: torch.Tensor) -> torch.Tensor: ...
+    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
+        ...
 
     @abstractmethod
-    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor: ...
+    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+        ...
 
     @abstractmethod
-    def train(self, dataloader: DataLoader): ...
+    def train(self, dataloader: DataLoader):
+        ...
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         return self.decision_function(x)
