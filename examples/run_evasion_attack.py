@@ -1,4 +1,3 @@
-import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
 from secml2.adv.backends import Backends

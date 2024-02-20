@@ -1,9 +1,9 @@
 import tensorflow as tf
 import torch
 
-from secml2.models.base_model import BaseModel
-from secml2.models.data_processing.data_processing import DataProcessing
-from secml2.models.tensorflow.base_tensorflow_trainer import BaseTensorflowTrainer
+from src.models.base_model import BaseModel
+from src.models.data_processing.data_processing import DataProcessing
+from src.models.tensorflow.base_tensorflow_trainer import BaseTensorflowTrainer
 
 
 class BaseTensorflowClassifier(BaseModel):

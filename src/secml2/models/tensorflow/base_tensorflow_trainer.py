@@ -1,4 +1,4 @@
-from secml2.models.base_trainer import BaseTrainer
+from src.models.base_trainer import BaseTrainer
 
 
 class BaseTensorflowTrainer(BaseTrainer):
