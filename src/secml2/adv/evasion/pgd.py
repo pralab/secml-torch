@@ -1,17 +1,10 @@
 from typing import Optional, List
 
-from foolbox.attacks.projected_gradient_descent import (
-    L1ProjectedGradientDescentAttack,
-    L2ProjectedGradientDescentAttack,
-    LinfProjectedGradientDescentAttack,
-)
-
 from secml2.adv.backends import Backends
 from secml2.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
 from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
-from secml2.adv.evasion.foolbox import BaseFoolboxEvasionAttack
 from secml2.adv.evasion.perturbation_models import PerturbationModels
 from secml2.manipulations.manipulation import AdditiveManipulation
 from secml2.optimization.constraints import (
@@ -19,7 +12,6 @@ from secml2.optimization.constraints import (
     L1Constraint,
     L2Constraint,
     LInfConstraint,
-    Constraint,
 )
 from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secml2.optimization.initializer import Initializer
@@ -58,7 +50,11 @@ class PGD(BaseEvasionAttackCreator):
         )
 
     @staticmethod
-    def get_foolbox_implementation():
+    def _get_foolbox_implementation():
+        try:
+            from .foolbox_attacks.foolbox_pgd import PGDFoolbox
+        except ImportError:
+            raise ImportError("Foolbox extra not installed")
         return PGDFoolbox
 
     @staticmethod

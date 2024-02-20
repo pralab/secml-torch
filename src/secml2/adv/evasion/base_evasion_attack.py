@@ -25,8 +25,17 @@ class BaseEvasionAttackCreator:
         if not PerturbationModels.is_perturbation_model_available(perturbation_model):
             raise NotImplementedError("Unsupported or not-implemented threat model.")
 
+    @classmethod
+    def get_foolbox_implementation(cls):
+        try:
+            import foolbox
+        except ImportError:
+            raise ImportError("Foolbox extra not installed.")
+        else:
+            return cls._get_foolbox_implementation()
+
     @staticmethod
-    def get_foolbox_implementation():
+    def _get_foolbox_implementation():
         raise NotImplementedError("Foolbox implementation not available.")
 
     @staticmethod
@@ -35,7 +44,6 @@ class BaseEvasionAttackCreator:
 
 
 class BaseEvasionAttack:
-    @abstractmethod
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
         """
         Compute the attack against the model, using the input data.
@@ -61,6 +69,7 @@ class BaseEvasionAttack:
         )
         return adversarial_loader
 
+    @abstractmethod
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):
         """
         Compute the attack against the model, using the input data (batch).
