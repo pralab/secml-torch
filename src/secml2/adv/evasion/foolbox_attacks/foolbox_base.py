@@ -1,12 +1,14 @@
+import logging
 from typing import Optional
 from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secml2.models.base_model import BaseModel
 from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secml2.models.base_model import BaseModel
 from foolbox.attacks.base import Attack
 from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
 import torch
+
+from src.secml2.trackers.tracker import Tracker
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
@@ -17,12 +19,18 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
+        trackers: list[Tracker] = None,
     ) -> None:
         self.foolbox_attack = foolbox_attack
         self.lb = lb
         self.ub = ub
         self.epsilon = epsilon
         self.y_target = y_target
+        self.trackers = trackers
+        if trackers is not None:
+            logging.warning(
+                "Trackers are not implemented on Foolbox backend. No information will be stored."
+            )
         super().__init__()
 
     def _run(
@@ -42,6 +50,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
                 else labels
             ).type(labels.dtype)
             criterion = TargetedMisclassification(target)
+        # TODO decide if we should integrate trackers inside Foolbox
         _, advx, _ = self.foolbox_attack(
             model=foolbox_model,
             inputs=samples,
