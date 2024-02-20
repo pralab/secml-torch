@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from secml2.adv.backends import Backends
 from secml2.adv.evasion.base_evasion_attack import (
@@ -16,7 +16,7 @@ from secml2.optimization.constraints import (
 from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
-from secml2.trackers.tracker import Tracker
+from src.secml2.trackers.tracker import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):

@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secml2.models.base_model import BaseModel
 from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secml2.models.base_model import BaseModel
 from foolbox.attacks.base import Attack
@@ -9,7 +8,7 @@ from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
 import torch
 
-from secml2.trackers.tracker import Tracker
+from src.secml2.trackers.tracker import Tracker
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
