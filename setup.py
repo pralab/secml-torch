@@ -1,30 +1,24 @@
-from setuptools import setup
+from setuptools import find_packages, setup
+
+with open("README.md", 'r') as f:
+    long_description=f.read()
 
 setup(
     name="secml2",
     version="1.0",
-    packages=[
-        "secml2",
-        "secml2.adv",
-        "secml2.adv.evasion",
-        "secml2.data",
-        "secml2.models",
-        "secml2.models.test",
-        "secml2.models.pytorch",
-        "secml2.models.pytorch.test",
-        "secml2.models.sklearn",
-        "secml2.models.sklearn.test",
-        "secml2.models.tensorflow",
-        "secml2.models.data_processing",
-        "secml2.models.data_processing.test",
-        "secml2.metrics",
-        "secml2.metrics.test",
-        "secml2.optimization",
-        "secml2.manipulations",
-    ],
+    description="SecML 2.0 Library",
+    long_description=long_description,
+    long_description_context_type="text/markdown",
+    package_dir={"": "secml2"},
+    packages=find_packages(where="secml2"),
     url="",
-    license="",
+    license="MIT",
     author="Maura Pintor, Luca Demetrio",
-    author_email="",
-    description="",
+    author_email="maura.pintor@unica.it, luca.demetrio@unige.it",
+    install_requires=[],
+    extras_require={
+        "pytorch": ["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
+        "foolbox": ["foolbox>=3.3.0", "torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
+    },
+    python_requires=">=3.7"
 )
