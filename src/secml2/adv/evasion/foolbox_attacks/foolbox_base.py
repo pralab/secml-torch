@@ -1,11 +1,10 @@
 from typing import Optional, Type, Union
-from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secml2.models.base_model import BaseModel
 from foolbox.attacks.base import Attack
 from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
-from secml2.trackers.tracker import Tracker
+from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack, TRACKER_TYPE
 import torch
 
 
@@ -17,7 +16,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: Union[Type[Tracker], None] = None,
+        trackers: Union[Type[TRACKER_TYPE], None] = None,
     ) -> None:
         self.foolbox_attack = foolbox_attack
         self.lb = lb

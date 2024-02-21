@@ -3,9 +3,7 @@ class PerturbationModels:
     L1 = "l1"
     L2 = "l2"
     LINF = "linf"
-    pert_models = {
-            L0: 0, L1: 1, L2: 2, LINF: float("inf")
-        }
+    pert_models = {L0: 0, L1: 1, L2: 2, LINF: float("inf")}
 
     @classmethod
     def is_perturbation_model_available(cls, perturbation_model) -> bool:

@@ -6,7 +6,6 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 
 
-
 class Tracker(ABC):
     def __init__(self, name) -> None:
         self.name = name
@@ -18,13 +17,13 @@ class Tracker(ABC):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
-    ) -> None: 
-        ...
+        grad: torch.Tensor,
+    ) -> None: ...
 
     def get(self) -> torch.Tensor:
         return torch.stack(self.tracked, -1)
 
-    def get_last_tracked(self) -> Union[None,torch.Tensor]: 
+    def get_last_tracked(self) -> Union[None, torch.Tensor]:
         if self.tracked is not None:
             return self.tracked[..., -1]  # return last tracked value
         return None
@@ -41,10 +40,9 @@ class LossTracker(Tracker):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
+        grad: torch.Tensor,
     ) -> None:
         self.tracked.append(loss.data)
-
-
 
 
 class ScoresTracker(Tracker):
@@ -58,9 +56,9 @@ class ScoresTracker(Tracker):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
+        grad: torch.Tensor,
     ) -> None:
         self.tracked.append(scores.data)
-
 
 
 class PredictionTracker(Tracker):
@@ -74,14 +72,31 @@ class PredictionTracker(Tracker):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
+        grad: torch.Tensor,
     ) -> None:
         self.tracked.append(scores.data.argmax(dim=1))
 
 
+class PertNormTracker(Tracker):
+    def __init__(self, p: PerturbationModels = PerturbationModels.L2) -> None:
+        super().__init__("PertNorm")
+        self.p = PerturbationModels.get_p(p)
+        self.tracked = []
+
+    def track(
+        self,
+        iteration: int,
+        loss: torch.Tensor,
+        scores: torch.Tensor,
+        delta: torch.Tensor,
+        grad: torch.Tensor,
+    ) -> None:
+        self.tracked.append(delta.flatten(start_dim=1).norm(p=self.p, dim=-1))
+
 
 class GradientTracker(Tracker):
     def __init__(self, p: PerturbationModels = PerturbationModels.L2) -> None:
-        super().__init__("Grad Norm")
+        super().__init__("GradNorm")
 
         self.p = PerturbationModels.get_p(p)
         self.tracked = []
@@ -92,10 +107,8 @@ class GradientTracker(Tracker):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
+        grad: torch.Tensor,
     ) -> None:
-        grad: torch.Tensor = delta.grad
-        if grad is None:
-            self.tracked.append(None)
         norm = grad.data.flatten(start_dim=1).norm(p=self.p, dim=1)
         self.tracked.append(norm)
 

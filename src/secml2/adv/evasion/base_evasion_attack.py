@@ -1,13 +1,15 @@
 from abc import abstractmethod
-from typing import Callable, List, Union
+from typing import Callable, List, Type, Union
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from secml2.adv.evasion.perturbation_models import PerturbationModels
 from secml2.adv.backends import Backends
 from secml2.models.base_model import BaseModel
-from secml2.trackers.tracker import Tracker
+
+# lazy evaluation to avoid circular imports
+TRACKER_TYPE = "secml2.trackers.tracker.Tracker"
 
 
 class BaseEvasionAttackCreator:
@@ -71,11 +73,11 @@ class BaseEvasionAttack:
         return adversarial_loader
 
     @property
-    def trackers(self) -> Union[List[Tracker], None]:
+    def trackers(self) -> Union[List[Type[TRACKER_TYPE]], None]:
         return self._trackers
 
     @trackers.setter
-    def trackers(self, trackers: Union[List[Tracker], None]) -> None:
+    def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None]) -> None:
         if trackers is not None:
             raise NotImplementedError("Trackers are not implemented for this backend")
 

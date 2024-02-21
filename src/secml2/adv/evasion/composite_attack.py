@@ -42,7 +42,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         self._trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
-                self.loss_function = LOSS_FUNCTIONS[loss_function](reduction='none')
+                self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
             else:
                 raise ValueError(
                     f"{loss_function} not in list of init from string. Use one among {LOSS_FUNCTIONS.values()}"
@@ -112,5 +112,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 x_adv.data = constraint(x_adv.data)
             if self.trackers is not None:
                 for tracker in self.trackers:
-                    tracker.track(i, losses.detach(), scores.detach(), delta.detach())
+                    tracker.track(
+                        i, losses.data, scores.data, delta.data, delta.grad.data
+                    )
         return x_adv
