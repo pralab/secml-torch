@@ -1,13 +1,13 @@
 from abc import abstractmethod
 from typing import Callable, List, Union
-from secml2.trackers.tracker import Tracker
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from secml2.adv.backends import Backends
 from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.adv.backends import Backends
 from secml2.models.base_model import BaseModel
+from secml2.trackers.tracker import Tracker
 
 
 class BaseEvasionAttackCreator:
@@ -69,7 +69,7 @@ class BaseEvasionAttack:
             adversarial_dataset, batch_size=data_loader.batch_size
         )
         return adversarial_loader
-    
+
     @property
     def trackers(self) -> Union[List[Tracker], None]:
         return self._trackers

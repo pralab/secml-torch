@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Union
-# from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -79,39 +79,25 @@ class PredictionTracker(Tracker):
 
 
 
-# class GradientTracker(Tracker):
-#     def __init__(self, p: PerturbationModels = PerturbationModels.L2):
-#         super().__init__("Grad Norm")
+class GradientTracker(Tracker):
+    def __init__(self, p: PerturbationModels = PerturbationModels.L2) -> None:
+        super().__init__("Grad Norm")
 
-#         perturbations_models = {
-#             PerturbationModels.L0: 0,
-#             PerturbationModels.L1: 1,
-#             PerturbationModels.L2: 2,
-#             PerturbationModels.LINF: float("inf"),
-#         }
-#         self.p = perturbations_models[p]
-#         self.grad_norms = []
+        self.p = PerturbationModels.get_p(p)
+        self.tracked = []
 
-#     def track(
-#         self,
-#         iteration: int,
-#         loss: torch.Tensor,
-#         scores: torch.Tensor,
-#         delta: torch.Tensor,
-#     ):
-#         grad: torch.Tensor = delta.grad
-#         if grad is None:
-#             self.grad_norms.append(None)
-#         norm = grad.data.flatten(start_dim=1).norm(p=self.p, dim=1)
-#         self.grad_norms.append(norm)
-
-#     def get(self):
-#         return self.grad_norms
-
-#     def get_last_tracked(self):
-#         if self.grad_norms:
-#             return self.grad_norms[-1]
-#         return None
+    def track(
+        self,
+        iteration: int,
+        loss: torch.Tensor,
+        scores: torch.Tensor,
+        delta: torch.Tensor,
+    ) -> None:
+        grad: torch.Tensor = delta.grad
+        if grad is None:
+            self.tracked.append(None)
+        norm = grad.data.flatten(start_dim=1).norm(p=self.p, dim=1)
+        self.tracked.append(norm)
 
 
 class TensorboardTracker(Tracker):
