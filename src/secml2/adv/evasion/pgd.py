@@ -23,7 +23,7 @@ from secml2.optimization.constraints import (
 from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
-from src.secml2.trackers.tracker import Tracker
+from secml2.trackers.tracker import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):

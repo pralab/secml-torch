@@ -1,5 +1,6 @@
 from abc import abstractmethod
-from typing import Callable
+from typing import Callable, List, Union
+from secml2.trackers.tracker import Tracker
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -68,6 +69,15 @@ class BaseEvasionAttack:
             adversarial_dataset, batch_size=data_loader.batch_size
         )
         return adversarial_loader
+    
+    @property
+    def trackers(self) -> Union[List[Tracker], None]:
+        return self._trackers
+
+    @trackers.setter
+    def trackers(self, trackers: Union[List[Tracker], None]) -> None:
+        if trackers is not None:
+            raise NotImplementedError("Trackers are not implemented for this backend")
 
     @abstractmethod
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):
