@@ -1,5 +1,9 @@
-from collections import OrderedDict
 import os
+from secml2.trackers.tracker import (
+    LossTracker,
+    PredictionTracker,
+    PerturbationNormTracker,
+)
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
@@ -10,8 +14,7 @@ from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 from secml2.metrics.classification import Accuracy
 from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-
-from torch import nn
+from secml2.trackers.tracker import TensorboardTracker
 
 
 class MNISTNet(torch.nn.Module):
@@ -55,10 +58,13 @@ print(accuracy)
 
 # Create and run attack
 epsilon = 0.3
-num_steps = 1
+num_steps = 6
 step_size = 0.05
 perturbation_model = PerturbationModels.LINF
 y_target = None
+
+trackers = [LossTracker(), PredictionTracker(), PerturbationNormTracker("linf")]
+
 native_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
@@ -67,8 +73,13 @@ native_attack = PGD(
     random_start=False,
     y_target=y_target,
     backend=Backends.NATIVE,
+    trackers=trackers[0],
 )
 native_adv_ds = native_attack(model, test_data_loader)
+
+# for tracker in trackers:
+#     print(tracker.name)
+#     print(tracker.get())
 
 # Test accuracy on adversarial examples
 n_robust_accuracy = Accuracy()(model, native_adv_ds)

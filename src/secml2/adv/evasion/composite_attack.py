@@ -34,12 +34,12 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         perturbation_constraints: List[Type[Constraint]],
         initializer: Initializer,
         gradient_processing: GradientProcessing,
-        trackers: list[Tracker] = None,
+        trackers: Union[List[Type[Tracker]], Type[Tracker]] = None,
     ) -> None:
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size
-        self._trackers = trackers
+        self.trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
                 self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
@@ -67,6 +67,8 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
     @BaseEvasionAttack.trackers.setter
     def trackers(self, trackers: Union[List[Tracker], None] = None) -> None:
+        if not isinstance(trackers, list):
+            trackers = [trackers]
         self._trackers = trackers
 
     def init_perturbation_constraints(self) -> List[Constraint]:

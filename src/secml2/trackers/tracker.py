@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Union
+from typing import Union, List, Type
 from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch
@@ -25,7 +25,7 @@ class Tracker(ABC):
 
     def get_last_tracked(self) -> Union[None, torch.Tensor]:
         if self.tracked is not None:
-            return self.tracked[..., -1]  # return last tracked value
+            return self.get()[..., -1]  # return last tracked value
         return None
 
 
@@ -77,7 +77,7 @@ class PredictionTracker(Tracker):
         self.tracked.append(scores.data.argmax(dim=1))
 
 
-class PertNormTracker(Tracker):
+class PerturbationNormTracker(Tracker):
     def __init__(self, p: PerturbationModels = PerturbationModels.L2) -> None:
         super().__init__("PertNorm")
         self.p = PerturbationModels.get_p(p)
@@ -94,7 +94,7 @@ class PertNormTracker(Tracker):
         self.tracked.append(delta.flatten(start_dim=1).norm(p=self.p, dim=-1))
 
 
-class GradientTracker(Tracker):
+class GradientNormTracker(Tracker):
     def __init__(self, p: PerturbationModels = PerturbationModels.L2) -> None:
         super().__init__("GradNorm")
 
@@ -114,13 +114,12 @@ class GradientTracker(Tracker):
 
 
 class TensorboardTracker(Tracker):
-    def __init__(self, logdir: str, trackers: list[Tracker] = None):
+    def __init__(self, logdir: str, trackers: List[Type[Tracker]] = None):
         super().__init__("Tensorboard")
         if trackers is None:
             trackers = [
                 LossTracker(),
-                PredictionTracker(),
-                GradientTracker(),
+                GradientNormTracker(),
             ]
         self.writer = SummaryWriter(log_dir=logdir)
         self.trackers = trackers
@@ -131,19 +130,17 @@ class TensorboardTracker(Tracker):
         loss: torch.Tensor,
         scores: torch.Tensor,
         delta: torch.Tensor,
+        grad: torch.Tensor,
     ):
         for tracker in self.trackers:
-            tracker.track(iteration, loss, scores, delta)
+            tracker.track(iteration, loss, scores, delta, grad)
             tracked_value = tracker.get_last_tracked()
-            if isinstance(tracked_value, torch.Tensor):
-                for i, sample in enumerate(tracked_value):
-                    self.writer.add_scalar(
-                        f"{tracker.name} #{i}", sample, global_step=iteration
-                    )
-            else:
+            for i, sample in enumerate(tracked_value):
                 self.writer.add_scalar(
-                    f"{tracker.name}", tracked_value, global_step=iteration
+                    f"Sample #{i}/{tracker.name}", sample, global_step=iteration
                 )
 
     def get_last_tracked(self):
-        return {tracker.name: tracker.get() for tracker in self.trackers}
+        return NotImplementedError(
+            "Last tracked value is not available for this tracker."
+        )
