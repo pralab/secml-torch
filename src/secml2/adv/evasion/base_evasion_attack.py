@@ -19,14 +19,14 @@ class BaseEvasionAttackCreator:
             Backends.FOOLBOX: cls.get_foolbox_implementation,
             Backends.NATIVE: cls.get_native_implementation,
         }
-        if backend not in implementations:
-            raise NotImplementedError("Unsupported or not-implemented backend.")
+        cls.check_backend_available(backend)
         return implementations[backend]()
 
-    @staticmethod
-    def check_perturbation_model_available(perturbation_model: str) -> bool:
-        if not PerturbationModels.is_perturbation_model_available(perturbation_model):
-            raise NotImplementedError("Unsupported or not-implemented threat model.")
+    @classmethod
+    def check_backend_available(cls, backend: str) -> bool:
+        if backend in cls.get_backends():
+            return
+        raise NotImplementedError("Unsupported or not-implemented backend.")
 
     @classmethod
     def get_foolbox_implementation(cls):
@@ -44,6 +44,11 @@ class BaseEvasionAttackCreator:
     @staticmethod
     def get_native_implementation():
         raise NotImplementedError("Native implementation not available.")
+
+    @staticmethod
+    @abstractmethod
+    def get_backends():
+        raise NotImplementedError("Backends should be specified in inherited class.")
 
 
 class BaseEvasionAttack:
@@ -80,6 +85,19 @@ class BaseEvasionAttack:
     def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None]) -> None:
         if trackers is not None:
             raise NotImplementedError("Trackers are not implemented for this backend")
+
+    @classmethod
+    def check_perturbation_model_available(cls, perturbation_model: str) -> bool:
+        if perturbation_model in cls.get_perturbation_models():
+            return
+        raise NotImplementedError("Unsupported or not-implemented perturbation model.")
+
+    @staticmethod
+    @abstractmethod
+    def get_perturbation_models():
+        raise NotImplementedError(
+            "Perturbation models should be specified in inherited class."
+        )
 
     @abstractmethod
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):

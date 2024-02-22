@@ -5,17 +5,22 @@ from secml2.adv.evasion.perturbation_models import PerturbationModels
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+SCALAR = "scalar"
+IMAGE = "image"
+
 
 class Tracker(ABC):
-    def __init__(self, name) -> None:
+    def __init__(self, name, tracker_type=SCALAR) -> None:
         self.name = name
         self.tracked = None
+        self.tracked_type = tracker_type
 
     def track(
         self,
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None: ...
@@ -39,6 +44,7 @@ class LossTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
@@ -55,6 +61,7 @@ class ScoresTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
@@ -71,6 +78,7 @@ class PredictionTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
@@ -88,6 +96,7 @@ class PerturbationNormTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
@@ -106,6 +115,7 @@ class GradientNormTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
@@ -129,16 +139,22 @@ class TensorboardTracker(Tracker):
         iteration: int,
         loss: torch.Tensor,
         scores: torch.Tensor,
+        x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
     ):
         for tracker in self.trackers:
-            tracker.track(iteration, loss, scores, delta, grad)
+            tracker.track(iteration, loss, scores, x_adv, delta, grad)
             tracked_value = tracker.get_last_tracked()
             for i, sample in enumerate(tracked_value):
-                self.writer.add_scalar(
-                    f"Sample #{i}/{tracker.name}", sample, global_step=iteration
-                )
+                if tracker.tracked_type == SCALAR:
+                    self.writer.add_scalar(
+                        f"Sample #{i}/{tracker.name}", sample, global_step=iteration
+                    )
+                elif tracker.tracked_type == IMAGE:
+                    self.writer.add_image(
+                        f"Sample #{i}/{tracker.name}", sample, global_step=iteration
+                    )
 
     def get_last_tracked(self):
         return NotImplementedError(

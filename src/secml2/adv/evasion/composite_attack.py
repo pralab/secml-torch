@@ -1,4 +1,5 @@
 from typing import Union, List, Type
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
@@ -11,7 +12,7 @@ from secml2.optimization.constraints import Constraint
 from secml2.optimization.gradient_processing import GradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
-from secml2.trackers.tracker import Tracker
+from secml2.trackers.trackers import Tracker
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logits_loss"
@@ -65,6 +66,10 @@ class CompositeEvasionAttack(BaseEvasionAttack):
 
         super().__init__()
 
+    @classmethod
+    def get_perturbation_models(self):
+        return {PerturbationModels.L2, PerturbationModels.LINF}
+
     @BaseEvasionAttack.trackers.setter
     def trackers(self, trackers: Union[List[Tracker], None] = None) -> None:
         if not isinstance(trackers, list):
@@ -115,6 +120,11 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             if self.trackers is not None:
                 for tracker in self.trackers:
                     tracker.track(
-                        i, losses.data, scores.data, delta.data, delta.grad.data
+                        i,
+                        losses.data,
+                        scores.data,
+                        x_adv.data,
+                        delta.data,
+                        delta.grad.data,
                     )
         return x_adv

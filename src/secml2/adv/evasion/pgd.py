@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Type
 
 from foolbox.attacks import (
     L1ProjectedGradientDescentAttack,
@@ -23,7 +23,7 @@ from secml2.optimization.constraints import (
 from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
-from secml2.trackers.tracker import Tracker
+from secml2.trackers.trackers import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):
@@ -41,8 +41,9 @@ class PGD(BaseEvasionAttackCreator):
         trackers: list[Tracker] = None,
         **kwargs
     ):
-        cls.check_perturbation_model_available(perturbation_model)
+        cls.check_backend_available(backend)
         implementation = cls.get_implementation(backend)
+        implementation.check_perturbation_model_available(perturbation_model)
         return implementation(
             perturbation_model=perturbation_model,
             epsilon=epsilon,
@@ -55,6 +56,10 @@ class PGD(BaseEvasionAttackCreator):
             trackers=trackers,
             **kwargs
         )
+
+    @staticmethod
+    def get_backends():
+        return [Backends.FOOLBOX, Backends.NATIVE]
 
     @staticmethod
     def _get_foolbox_implementation():
@@ -91,7 +96,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         foolbox_attack_cls = perturbation_models.get(perturbation_model, None)
         if foolbox_attack_cls is None:
             raise NotImplementedError(
-                "This threat model is not implemented in foolbox."
+                "This perturbation model is not implemented in foolbox."
             )
 
         foolbox_attack = foolbox_attack_cls(
