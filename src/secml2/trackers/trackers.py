@@ -7,6 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 SCALAR = "scalar"
 IMAGE = "image"
+MULTI_SCALAR = "multiple_scalars"
 
 
 class Tracker(ABC):
@@ -52,8 +53,12 @@ class LossTracker(Tracker):
 
 
 class ScoresTracker(Tracker):
-    def __init__(self) -> None:
-        super().__init__("Scores")
+    def __init__(self, y: Union[int, torch.Tensor] = None) -> None:
+        if y is None:
+            super().__init__("Scores", MULTI_SCALAR)
+        else:
+            super().__init__("Scores")
+        self.y = y
         self.tracked = []
 
     def track(
@@ -65,7 +70,10 @@ class ScoresTracker(Tracker):
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
-        self.tracked.append(scores.data)
+        if self.y is None:
+            self.tracked.append(scores.data)
+        else:
+            self.tracked.append(scores.data[..., self.y])
 
 
 class PredictionTracker(Tracker):
@@ -151,6 +159,18 @@ class TensorboardTracker(Tracker):
                     self.writer.add_scalar(
                         f"Sample #{i}/{tracker.name}", sample, global_step=iteration
                     )
+                elif tracker.tracked_type == MULTI_SCALAR:
+                    # this is partially supported
+                    self.writer.add_custom_scalars_multilinechart(
+                        [
+                            f"Sample #{i}/{tracker.name}_{j}"
+                            for j, _ in enumerate(scores)
+                        ]
+                    )
+                    for j, v in enumerate(sample):
+                        self.writer.add_scalar(
+                            f"Sample #{i}/{tracker.name}_{j}", v, global_step=iteration
+                        )
                 elif tracker.tracked_type == IMAGE:
                     self.writer.add_image(
                         f"Sample #{i}/{tracker.name}", sample, global_step=iteration

@@ -108,6 +108,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             loss = losses.sum() * multiplier
             optimizer.zero_grad()
             loss.backward()
+            grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
             for constraint in self.perturbation_constraints:
@@ -125,6 +126,6 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                         scores.data,
                         x_adv.data,
                         delta.data,
-                        delta.grad.data,
+                        grad_before_processing,
                     )
         return x_adv
