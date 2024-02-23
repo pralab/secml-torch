@@ -109,7 +109,8 @@ f_data, f_labels = next(iter(f_adv_ds))
 real_data, real_labels = next(iter(test_data_loader))
 
 distance = torch.linalg.norm(
-    native_data.flatten(start_dim=1).to(device) - f_data.flatten(start_dim=1),
+    native_data.detach().cpu().flatten(start_dim=1)
+    - f_data.detach().cpu().flatten(start_dim=1),
     ord=float("inf"),
     dim=1,
 )

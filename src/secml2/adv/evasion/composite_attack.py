@@ -120,10 +120,10 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 for tracker in self.trackers:
                     tracker.track(
                         i,
-                        losses.data,
-                        scores.data,
-                        x_adv.data,
-                        delta.data,
-                        grad_before_processing,
+                        losses.detach().cpu().data,
+                        scores.detach().cpu().data,
+                        x_adv.detach().cpu().data,
+                        delta.detach().cpu().data,
+                        grad_before_processing.detach().cpu().data,
                     )
         return x_adv
