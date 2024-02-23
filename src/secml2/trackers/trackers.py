@@ -160,21 +160,17 @@ class TensorboardTracker(Tracker):
                         f"Sample #{i}/{tracker.name}", sample, global_step=iteration
                     )
                 elif tracker.tracked_type == MULTI_SCALAR:
-                    # this is partially supported
-                    self.writer.add_custom_scalars_multilinechart(
-                        [
-                            f"Sample #{i}/{tracker.name}_{j}"
-                            for j, _ in enumerate(scores)
-                        ]
+                    self.writer.add_scalars(
+                        main_tag=f"Sample #{i}/{tracker.name}", 
+                        tag_scalar_dict={f"Sample #{i}/{tracker.name}{j}": v for j, v in enumerate(sample)}, 
+                        global_step=iteration
                     )
-                    for j, v in enumerate(sample):
-                        self.writer.add_scalar(
-                            f"Sample #{i}/{tracker.name}_{j}", v, global_step=iteration
-                        )
                 elif tracker.tracked_type == IMAGE:
                     self.writer.add_image(
                         f"Sample #{i}/{tracker.name}", sample, global_step=iteration
                     )
+
+                
 
     def get_last_tracked(self):
         return NotImplementedError(

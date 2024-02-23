@@ -6,6 +6,7 @@ from secml2.trackers.trackers import (
     PredictionTracker,
     PerturbationNormTracker,
     TensorboardTracker,
+    ScoresTracker,
 )
 import torch
 import torchvision.datasets
@@ -71,6 +72,7 @@ trackers = [
     PerturbationNormTracker("linf"),
     GradientNormTracker(),
     SampleTracker(),
+    ScoresTracker(),
     GradientsTracker(),
 ]
 
