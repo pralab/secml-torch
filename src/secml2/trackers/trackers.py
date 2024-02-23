@@ -161,16 +161,17 @@ class TensorboardTracker(Tracker):
                     )
                 elif tracker.tracked_type == MULTI_SCALAR:
                     self.writer.add_scalars(
-                        main_tag=f"Sample #{i}/{tracker.name}", 
-                        tag_scalar_dict={f"Sample #{i}/{tracker.name}{j}": v for j, v in enumerate(sample)}, 
-                        global_step=iteration
+                        main_tag=f"Sample #{i}/{tracker.name}",
+                        tag_scalar_dict={
+                            f"Sample #{i}/{tracker.name}{j}": v
+                            for j, v in enumerate(sample)
+                        },
+                        global_step=iteration,
                     )
                 elif tracker.tracked_type == IMAGE:
                     self.writer.add_image(
                         f"Sample #{i}/{tracker.name}", sample, global_step=iteration
                     )
-
-                
 
     def get_last_tracked(self):
         return NotImplementedError(
