@@ -1,12 +1,15 @@
 from abc import abstractmethod
-from typing import Callable
+from typing import Callable, List, Type, Union
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from secml2.adv.backends import Backends
-from secml2.adv.evasion.perturbation_models import PerturbationModels
 from secml2.models.base_model import BaseModel
+
+# lazy evaluation to avoid circular imports
+TRACKER_TYPE = "secml2.trackers.tracker.Tracker"
 
 
 class BaseEvasionAttackCreator:
@@ -16,14 +19,14 @@ class BaseEvasionAttackCreator:
             Backends.FOOLBOX: cls.get_foolbox_implementation,
             Backends.NATIVE: cls.get_native_implementation,
         }
-        if backend not in implementations:
-            raise NotImplementedError("Unsupported or not-implemented backend.")
+        cls.check_backend_available(backend)
         return implementations[backend]()
 
-    @staticmethod
-    def check_perturbation_model_available(perturbation_model: str) -> bool:
-        if not PerturbationModels.is_perturbation_model_available(perturbation_model):
-            raise NotImplementedError("Unsupported or not-implemented threat model.")
+    @classmethod
+    def check_backend_available(cls, backend: str) -> bool:
+        if backend in cls.get_backends():
+            return True
+        raise NotImplementedError("Unsupported or not-implemented backend.")
 
     @classmethod
     def get_foolbox_implementation(cls):
@@ -41,6 +44,11 @@ class BaseEvasionAttackCreator:
     @staticmethod
     def get_native_implementation():
         raise NotImplementedError("Native implementation not available.")
+
+    @staticmethod
+    @abstractmethod
+    def get_backends():
+        raise NotImplementedError("Backends should be specified in inherited class.")
 
 
 class BaseEvasionAttack:
@@ -68,6 +76,36 @@ class BaseEvasionAttack:
             adversarial_dataset, batch_size=data_loader.batch_size
         )
         return adversarial_loader
+
+    @property
+    def trackers(self) -> Union[List[Type[TRACKER_TYPE]], None]:
+        return self._trackers
+
+    @trackers.setter
+    def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None] = None) -> None:
+        if self.trackers_allowed():
+            if not isinstance(trackers, list):
+                trackers = [trackers]
+            self._trackers = trackers
+        elif trackers is not None:
+            raise NotImplementedError("Trackers not implemented for this attack.")
+
+    @abstractmethod
+    def trackers_allowed(cls):
+        return False
+
+    @classmethod
+    def check_perturbation_model_available(cls, perturbation_model: str) -> bool:
+        if perturbation_model in cls.get_perturbation_models():
+            return
+        raise NotImplementedError("Unsupported or not-implemented perturbation model.")
+
+    @staticmethod
+    @abstractmethod
+    def get_perturbation_models():
+        raise NotImplementedError(
+            "Perturbation models should be specified in inherited class."
+        )
 
     @abstractmethod
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):

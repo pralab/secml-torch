@@ -1,4 +1,5 @@
 from typing import Union, List, Type
+from secml2.adv.evasion.perturbation_models import PerturbationModels
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
@@ -11,10 +12,10 @@ from secml2.optimization.constraints import Constraint
 from secml2.optimization.gradient_processing import GradientProcessing
 from secml2.optimization.initializer import Initializer
 from secml2.optimization.optimizer_factory import OptimizerFactory
-from src.secml2.trackers.tracker import Tracker
+from secml2.trackers.trackers import Tracker
 
 CE_LOSS = "ce_loss"
-LOGIT_LOSS = "logits_loss"
+LOGIT_LOSS = "logit_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
@@ -34,15 +35,15 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         perturbation_constraints: List[Type[Constraint]],
         initializer: Initializer,
         gradient_processing: GradientProcessing,
-        trackers: list[Tracker] = None,
-    ):
+        trackers: Union[List[Type[Tracker]], Type[Tracker]] = None,
+    ) -> None:
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size
         self.trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
-                self.loss_function = LOSS_FUNCTIONS[loss_function]()
+                self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
             else:
                 raise ValueError(
                     f"{loss_function} not in list of init from string. Use one among {LOSS_FUNCTIONS.values()}"
@@ -64,6 +65,14 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         self.gradient_processing = gradient_processing
 
         super().__init__()
+
+    @classmethod
+    def get_perturbation_models(self):
+        return {PerturbationModels.L2, PerturbationModels.LINF}
+
+    @classmethod
+    def trackers_allowed(cls):
+        return True
 
     def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")
@@ -93,10 +102,11 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
             target = target.to(scores.device)
-            loss = self.loss_function(scores, target)
-            loss = loss * multiplier
+            losses = self.loss_function(scores, target)
+            loss = losses.sum() * multiplier
             optimizer.zero_grad()
             loss.backward()
+            grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
             for constraint in self.perturbation_constraints:
@@ -108,5 +118,12 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                 x_adv.data = constraint(x_adv.data)
             if self.trackers is not None:
                 for tracker in self.trackers:
-                    tracker.track(i, loss, scores, delta)
+                    tracker.track(
+                        i,
+                        losses.data,
+                        scores.data,
+                        x_adv.data,
+                        delta.data,
+                        grad_before_processing,
+                    )
         return x_adv

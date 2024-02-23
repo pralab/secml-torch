@@ -27,11 +27,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
             PerturbationModels.L2: L2ProjectedGradientDescentAttack,
             PerturbationModels.LINF: LinfProjectedGradientDescentAttack,
         }
-        foolbox_attack_cls = perturbation_models.get(perturbation_model, None)
-        if foolbox_attack_cls is None:
-            raise NotImplementedError(
-                "This threat model is not implemented in foolbox."
-            )
+        foolbox_attack_cls = perturbation_models.get(perturbation_model)
 
         foolbox_attack = foolbox_attack_cls(
             abs_stepsize=step_size, steps=num_steps, random_start=random_start
@@ -44,3 +40,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
             lb=lb,
             ub=ub,
         )
+
+    @staticmethod
+    def get_perturbation_models():
+        return {PerturbationModels.L1, PerturbationModels.L2, PerturbationModels.LINF}
