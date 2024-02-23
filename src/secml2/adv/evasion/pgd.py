@@ -33,7 +33,7 @@ class PGD(BaseEvasionAttackCreator):
         epsilon: float,
         num_steps: int,
         step_size: float,
-        random_start: bool,
+        random_start: bool = False,
         y_target: Optional[int] = None,
         lb: float = 0.0,
         ub: float = 1.0,
