@@ -82,9 +82,17 @@ class BaseEvasionAttack:
         return self._trackers
 
     @trackers.setter
-    def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None]) -> None:
-        if trackers is not None:
-            raise NotImplementedError("Trackers are not implemented for this backend")
+    def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None] = None) -> None:
+        if self.trackers_allowed():
+            if not isinstance(trackers, list):
+                trackers = [trackers]
+            self._trackers = trackers
+        elif trackers is not None:
+            raise NotImplementedError("Trackers not implemented for this attack.")
+
+    @abstractmethod
+    def trackers_allowed(cls):
+        return False
 
     @classmethod
     def check_perturbation_model_available(cls, perturbation_model: str) -> bool:

@@ -70,11 +70,9 @@ class CompositeEvasionAttack(BaseEvasionAttack):
     def get_perturbation_models(self):
         return {PerturbationModels.L2, PerturbationModels.LINF}
 
-    @BaseEvasionAttack.trackers.setter
-    def trackers(self, trackers: Union[List[Tracker], None] = None) -> None:
-        if not isinstance(trackers, list):
-            trackers = [trackers]
-        self._trackers = trackers
+    @classmethod
+    def trackers_allowed(cls):
+        return True
 
     def init_perturbation_constraints(self) -> List[Constraint]:
         raise NotImplementedError("Must be implemented accordingly")

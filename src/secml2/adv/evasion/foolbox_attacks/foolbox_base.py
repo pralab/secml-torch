@@ -26,6 +26,10 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         self.trackers = trackers
         super().__init__()
 
+    @classmethod
+    def trackers_allowed(cls):
+        return False
+
     def _run(
         self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
     ) -> torch.Tensor:
