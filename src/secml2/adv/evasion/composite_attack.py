@@ -15,7 +15,7 @@ from secml2.optimization.optimizer_factory import OptimizerFactory
 from secml2.trackers.trackers import Tracker
 
 CE_LOSS = "ce_loss"
-LOGIT_LOSS = "logits_loss"
+LOGIT_LOSS = "logit_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
