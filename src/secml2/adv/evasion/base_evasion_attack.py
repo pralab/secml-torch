@@ -84,7 +84,7 @@ class BaseEvasionAttack:
     @trackers.setter
     def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None] = None) -> None:
         if self.trackers_allowed():
-            if not isinstance(trackers, list):
+            if trackers is not None and not isinstance(trackers, list):
                 trackers = [trackers]
             self._trackers = trackers
         elif trackers is not None:
