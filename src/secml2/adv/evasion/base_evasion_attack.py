@@ -25,7 +25,7 @@ class BaseEvasionAttackCreator:
     @classmethod
     def check_backend_available(cls, backend: str) -> bool:
         if backend in cls.get_backends():
-            return
+            return True
         raise NotImplementedError("Unsupported or not-implemented backend.")
 
     @classmethod
