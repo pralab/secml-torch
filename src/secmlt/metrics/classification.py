@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from secml2.models.base_model import BaseModel
+from secmlt.models.base_model import BaseModel
 
 
 def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:

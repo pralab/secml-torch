@@ -3,9 +3,9 @@ import torchvision.datasets
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from secml2.metrics.classification import Accuracy
-from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from secml2.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secmlt.metrics.classification import Accuracy
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 
 
 class MNISTNet(torch.nn.Module):

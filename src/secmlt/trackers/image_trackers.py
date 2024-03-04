@@ -1,5 +1,5 @@
-from secml2.adv.evasion.perturbation_models import PerturbationModels
-from secml2.trackers.trackers import IMAGE, Tracker
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.trackers.trackers import IMAGE, Tracker
 import torch
 
 

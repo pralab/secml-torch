@@ -3,7 +3,7 @@ from typing import Tuple
 
 import torch
 
-from secml2.optimization.constraints import Constraint
+from secmlt.optimization.constraints import Constraint
 
 
 class Manipulation(ABC):

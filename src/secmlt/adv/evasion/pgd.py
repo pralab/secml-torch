@@ -6,24 +6,24 @@ from foolbox.attacks import (
     LinfProjectedGradientDescentAttack,
 )
 
-from secml2.adv.backends import Backends
-from secml2.adv.evasion import BaseFoolboxEvasionAttack
-from secml2.adv.evasion.base_evasion_attack import (
+from secmlt.adv.backends import Backends
+from secmlt.adv.evasion import BaseFoolboxEvasionAttack
+from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
-from secml2.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
-from secml2.adv.evasion.perturbation_models import PerturbationModels
-from secml2.manipulations.manipulation import AdditiveManipulation
-from secml2.optimization.constraints import (
+from secmlt.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.manipulations.manipulation import AdditiveManipulation
+from secmlt.optimization.constraints import (
     ClipConstraint,
     L1Constraint,
     L2Constraint,
     LInfConstraint,
 )
-from secml2.optimization.gradient_processing import LinearProjectionGradientProcessing
-from secml2.optimization.initializer import Initializer
-from secml2.optimization.optimizer_factory import OptimizerFactory
-from secml2.trackers.trackers import Tracker
+from secmlt.optimization.gradient_processing import LinearProjectionGradientProcessing
+from secmlt.optimization.initializer import Initializer
+from secmlt.optimization.optimizer_factory import OptimizerFactory
+from secmlt.trackers.trackers import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):

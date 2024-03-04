@@ -1,6 +1,6 @@
 import torch
 
-from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
 
 
 class Initializer:

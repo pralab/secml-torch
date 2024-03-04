@@ -1,15 +1,15 @@
 from abc import abstractmethod
 from typing import Callable, List, Type, Union
-from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-from secml2.adv.backends import Backends
-from secml2.models.base_model import BaseModel
+from secmlt.adv.backends import Backends
+from secmlt.models.base_model import BaseModel
 
 # lazy evaluation to avoid circular imports
-TRACKER_TYPE = "secml2.trackers.tracker.Tracker"
+TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"
 
 
 class BaseEvasionAttackCreator:
