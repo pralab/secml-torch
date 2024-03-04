@@ -1,10 +1,10 @@
 from typing import Optional, Type, Union
-from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from secml2.models.base_model import BaseModel
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.base_model import BaseModel
 from foolbox.attacks.base import Attack
 from foolbox.models.pytorch import PyTorchModel
 from foolbox.criteria import Misclassification, TargetedMisclassification
-from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack, TRACKER_TYPE
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack, TRACKER_TYPE
 import torch
 
 

@@ -1,18 +1,18 @@
 from typing import Union, List, Type
-from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
 from torch.optim import Optimizer
 from functools import partial
-from secml2.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secml2.manipulations.manipulation import Manipulation
-from secml2.models.base_model import BaseModel
-from secml2.optimization.constraints import Constraint
-from secml2.optimization.gradient_processing import GradientProcessing
-from secml2.optimization.initializer import Initializer
-from secml2.optimization.optimizer_factory import OptimizerFactory
-from secml2.trackers.trackers import Tracker
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.manipulations.manipulation import Manipulation
+from secmlt.models.base_model import BaseModel
+from secmlt.optimization.constraints import Constraint
+from secmlt.optimization.gradient_processing import GradientProcessing
+from secmlt.optimization.initializer import Initializer
+from secmlt.optimization.optimizer_factory import OptimizerFactory
+from secmlt.trackers.trackers import Tracker
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"

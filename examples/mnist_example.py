@@ -1,5 +1,5 @@
 import os
-from secml2.trackers.trackers import (
+from secmlt.trackers.trackers import (
     LossTracker,
     PredictionTracker,
     PerturbationNormTracker,
@@ -8,12 +8,12 @@ import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
 from robustbench.utils import download_gdrive
-from secml2.adv.backends import Backends
-from secml2.adv.evasion.pgd import PGD
-from secml2.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.adv.backends import Backends
+from secmlt.adv.evasion.pgd import PGD
+from secmlt.adv.evasion.perturbation_models import PerturbationModels
 
-from secml2.metrics.classification import Accuracy
-from secml2.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.metrics.classification import Accuracy
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 
 class MNISTNet(torch.nn.Module):
