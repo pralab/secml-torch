@@ -32,10 +32,7 @@ class Accuracy(object):
         return self._accumulated_accuracy / self._num_samples
 
 
-class SampleWiseAccuracy(object):
-    def __init__(self):
-        self._num_samples = 0
-        self._accumulated_accuracy = 0.0
+class SampleWiseAccuracy(Accuracy):
 
     def __call__(self, model: BaseModel, dataloaders: List[DataLoader]):
         for advs in zip(*dataloaders):
