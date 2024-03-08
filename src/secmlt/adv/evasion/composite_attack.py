@@ -1,5 +1,6 @@
 from typing import Union, List, Type
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.utils.tensor_utils import atleast_kd
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
@@ -99,6 +100,9 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         optimizer = self.create_optimizer(delta, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
 
+        best_losses = torch.zeros(samples.shape[0])
+        best_delta = torch.zeros_like(samples)
+
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
             target = target.to(scores.device)
@@ -126,4 +130,17 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                         delta.detach().cpu().data,
                         grad_before_processing.detach().cpu().data,
                     )
+
+            # keep perturbation with highest loss
+            best_losses.data = torch.where(
+                losses > best_losses, losses.data, best_losses.data
+            )
+            best_delta.data = torch.where(
+                atleast_kd(losses < best_losses, len(samples.shape)),
+                delta.data,
+                best_delta.data,
+            )
+        x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
+        for constraint in self.domain_constraints:
+            x_adv.data = constraint(x_adv.data)
         return x_adv
