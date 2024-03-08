@@ -46,7 +46,7 @@ class L2Constraint(LpConstraint):
     def project(self, x):
         flat_x = x.flatten(start_dim=1)
         diff_norm = flat_x.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        flat_x = flat_x / diff_norm * self.radius
+        flat_x = torch.where(diff_norm <= 1, flat_x, flat_x / diff_norm) * self.radius
         x = flat_x.reshape(x.shape)
         return x
 
