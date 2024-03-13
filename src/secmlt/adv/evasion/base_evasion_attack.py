@@ -78,11 +78,11 @@ class BaseEvasionAttack:
         return adversarial_loader
 
     @property
-    def trackers(self) -> Union[List[Type[TRACKER_TYPE]], None]:
+    def trackers(self) -> Union[List[TRACKER_TYPE], None]:
         return self._trackers
 
     @trackers.setter
-    def trackers(self, trackers: Union[List[Type[TRACKER_TYPE]], None] = None) -> None:
+    def trackers(self, trackers: Union[List[TRACKER_TYPE], None] = None) -> None:
         if self.trackers_allowed():
             if trackers is not None and not isinstance(trackers, list):
                 trackers = [trackers]

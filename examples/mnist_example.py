@@ -86,7 +86,7 @@ for tracker in trackers:
 
 # Test accuracy on adversarial examples
 n_robust_accuracy = Accuracy()(model, native_adv_ds)
-print("robust accuracy foolbox: ", n_robust_accuracy)
+print("robust accuracy native: ", n_robust_accuracy)
 
 # Create and run attack
 foolbox_attack = PGD(
@@ -102,7 +102,7 @@ f_adv_ds = foolbox_attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples
 f_robust_accuracy = Accuracy()(model, f_adv_ds)
-print("robust accuracy native: ", f_robust_accuracy)
+print("robust accuracy foolbox: ", f_robust_accuracy)
 
 native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))

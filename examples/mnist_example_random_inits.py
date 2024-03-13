@@ -1,9 +1,5 @@
 import os
-from secmlt.trackers.trackers import (
-    LossTracker,
-    PredictionTracker,
-    PerturbationNormTracker,
-)
+from secmlt.adv.evasion.aggregators.criterions import MaxLossCriterion
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
@@ -11,8 +7,7 @@ from robustbench.utils import download_gdrive
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
-
-from secmlt.metrics.classification import Accuracy, SampleWiseAccuracy
+from secmlt.metrics.classification import Accuracy, AccuracyEnsemble
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 
@@ -45,7 +40,7 @@ net.load_state_dict(model_weigths)
 test_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
 )
-test_dataset = Subset(test_dataset, list(range(10)))
+test_dataset = Subset(test_dataset, list(range(20)))
 test_data_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
 
 # Wrap model
@@ -53,60 +48,37 @@ model = BasePytorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_data_loader)
-print("Accuracy on clean samples: ", accuracy)
+print("test accuracy: ", accuracy.item())
 
 # Create and run attack
-epsilon = 0.05
-num_steps = 10
-step_size = 0.05
+epsilon = 0.1
+num_steps = 5
+step_size = 0.01
 perturbation_model = PerturbationModels.LINF
 y_target = None
 
-trackers = [
-    LossTracker(),
-    PredictionTracker(),
-    PerturbationNormTracker("linf"),
-]
-
-attack_1 = PGD(
+pgd_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
     num_steps=num_steps,
     step_size=step_size,
-    random_start=False,
+    random_start=True,
     y_target=y_target,
     backend=Backends.NATIVE,
 )
 
-attack_2 = PGD(
-    perturbation_model=perturbation_model,
-    epsilon=epsilon,
-    num_steps=num_steps,
-    step_size=step_size,
-    random_start=True,
-    y_target=y_target,
-    backend=Backends.FOOLBOX,
-)
+multiple_attack_results = [pgd_attack(model, test_data_loader) for i in range(3)]
+criterion = MaxLossCriterion(loss_fn=torch.nn.CrossEntropyLoss(), maximize=True)
+best_advs = criterion(model, test_data_loader, multiple_attack_results)
 
-attack_3 = PGD(
-    perturbation_model=perturbation_model,
-    epsilon=epsilon,
-    num_steps=num_steps,
-    step_size=0.01,
-    random_start=True,
-    y_target=y_target,
-    backend=Backends.FOOLBOX,
-)
+# Test accuracy on best adversarial examples
+n_robust_accuracy = Accuracy()(model, best_advs)
+print("robust accuracy best advs: ", n_robust_accuracy.item())
 
-# run all attacks and collect results
-adv_datasets = []
-for i, attack in enumerate([attack_1, attack_2, attack_3]):
-    adv_dataset = attack(model, test_data_loader)
-    adv_datasets.append(adv_dataset)
-    # individual attacks robust accuracy
-    robust_accuracy = Accuracy()(model, adv_dataset)
-    print(f"robust accuracy attack #{i}: {robust_accuracy}")
+# Test accuracy on ensemble
+n_robust_accuracy = AccuracyEnsemble()(model, multiple_attack_results)
+print("robust accuracy ensemble: ", n_robust_accuracy.item())
 
-# test accuracy on ensemble
-n_robust_accuracy = SampleWiseAccuracy()(model, adv_datasets)
-print("robust accuracy: ", n_robust_accuracy)
+for i, res in enumerate(multiple_attack_results):
+    n_robust_accuracy = Accuracy()(model, res)
+    print(f"robust accuracy attack {i}: {n_robust_accuracy.item()}")
