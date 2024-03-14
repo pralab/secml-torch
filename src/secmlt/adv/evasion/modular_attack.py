@@ -94,6 +94,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
         if init_deltas is not None:
             delta = init_deltas.data
+        elif isinstance(self.initializer, BaseEvasionAttack):
+            _, delta = self.initializer._run(model, samples, target)
         else:
             delta = self.initializer(samples.data)
         delta.requires_grad = True
@@ -138,4 +140,4 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                 losses < best_losses, losses.data, best_losses.data
             )
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
-        return x_adv
+        return x_adv, best_delta

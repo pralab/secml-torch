@@ -1,6 +1,5 @@
 from abc import abstractmethod
-from typing import Callable, List, Type, Union
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
+from typing import Callable, List, Union
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -66,7 +65,7 @@ class BaseEvasionAttack:
         adversarials = []
         original_labels = []
         for samples, labels in data_loader:
-            x_adv = self._run(model, samples, labels)
+            x_adv, _ = self._run(model, samples, labels)
             adversarials.append(x_adv)
             original_labels.append(labels)
         adversarials = torch.vstack(adversarials)
@@ -111,6 +110,6 @@ class BaseEvasionAttack:
     def _run(self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor):
         """
         Compute the attack against the model, using the input data (batch).
-        It returns the batch of adversarial examples.
+        It returns the batch of adversarial examples and the perturbation delta.
         """
         ...

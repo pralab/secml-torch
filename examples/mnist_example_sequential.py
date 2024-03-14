@@ -1,4 +1,5 @@
 import os
+from secmlt.adv.evasion.modular_attack import ModularEvasionAttackFixedEps
 from secmlt.trackers.trackers import (
     LossTracker,
     PredictionTracker,
@@ -55,6 +56,7 @@ model = BasePytorchClassifier(net)
 accuracy = Accuracy()(model, test_data_loader)
 print("accuracy: ", accuracy)
 
+
 # Create and run attack
 epsilon = 0.3
 num_steps = 10
@@ -62,13 +64,7 @@ step_size = 0.05
 perturbation_model = PerturbationModels.LINF
 y_target = None
 
-trackers = [
-    LossTracker(),
-    PredictionTracker(),
-    PerturbationNormTracker("linf"),
-]
-
-native_attack = PGD(
+attack_1 = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
     num_steps=num_steps,
@@ -76,42 +72,23 @@ native_attack = PGD(
     random_start=False,
     y_target=y_target,
     backend=Backends.NATIVE,
-    trackers=trackers,
 )
-native_adv_ds = native_attack(model, test_data_loader)
-
-for tracker in trackers:
-    print(tracker.name)
-    print(tracker.get())
-
-# Test accuracy on adversarial examples
-n_robust_accuracy = Accuracy()(model, native_adv_ds)
-print("robust accuracy native: ", n_robust_accuracy)
-
-# Create and run attack
-foolbox_attack = PGD(
+attack_2 = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
     num_steps=num_steps,
     step_size=step_size,
     random_start=False,
     y_target=y_target,
-    backend=Backends.FOOLBOX,
+    backend=Backends.NATIVE,
 )
-f_adv_ds = foolbox_attack(model, test_data_loader)
+
+attack_2.initializer = attack_1
+
+
+adv_ds = attack_2(model, test_data_loader)
+
 
 # Test accuracy on adversarial examples
-f_robust_accuracy = Accuracy()(model, f_adv_ds)
-print("robust accuracy foolbox: ", f_robust_accuracy)
-
-native_data, native_labels = next(iter(native_adv_ds))
-f_data, f_labels = next(iter(f_adv_ds))
-real_data, real_labels = next(iter(test_data_loader))
-
-distance = torch.linalg.norm(
-    native_data.detach().cpu().flatten(start_dim=1)
-    - f_data.detach().cpu().flatten(start_dim=1),
-    ord=float("inf"),
-    dim=1,
-)
-print("Solutions are :", distance, "linf distant")
+n_robust_accuracy = Accuracy()(model, adv_ds)
+print("robust accuracy: ", n_robust_accuracy)
