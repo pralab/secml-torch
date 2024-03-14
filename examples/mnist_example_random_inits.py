@@ -1,5 +1,5 @@
 import os
-from secmlt.adv.evasion.aggregators.criterions import MaxLossCriterion
+from secmlt.adv.evasion.aggregators.ensemble import FixedEpsilonEnsemble
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
@@ -7,7 +7,12 @@ from robustbench.utils import download_gdrive
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
-from secmlt.metrics.classification import Accuracy, AccuracyEnsemble
+from secmlt.metrics.classification import (
+    Accuracy,
+    AccuracyEnsemble,
+    AttackSuccessRate,
+    EnsembleSuccessRate,
+)
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 
@@ -40,20 +45,20 @@ net.load_state_dict(model_weigths)
 test_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
 )
-test_dataset = Subset(test_dataset, list(range(20)))
-test_data_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
+test_dataset = Subset(test_dataset, list(range(10)))
+test_data_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
 
 # Wrap model
 model = BasePytorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_data_loader)
-print("test accuracy: ", accuracy.item())
+print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
-epsilon = 0.1
-num_steps = 5
-step_size = 0.01
+epsilon = 0.15
+num_steps = 3
+step_size = 0.05
 perturbation_model = PerturbationModels.LINF
 y_target = None
 
@@ -68,17 +73,23 @@ pgd_attack = PGD(
 )
 
 multiple_attack_results = [pgd_attack(model, test_data_loader) for i in range(3)]
-criterion = MaxLossCriterion(loss_fn=torch.nn.CrossEntropyLoss(), maximize=True)
+criterion = FixedEpsilonEnsemble(loss_fn=torch.nn.CrossEntropyLoss())
 best_advs = criterion(model, test_data_loader, multiple_attack_results)
 
 # Test accuracy on best adversarial examples
 n_robust_accuracy = Accuracy()(model, best_advs)
-print("robust accuracy best advs: ", n_robust_accuracy.item())
+print(f"RA best advs: {n_robust_accuracy.item():.2f}")
 
 # Test accuracy on ensemble
 n_robust_accuracy = AccuracyEnsemble()(model, multiple_attack_results)
-print("robust accuracy ensemble: ", n_robust_accuracy.item())
+print(f"RA ensemble: {n_robust_accuracy.item():.2f}")
+
+n_asr = EnsembleSuccessRate(y_target=y_target)(model, multiple_attack_results)
+print(f"ASR ensemble: {n_asr.item():.2f}")
 
 for i, res in enumerate(multiple_attack_results):
     n_robust_accuracy = Accuracy()(model, res)
-    print(f"robust accuracy attack {i}: {n_robust_accuracy.item()}")
+    print(f"RA attack: {i}: {n_robust_accuracy.item():.2f}")
+
+    asr = AttackSuccessRate(y_target=y_target)(model, res)
+    print(f"ASR attack: {i}: {asr.item():.2f}")

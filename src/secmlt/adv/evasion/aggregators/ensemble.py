@@ -5,7 +5,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 
-class Criterion(ABC):
+class Ensemble(ABC):
     def __call__(self, model, data_loader, adv_loaders):
         best_x_adv_data = []
         original_labels = []
@@ -29,7 +29,7 @@ class Criterion(ABC):
     def get_best(self, model, samples, labels, x_adv): ...
 
 
-class MinDistanceCriterion(Criterion):
+class MinDistanceEnsemble(Ensemble):
     def get_best(self, model, samples, labels, x_adv, best_x_adv):
         preds = model(x_adv).argmax(dim=1)
         is_adv = preds.type(labels.dtype) == labels
@@ -50,14 +50,19 @@ class MinDistanceCriterion(Criterion):
         return best_x_adv
 
 
-class MaxLossCriterion(Criterion):
-    def __init__(self, loss_fn, maximize=False) -> None:
+class FixedEpsilonEnsemble(Ensemble):
+    def __init__(self, loss_fn, maximize=True, y_target=None) -> None:
         self.maximize = maximize
         self.loss_fn = loss_fn
+        self.y_target = y_target
 
     def get_best(self, model, samples, labels, x_adv, best_x_adv):
-        loss = self.loss_fn(model(x_adv), labels)
-        best_adv_loss = self.loss_fn(model(best_x_adv), labels)
+        if self.y_target is None:
+            targets = labels
+        else:
+            targets = torch.ones_like(labels) * self.y_target
+        loss = self.loss_fn(model(x_adv), targets)
+        best_adv_loss = self.loss_fn(model(best_x_adv), targets)
         if self.maximize is True:
             is_best = loss > best_adv_loss
         else:
