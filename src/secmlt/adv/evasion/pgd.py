@@ -1,4 +1,4 @@
-from typing import Optional, Type
+from typing import Optional
 
 from foolbox.attacks import (
     L1ProjectedGradientDescentAttack,
@@ -11,7 +11,7 @@ from secmlt.adv.evasion import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
-from secmlt.adv.evasion.composite_attack import CompositeEvasionAttack, CE_LOSS
+from secmlt.adv.evasion.modular_attack import ModularEvasionAttackFixedEps, CE_LOSS
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.constraints import (
@@ -21,7 +21,7 @@ from secmlt.optimization.constraints import (
     LInfConstraint,
 )
 from secmlt.optimization.gradient_processing import LinearProjectionGradientProcessing
-from secmlt.optimization.initializer import Initializer
+from secmlt.optimization.initializer import Initializer, RandomLpInitializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.trackers.trackers import Tracker
 
@@ -113,7 +113,7 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         )
 
 
-class PGDNative(CompositeEvasionAttack):
+class PGDNative(ModularEvasionAttackFixedEps):
     def __init__(
         self,
         perturbation_model: str,
@@ -132,9 +132,13 @@ class PGDNative(CompositeEvasionAttack):
             PerturbationModels.L2: L2Constraint,
             PerturbationModels.LINF: LInfConstraint,
         }
-        initializer = Initializer()
+
         if random_start:
-            raise NotImplementedError("Random start in LP ball not yet implemented.")
+            initializer = RandomLpInitializer(
+                perturbation_model=perturbation_model, radius=epsilon
+            )
+        else:
+            initializer = Initializer()
         self.epsilon = epsilon
         gradient_processing = LinearProjectionGradientProcessing(perturbation_model)
         perturbation_constraints = [
@@ -152,8 +156,6 @@ class PGDNative(CompositeEvasionAttack):
             loss_function=CE_LOSS,
             optimizer_cls=OptimizerFactory.create_sgd(step_size),
             manipulation_function=manipulation_function,
-            domain_constraints=domain_constraints,
-            perturbation_constraints=perturbation_constraints,
             gradient_processing=gradient_processing,
             initializer=initializer,
             trackers=trackers,

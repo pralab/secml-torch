@@ -53,4 +53,6 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             criterion=criterion,
             epsilons=self.epsilon,
         )
-        return advx
+        # foolbox deals only with additive perturbations
+        delta = advx - samples
+        return advx, delta

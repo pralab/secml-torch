@@ -1,5 +1,6 @@
 from typing import Union, List, Type
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
+from secmlt.utils.tensor_utils import atleast_kd
 
 import torch.nn
 from torch.nn import CrossEntropyLoss
@@ -22,7 +23,7 @@ LOSS_FUNCTIONS = {
 }
 
 
-class CompositeEvasionAttack(BaseEvasionAttack):
+class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def __init__(
         self,
         y_target: Union[int, None],
@@ -31,8 +32,6 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         loss_function: Union[str, torch.nn.Module],
         optimizer_cls: Union[str, Type[partial[Optimizer]]],
         manipulation_function: Manipulation,
-        domain_constraints: List[Constraint],
-        perturbation_constraints: List[Type[Constraint]],
         initializer: Initializer,
         gradient_processing: GradientProcessing,
         trackers: Union[List[Type[Tracker]], Type[Tracker]] = None,
@@ -59,8 +58,6 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         self.optimizer_cls = optimizer_cls
 
         self.manipulation_function = manipulation_function
-        self.perturbation_constraints = perturbation_constraints
-        self.domain_constraints = domain_constraints
         self.initializer = initializer
         self.gradient_processing = gradient_processing
 
@@ -85,6 +82,7 @@ class CompositeEvasionAttack(BaseEvasionAttack):
         model: BaseModel,
         samples: torch.Tensor,
         labels: torch.Tensor,
+        init_deltas: torch.Tensor = None,
         **optim_kwargs,
     ) -> torch.Tensor:
         multiplier = 1 if self.y_target is not None else -1
@@ -93,29 +91,34 @@ class CompositeEvasionAttack(BaseEvasionAttack):
             if self.y_target is not None
             else labels
         ).type(labels.dtype)
-        delta = self.initializer(samples.data)
+
+        if init_deltas is not None:
+            delta = init_deltas.data
+        elif isinstance(self.initializer, BaseEvasionAttack):
+            _, delta = self.initializer._run(model, samples, target)
+        else:
+            delta = self.initializer(samples.data)
         delta.requires_grad = True
 
         optimizer = self.create_optimizer(delta, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
+        x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
+        best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
+        best_delta = torch.zeros_like(samples)
 
         for i in range(self.num_steps):
             scores = model.decision_function(x_adv)
             target = target.to(scores.device)
-            losses = self.loss_function(scores, target)
-            loss = losses.sum() * multiplier
+            losses = self.loss_function(scores, target) * multiplier
+            loss = losses.sum()
             optimizer.zero_grad()
             loss.backward()
             grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
-            for constraint in self.perturbation_constraints:
-                delta.data = constraint(delta.data)
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data, delta.data
             )
-            for constraint in self.domain_constraints:
-                x_adv.data = constraint(x_adv.data)
             if self.trackers is not None:
                 for tracker in self.trackers:
                     tracker.track(
@@ -126,4 +129,15 @@ class CompositeEvasionAttack(BaseEvasionAttack):
                         delta.detach().cpu().data,
                         grad_before_processing.detach().cpu().data,
                     )
-        return x_adv
+
+            # keep perturbation with highest loss
+            best_delta.data = torch.where(
+                atleast_kd(losses < best_losses, len(samples.shape)),
+                delta.data,
+                best_delta.data,
+            )
+            best_losses.data = torch.where(
+                losses < best_losses, losses.data, best_losses.data
+            )
+        x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
+        return x_adv, best_delta

@@ -1,9 +1,5 @@
 import os
-from secmlt.trackers.trackers import (
-    LossTracker,
-    PredictionTracker,
-    PerturbationNormTracker,
-)
+from secmlt.adv.evasion.aggregators.ensemble import FixedEpsilonEnsemble
 import torch
 import torchvision.datasets
 from torch.utils.data import DataLoader, Subset
@@ -11,8 +7,12 @@ from robustbench.utils import download_gdrive
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.adv.evasion.perturbation_models import PerturbationModels
-
-from secmlt.metrics.classification import Accuracy
+from secmlt.metrics.classification import (
+    Accuracy,
+    AccuracyEnsemble,
+    AttackSuccessRate,
+    EnsembleSuccessRate,
+)
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 
@@ -45,73 +45,51 @@ net.load_state_dict(model_weigths)
 test_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
 )
-test_dataset = Subset(test_dataset, list(range(5)))
-test_data_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
+test_dataset = Subset(test_dataset, list(range(10)))
+test_data_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
 
 # Wrap model
 model = BasePytorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_data_loader)
-print("accuracy: ", accuracy)
+print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
-epsilon = 0.3
-num_steps = 10
+epsilon = 0.15
+num_steps = 3
 step_size = 0.05
 perturbation_model = PerturbationModels.LINF
 y_target = None
 
-trackers = [
-    LossTracker(),
-    PredictionTracker(),
-    PerturbationNormTracker("linf"),
-]
-
-native_attack = PGD(
+pgd_attack = PGD(
     perturbation_model=perturbation_model,
     epsilon=epsilon,
     num_steps=num_steps,
     step_size=step_size,
-    random_start=False,
+    random_start=True,
     y_target=y_target,
     backend=Backends.NATIVE,
-    trackers=trackers,
 )
-native_adv_ds = native_attack(model, test_data_loader)
 
-for tracker in trackers:
-    print(tracker.name)
-    print(tracker.get())
+multiple_attack_results = [pgd_attack(model, test_data_loader) for i in range(3)]
+criterion = FixedEpsilonEnsemble(loss_fn=torch.nn.CrossEntropyLoss())
+best_advs = criterion(model, test_data_loader, multiple_attack_results)
 
-# Test accuracy on adversarial examples
-n_robust_accuracy = Accuracy()(model, native_adv_ds)
-print("robust accuracy native: ", n_robust_accuracy)
+# Test accuracy on best adversarial examples
+n_robust_accuracy = Accuracy()(model, best_advs)
+print(f"RA best advs: {n_robust_accuracy.item():.2f}")
 
-# Create and run attack
-foolbox_attack = PGD(
-    perturbation_model=perturbation_model,
-    epsilon=epsilon,
-    num_steps=num_steps,
-    step_size=step_size,
-    random_start=False,
-    y_target=y_target,
-    backend=Backends.FOOLBOX,
-)
-f_adv_ds = foolbox_attack(model, test_data_loader)
+# Test accuracy on ensemble
+n_robust_accuracy = AccuracyEnsemble()(model, multiple_attack_results)
+print(f"RA ensemble: {n_robust_accuracy.item():.2f}")
 
-# Test accuracy on adversarial examples
-f_robust_accuracy = Accuracy()(model, f_adv_ds)
-print("robust accuracy foolbox: ", f_robust_accuracy)
+n_asr = EnsembleSuccessRate(y_target=y_target)(model, multiple_attack_results)
+print(f"ASR ensemble: {n_asr.item():.2f}")
 
-native_data, native_labels = next(iter(native_adv_ds))
-f_data, f_labels = next(iter(f_adv_ds))
-real_data, real_labels = next(iter(test_data_loader))
+for i, res in enumerate(multiple_attack_results):
+    n_robust_accuracy = Accuracy()(model, res)
+    print(f"RA attack: {i}: {n_robust_accuracy.item():.2f}")
 
-distance = torch.linalg.norm(
-    native_data.detach().cpu().flatten(start_dim=1)
-    - f_data.detach().cpu().flatten(start_dim=1),
-    ord=float("inf"),
-    dim=1,
-)
-print("Solutions are :", distance, "linf distant")
+    asr = AttackSuccessRate(y_target=y_target)(model, res)
+    print(f"ASR attack: {i}: {asr.item():.2f}")

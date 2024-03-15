@@ -46,7 +46,7 @@ class L2Constraint(LpConstraint):
     def project(self, x):
         flat_x = x.flatten(start_dim=1)
         diff_norm = flat_x.norm(p=2, dim=1, keepdim=True).clamp_(min=1e-12)
-        flat_x = flat_x / diff_norm * self.radius
+        flat_x = torch.where(diff_norm <= 1, flat_x, flat_x / diff_norm) * self.radius
         x = flat_x.reshape(x.shape)
         return x
 
@@ -108,3 +108,13 @@ class L1Constraint(LpConstraint):
         x = mask * x + (1 - mask) * proj * torch.sign(x)
         x = x.view(original_shape)
         return x
+
+
+class L0Constraint(LpConstraint):
+    def __init__(self, radius=0, center=0):
+        super().__init__(radius=radius, center=center, p=0)
+
+    def project(self, x):
+        flat_x = x.flatten(start_dim=1)
+        positions, topk = torch.topk(flat_x, k=self.radius)
+        return torch.zeros_like(flat_x).scatter_(positions, topk).reshape(x.shape)

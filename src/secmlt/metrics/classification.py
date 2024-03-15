@@ -32,7 +32,25 @@ class Accuracy(object):
         return self._accumulated_accuracy / self._num_samples
 
 
-class SampleWiseAccuracy(Accuracy):
+class AttackSuccessRate(Accuracy):
+    def __init__(self, y_target=None):
+        super().__init__()
+        self.y_target = y_target
+
+    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+        if self.y_target is None:
+            super().accumulate(y_pred, y_true)
+        else:
+            super().accumulate(y_pred, torch.ones_like(y_true) * self.y_target)
+
+    def compute(self):
+        if self.y_target is None:
+            return 1 - super().compute()
+        else:
+            return super().compute()
+
+
+class AccuracyEnsemble(Accuracy):
 
     def __call__(self, model: BaseModel, dataloaders: List[DataLoader]):
         for advs in zip(*dataloaders):
@@ -55,5 +73,30 @@ class SampleWiseAccuracy(Accuracy):
             .values
         )
 
+
+class EnsembleSuccessRate(AccuracyEnsemble):
+    def __init__(self, y_target=None):
+        super().__init__()
+        self.y_target = y_target
+
+    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+        if self.y_target is None:
+            super().accumulate(y_pred, y_true)
+        else:
+            print(y_pred)
+            self._num_samples += y_true.shape[0]
+            self._accumulated_accuracy += torch.sum(
+                # take worst over predictions
+                (
+                    y_pred.type(y_true.dtype).cpu()
+                    == (torch.ones_like(y_true) * self.y_target).cpu()
+                )
+                .max(dim=0)
+                .values
+            )
+
     def compute(self):
-        return self._accumulated_accuracy / self._num_samples
+        if self.y_target is None:
+            return 1 - super().compute()
+        else:
+            return super().compute()
