@@ -1,87 +1,192 @@
+"""Random pertubations in Lp balls."""
+
 from abc import ABC, abstractmethod
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
+
+import torch
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.optimization.constraints import (
     L0Constraint,
     L1Constraint,
     L2Constraint,
     LInfConstraint,
+    LpConstraint,
 )
-import torch
 from torch.distributions.laplace import Laplace
 
 
 class RandomPerturbBase(ABC):
-    def __init__(self, epsilon):
+    """Class implementing the random perturbations in Lp balls."""
+
+    def __init__(self, epsilon: float) -> None:
         self.epsilon = epsilon
 
-    def __call__(self, x):
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Get the perturbations for the given samples.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+
+        Returns
+        -------
+        torch.Tensor
+            Perturbations (to apply) to the given samples.
+        """
         perturbations = self.get_perturb(x)
-        perturbations = self.constraint(
-            radius=self.epsilon, center=torch.zeros_like(perturbations)
+        return self._constraint(
+            radius=self.epsilon,
+            center=torch.zeros_like(perturbations),
         ).project(perturbations)
-        return perturbations
 
     @abstractmethod
-    def get_perturb(self, x): ...
+    def get_perturb(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generate random perturbation for the Lp norm.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+        """
+        ...
 
     @abstractmethod
-    def constraint(self, x): ...
+    def _constraint(self) -> LpConstraint:
+        ...
 
 
 class RandomPerturbLinf(RandomPerturbBase):
-    def get_perturb(self, x):
-        x = torch.randn_like(x)
-        return x
+    """Random Perturbations for Linf norm."""
+
+    def get_perturb(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generate random perturbation for the Linf norm.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+
+        Returns
+        -------
+        torch.Tensor
+            Perturbed samples.
+        """
+        return torch.randn_like(x)
 
     @property
-    def constraint(self):
+    def _constraint(self) -> type[LInfConstraint]:
         return LInfConstraint
 
 
 class RandomPerturbL1(RandomPerturbBase):
-    def __init__(self, epsilon):
-        super().__init__(epsilon)
+    """Random Perturbations for L1 norm."""
 
-    def get_perturb(self, x):
-        s = Laplace(0, 1)
+    def get_perturb(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generate random perturbation for the L1 norm.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+
+        Returns
+        -------
+        torch.Tensor
+            Perturbed samples.
+        """
+        s = Laplace(loc=0, scale=1)
         return s.sample(x.shape)
 
     @property
-    def constraint(self):
+    def _constraint(self) -> type[L1Constraint]:
         return L1Constraint
 
 
 class RandomPerturbL2(RandomPerturbBase):
-    def get_perturb(self, x):
-        perturbations = torch.randn_like(x)
-        return perturbations
+    """Random Perturbations for L2 norm."""
+
+    def get_perturb(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generate random perturbation for the L2 norm.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+
+        Returns
+        -------
+        torch.Tensor
+            Perturbed samples.
+        """
+        return torch.randn_like(x)
 
     @property
-    def constraint(self):
+    def _constraint(self) -> type[L2Constraint]:
         return L2Constraint
 
 
 class RandomPerturbL0(RandomPerturbBase):
-    def get_perturb(self, x):
+    """Random Perturbations for L0 norm."""
+
+    def get_perturb(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Generate random perturbation for the L0 norm.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples to perturb.
+
+        Returns
+        -------
+        torch.Tensor
+            Perturbed samples.
+        """
         perturbations = torch.randn_like(x)
         return perturbations.sign()
 
     @property
-    def constraint(self):
+    def _constraint(self) -> type[L0Constraint]:
         return L0Constraint
 
 
 class RandomPerturb:
-    def __new__(cls, p, epsilon) -> RandomPerturbBase:
+    """Random perturbation creator."""
+
+    def __new__(cls, p: str, epsilon: float) -> RandomPerturbBase:
+        """
+        Creator for random perturbation in Lp norms.
+
+        Parameters
+        ----------
+        p : str
+            p-norm used for the random perturbation shape.
+        epsilon : float
+            Radius of the random perturbation constraint.
+
+        Returns
+        -------
+        RandomPerturbBase
+            Random perturbation object.
+
+        Raises
+        ------
+        ValueError
+            Raises ValueError if the norm is not in 0, 1, 2, inf.
+        """
         random_inits = {
-            PerturbationModels.L0: RandomPerturbL0,
-            PerturbationModels.L1: RandomPerturbL1,
-            PerturbationModels.L2: RandomPerturbL2,
-            PerturbationModels.LINF: RandomPerturbLinf,
+            LpPerturbationModels.L0: RandomPerturbL0,
+            LpPerturbationModels.L1: RandomPerturbL1,
+            LpPerturbationModels.L2: RandomPerturbL2,
+            LpPerturbationModels.LINF: RandomPerturbLinf,
         }
-        selected = random_inits.get(p, None)
+        selected = random_inits.get(p)
         if selected is not None:
             return selected(epsilon=epsilon)
-        raise ValueError(
-            "Random Perturbation not implemented for this perturbation model."
-        )
+        msg = "Perturbation model not available."
+        raise ValueError(msg)

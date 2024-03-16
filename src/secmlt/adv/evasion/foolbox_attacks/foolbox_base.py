@@ -1,22 +1,27 @@
-from typing import Optional, Type, Union
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from secmlt.models.base_model import BaseModel
-from foolbox.attacks.base import Attack
-from foolbox.models.pytorch import PyTorchModel
-from foolbox.criteria import Misclassification, TargetedMisclassification
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack, TRACKER_TYPE
+"""Generic wrapper for Foolbox evasion attacks."""
+
+from typing import Literal
+
 import torch
+from foolbox.attacks.base import Attack
+from foolbox.criteria import Misclassification, TargetedMisclassification
+from foolbox.models.pytorch import PyTorchModel
+from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
+from secmlt.models.base_model import BaseModel
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
+    """Generic wrapper for Foolbox Evasion attacks."""
+
     def __init__(
         self,
         foolbox_attack: Attack,
         epsilon: float = torch.inf,
-        y_target: Optional[int] = None,
+        y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: Union[Type[TRACKER_TYPE], None] = None,
+        trackers: type[TRACKER_TYPE] | None = None,
     ) -> None:
         self.foolbox_attack = foolbox_attack
         self.lb = lb
@@ -27,16 +32,19 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         super().__init__()
 
     @classmethod
-    def trackers_allowed(cls):
+    def _trackers_allowed(cls) -> Literal[False]:
         return False
 
     def _run(
-        self, model: BaseModel, samples: torch.Tensor, labels: torch.Tensor
+        self,
+        model: BaseModel,
+        samples: torch.Tensor,
+        labels: torch.Tensor,
     ) -> torch.Tensor:
-        # TODO get here the correct model if not pytorch
         if not isinstance(model, BasePytorchClassifier):
-            raise NotImplementedError("Model type not supported.")
-        device = model.get_device()
+            msg = "Model type not supported."
+            raise NotImplementedError(msg)
+        device = model._get_device()
         foolbox_model = PyTorchModel(model.model, (self.lb, self.ub), device=device)
         if self.y_target is None:
             criterion = Misclassification(labels)

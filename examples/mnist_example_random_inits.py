@@ -1,12 +1,10 @@
-import os
-from secmlt.adv.evasion.aggregators.ensemble import FixedEpsilonEnsemble
 import torch
-import torchvision.datasets
-from torch.utils.data import DataLoader, Subset
-from robustbench.utils import download_gdrive
+from loaders.get_loaders import get_mnist_loader
+from models.mnist_net import get_mnist_model
 from secmlt.adv.backends import Backends
+from secmlt.adv.evasion.aggregators.ensemble import FixedEpsilonEnsemble
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
 from secmlt.metrics.classification import (
     Accuracy,
     AccuracyEnsemble,
@@ -15,51 +13,24 @@ from secmlt.metrics.classification import (
 )
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 
-
-class MNISTNet(torch.nn.Module):
-    def __init__(self):
-        super(MNISTNet, self).__init__()
-        self.fc1 = torch.nn.Linear(784, 200)
-        self.fc2 = torch.nn.Linear(200, 200)
-        self.fc3 = torch.nn.Linear(200, 10)
-
-    def forward(self, x):
-        x = x.flatten(1)
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        return self.fc3(x)
-
-
 device = "cpu"
-net = MNISTNet()
-model_folder = "models/mnist"
-model_weights_path = os.path.join("mnist_model.pt")
-if not os.path.exists(model_weights_path):
-    os.makedirs(model_folder, exist_ok=True)
-    MODEL_ID = "12h1tXK442jHSE7wtsPpt8tU8f04R4nHM"
-    download_gdrive(MODEL_ID, model_weights_path)
-
-model_weigths = torch.load(model_weights_path, map_location=device)
-net.eval()
-net.load_state_dict(model_weigths)
-test_dataset = torchvision.datasets.MNIST(
-    transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
-)
-test_dataset = Subset(test_dataset, list(range(10)))
-test_data_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
+model_path = "example_data/models/mnist"
+dataset_path = "example_data/datasets/"
+net = get_mnist_model(model_path).to(device)
+test_loader = get_mnist_loader(dataset_path)
 
 # Wrap model
 model = BasePytorchClassifier(net)
 
 # Test accuracy on original data
-accuracy = Accuracy()(model, test_data_loader)
+accuracy = Accuracy()(model, test_loader)
 print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
 epsilon = 0.15
 num_steps = 3
 step_size = 0.05
-perturbation_model = PerturbationModels.LINF
+perturbation_model = LpPerturbationModels.LINF
 y_target = None
 
 pgd_attack = PGD(
@@ -72,9 +43,9 @@ pgd_attack = PGD(
     backend=Backends.NATIVE,
 )
 
-multiple_attack_results = [pgd_attack(model, test_data_loader) for i in range(3)]
+multiple_attack_results = [pgd_attack(model, test_loader) for i in range(3)]
 criterion = FixedEpsilonEnsemble(loss_fn=torch.nn.CrossEntropyLoss())
-best_advs = criterion(model, test_data_loader, multiple_attack_results)
+best_advs = criterion(model, test_loader, multiple_attack_results)
 
 # Test accuracy on best adversarial examples
 n_robust_accuracy = Accuracy()(model, best_advs)

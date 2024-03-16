@@ -1,89 +1,135 @@
-from typing import List
-import torch
-from torch.utils.data import DataLoader
+"""Classification metrics for machine-learning models and for attack performance."""
 
+import torch
 from secmlt.models.base_model import BaseModel
+from torch.utils.data import DataLoader
 
 
 def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
-    acc = (y_pred.type(y_true.dtype) == y_true).mean()
-    return acc
+    """
+    Compute the accuracy on a batch of predictions and targets.
+
+    Parameters
+    ----------
+    y_pred : torch.Tensor
+        Predictions from the model.
+    y_true : torch.Tensor
+        Target labels.
+
+    Returns
+    -------
+    torch.Tensor
+        The percentage of predictions that match the targets.
+    """
+    return (y_pred.type(y_true.dtype) == y_true).mean()
 
 
-class Accuracy(object):
-    def __init__(self):
+class Accuracy:
+    """Class for computing accuracy of a model on a dataset."""
+
+    def __init__(self) -> None:
         self._num_samples = 0
         self._accumulated_accuracy = 0.0
 
-    def __call__(self, model: BaseModel, dataloader: DataLoader):
-        for batch_idx, (x, y) in enumerate(dataloader):
-            y_pred = model.predict(x).cpu().detach()
-            self.accumulate(y_pred, y)
-        accuracy = self.compute()
-        return accuracy
+    def __call__(self, model: BaseModel, dataloader: DataLoader) -> torch.Tensor:
+        """
+        Compute the metric on a single attack run or a dataloader.
 
-    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+        Parameters
+        ----------
+        model : BaseModel
+            Model to use for prediction.
+        dataloader : DataLoader
+            A dataloader, can be the result of an attack or a generic
+            test dataloader.
+
+        Returns
+        -------
+        torch.Tensor
+            The metric computed on the given dataloader.
+        """
+        for _, (x, y) in enumerate(dataloader):
+            y_pred = model.predict(x).cpu().detach()
+            self._accumulate(y_pred, y)
+        return self._compute()
+
+    def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         self._num_samples += y_true.shape[0]
         self._accumulated_accuracy += torch.sum(
-            y_pred.type(y_true.dtype).cpu() == y_true.cpu()
+            y_pred.type(y_true.dtype).cpu() == y_true.cpu(),
         )
 
-    def compute(self):
+    def _compute(self) -> torch.Tensor:
         return self._accumulated_accuracy / self._num_samples
 
 
 class AttackSuccessRate(Accuracy):
-    def __init__(self, y_target=None):
+    """Single attack success rate from attack results."""
+
+    def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
         super().__init__()
         self.y_target = y_target
 
-    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+    def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         if self.y_target is None:
-            super().accumulate(y_pred, y_true)
+            super()._accumulate(y_pred, y_true)
         else:
-            super().accumulate(y_pred, torch.ones_like(y_true) * self.y_target)
+            super()._accumulate(y_pred, torch.ones_like(y_true) * self.y_target)
 
-    def compute(self):
+    def _compute(self) -> torch.Tensor:
         if self.y_target is None:
-            return 1 - super().compute()
-        else:
-            return super().compute()
+            return 1 - super()._compute()
+        return super()._compute()
 
 
 class AccuracyEnsemble(Accuracy):
+    """Robust accuracy of a model on multiple attack runs."""
 
-    def __call__(self, model: BaseModel, dataloaders: List[DataLoader]):
-        for advs in zip(*dataloaders):
+    def __call__(self, model: BaseModel, dataloaders: list[DataLoader]) -> torch.Tensor:
+        """
+        Compute the metric on an ensemble of attacks from their results.
+
+        Parameters
+        ----------
+        model : BaseModel
+            Model to use for prediction.
+        dataloaders : list[DataLoader]
+            List of loaders returned from multiple attack runs.
+
+        Returns
+        -------
+        torch.Tensor
+            The metric computed across multiple attack runs.
+        """
+        for advs in zip(*dataloaders, strict=False):
             y_pred = []
             for x, y in advs:
                 y_pred.append(model.predict(x).cpu().detach())
                 # verify that the samples order correspond
                 assert (y - advs[0][1]).sum() == 0
             y_pred = torch.vstack(y_pred)
-            self.accumulate(y_pred, advs[0][1])
-        accuracy = self.compute()
-        return accuracy
+            self._accumulate(y_pred, advs[0][1])
+        return self._compute()
 
-    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+    def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         self._num_samples += y_true.shape[0]
         self._accumulated_accuracy += torch.sum(
             # take worst over predictions
-            (y_pred.type(y_true.dtype).cpu() == y_true.cpu())
-            .min(dim=0)
-            .values
+            (y_pred.type(y_true.dtype).cpu() == y_true.cpu()).min(dim=0).values,
         )
 
 
 class EnsembleSuccessRate(AccuracyEnsemble):
-    def __init__(self, y_target=None):
+    """Worst-case success rate of multiple attack runs."""
+
+    def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
         super().__init__()
         self.y_target = y_target
 
-    def accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor):
+    def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         if self.y_target is None:
-            super().accumulate(y_pred, y_true)
+            super()._accumulate(y_pred, y_true)
         else:
-            print(y_pred)
             self._num_samples += y_true.shape[0]
             self._accumulated_accuracy += torch.sum(
                 # take worst over predictions
@@ -92,11 +138,10 @@ class EnsembleSuccessRate(AccuracyEnsemble):
                     == (torch.ones_like(y_true) * self.y_target).cpu()
                 )
                 .max(dim=0)
-                .values
+                .values,
             )
 
-    def compute(self):
+    def _compute(self) -> torch.Tensor:
         if self.y_target is None:
-            return 1 - super().compute()
-        else:
-            return super().compute()
+            return 1 - super()._compute()
+        return super()._compute()

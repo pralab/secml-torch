@@ -1,19 +1,20 @@
 import torchvision.datasets
-from torch.utils.data import DataLoader, Subset
+from robustbench.utils import load_model
 from secmlt.adv.backends import Backends
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
-
 from secmlt.metrics.classification import Accuracy
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-
-from robustbench.utils import load_model
+from torch.utils.data import DataLoader, Subset
 
 net = load_model(model_name="Rony2019Decoupling", dataset="cifar10", threat_model="L2")
 device = "cpu"
 net.to(device)
 test_dataset = torchvision.datasets.CIFAR10(
-    transform=torchvision.transforms.ToTensor(), train=False, root=".", download=True
+    transform=torchvision.transforms.ToTensor(),
+    train=False,
+    root=".",
+    download=True,
 )
 test_dataset = Subset(test_dataset, list(range(5)))
 test_data_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
@@ -29,7 +30,7 @@ print("Accuracy:", accuracy.item())
 epsilon = 0.5
 num_steps = 10
 step_size = 0.005
-perturbation_model = PerturbationModels.LINF
+perturbation_model = LpPerturbationModels.LINF
 y_target = None
 native_attack = PGD(
     perturbation_model=perturbation_model,

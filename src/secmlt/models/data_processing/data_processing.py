@@ -1,13 +1,46 @@
+"""Interface for the data processing functionalities."""
+
 from abc import ABC, abstractmethod
 
 import torch
 
 
 class DataProcessing(ABC):
-    @abstractmethod
-    def process(self, x: torch.Tensor) -> torch.Tensor: ...
+    """Abstract data processing class."""
 
-    def invert(self, x: torch.Tensor) -> torch.Tensor: ...
+    @abstractmethod
+    def _process(self, x: torch.Tensor) -> torch.Tensor:
+        ...
+
+    @abstractmethod
+    def invert(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Apply the inverted transform (if defined).
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples.
+
+        Returns
+        -------
+        torch.Tensor
+            The samples in the input space before the transformation.
+        """
+        ...
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
-        return self.process(x)
+        """
+        Apply the forward transformation.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input samples.
+
+        Returns
+        -------
+        torch.Tensor
+            The samples after transformation.
+        """
+        return self._process(x)

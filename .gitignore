@@ -245,3 +245,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Example models and datasets
+examples/example_data/*

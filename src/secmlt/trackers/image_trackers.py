@@ -1,9 +1,12 @@
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
-from secmlt.trackers.trackers import IMAGE, Tracker
+"""Image-specific trackers."""
+
 import torch
+from secmlt.trackers.trackers import IMAGE, Tracker
 
 
 class SampleTracker(Tracker):
+    """Tracker for adversarial images."""
+
     def __init__(self) -> None:
         super().__init__("Sample", IMAGE)
 
@@ -18,12 +21,32 @@ class SampleTracker(Tracker):
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
+        """
+        Track the adversarial examples at the current iteration as images.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
         self.tracked.append(x_adv)
 
 
 class GradientsTracker(Tracker):
+    """Tracker for gradient images."""
+
     def __init__(self) -> None:
-        super().__init__("Grad", IMAGE)
+        super().__init__(name="Grad", tracker_type=IMAGE)
 
         self.tracked = []
 
@@ -36,4 +59,22 @@ class GradientsTracker(Tracker):
         delta: torch.Tensor,
         grad: torch.Tensor,
     ) -> None:
+        """
+        Track the gradients at the current iteration as images.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
         self.tracked.append(grad)

@@ -1,12 +1,11 @@
-from typing import Union, List, Type
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
-from secmlt.utils.tensor_utils import atleast_kd
+"""Implementation of modular iterative attacks with customizable components."""
+
+from functools import partial
+from typing import Literal
 
 import torch.nn
-from torch.nn import CrossEntropyLoss
-from torch.optim import Optimizer
-from functools import partial
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
 from secmlt.models.base_model import BaseModel
 from secmlt.optimization.constraints import Constraint
@@ -14,6 +13,9 @@ from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.trackers.trackers import Tracker
+from secmlt.utils.tensor_utils import atleast_kd
+from torch.nn import CrossEntropyLoss
+from torch.optim import Optimizer
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"
@@ -24,17 +26,19 @@ LOSS_FUNCTIONS = {
 
 
 class ModularEvasionAttackFixedEps(BaseEvasionAttack):
+    """Modular evasion attack for fixed-epsilon attacks."""
+
     def __init__(
         self,
-        y_target: Union[int, None],
+        y_target: int | None,
         num_steps: int,
         step_size: float,
-        loss_function: Union[str, torch.nn.Module],
-        optimizer_cls: Union[str, Type[partial[Optimizer]]],
+        loss_function: str | torch.nn.Module,
+        optimizer_cls: str | partial[Optimizer],
         manipulation_function: Manipulation,
         initializer: Initializer,
         gradient_processing: GradientProcessing,
-        trackers: Union[List[Type[Tracker]], Type[Tracker]] = None,
+        trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
         self.y_target = y_target
         self.num_steps = num_steps
@@ -44,15 +48,17 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             if loss_function in LOSS_FUNCTIONS:
                 self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
             else:
-                raise ValueError(
-                    f"{loss_function} not in list of init from string. Use one among {LOSS_FUNCTIONS.values()}"
+                msg = (
+                    f"Loss function not found. Use one among {LOSS_FUNCTIONS.values()}"
                 )
+                raise ValueError(msg)
         else:
             self.loss_function = loss_function
 
         if isinstance(optimizer_cls, str):
             optimizer_cls = OptimizerFactory.create_from_name(
-                optimizer_cls, lr=step_size
+                optimizer_cls,
+                lr=step_size,
             )
 
         self.optimizer_cls = optimizer_cls
@@ -64,17 +70,26 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         super().__init__()
 
     @classmethod
-    def get_perturbation_models(self):
-        return {PerturbationModels.L2, PerturbationModels.LINF}
+    def get_perturbation_models(cls) -> set[str]:
+        """
+        Check if a given perturbation model is implemented.
+
+        Returns
+        -------
+        set[str]
+            Set of perturbation models available for this attack.
+        """
+        return {LpPerturbationModels.L2, LpPerturbationModels.LINF}
 
     @classmethod
-    def trackers_allowed(cls):
+    def _trackers_allowed(cls) -> Literal[True]:
         return True
 
-    def init_perturbation_constraints(self) -> List[Constraint]:
-        raise NotImplementedError("Must be implemented accordingly")
+    def _init_perturbation_constraints(self) -> list[Constraint]:
+        msg = "Must be implemented accordingly"
+        raise NotImplementedError(msg)
 
-    def create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
+    def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], **kwargs)
 
     def _run(
@@ -100,7 +115,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             delta = self.initializer(samples.data)
         delta.requires_grad = True
 
-        optimizer = self.create_optimizer(delta, **optim_kwargs)
+        optimizer = self._create_optimizer(delta, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
         x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
@@ -117,7 +132,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
             x_adv.data, delta.data = self.manipulation_function(
-                samples.data, delta.data
+                samples.data,
+                delta.data,
             )
             if self.trackers is not None:
                 for tracker in self.trackers:
@@ -137,7 +153,9 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                 best_delta.data,
             )
             best_losses.data = torch.where(
-                losses < best_losses, losses.data, best_losses.data
+                losses < best_losses,
+                losses.data,
+                best_losses.data,
             )
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
         return x_adv, best_delta

@@ -1,6 +1,6 @@
-try:
-    import foolbox
-except ImportError:
-    pass  # foolbox is an extra component and requires the foolbox library
-else:
-    from .foolbox_pgd import *
+"""Wrappers of Foolbox library for evasion attacks."""
+
+import importlib
+
+if importlib.util.find_spec("foolbox", None) is not None:
+    from .foolbox_pgd import *  # noqa: F403
