@@ -2,11 +2,6 @@
 
 import importlib
 
-from foolbox.attacks import (
-    L1ProjectedGradientDescentAttack,
-    L2ProjectedGradientDescentAttack,
-    LinfProjectedGradientDescentAttack,
-)
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.base_evasion_attack import (
@@ -129,6 +124,12 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         trackers: list[Tracker] | None = None,
         **kwargs,
     ) -> None:
+        from foolbox.attacks import (
+            L1ProjectedGradientDescentAttack,
+            L2ProjectedGradientDescentAttack,
+            LinfProjectedGradientDescentAttack,
+        )
+
         perturbation_models = {
             LpPerturbationModels.L1: L1ProjectedGradientDescentAttack,
             LpPerturbationModels.L2: L2ProjectedGradientDescentAttack,
