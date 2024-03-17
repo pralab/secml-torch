@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 
 import torch
-from eagerpy import Optional
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.models.base_model import BaseModel
 from secmlt.utils.tensor_utils import atleast_kd
@@ -152,7 +151,7 @@ class FixedEpsilonEnsemble(Ensemble):
         self,
         loss_fn: torch.nn.Module,
         maximize: bool = True,
-        y_target: Optional[torch.Tensor | float] = None,
+        y_target: torch.Tensor | None = None,
     ) -> None:
         self.maximize = maximize
         self.loss_fn = loss_fn
