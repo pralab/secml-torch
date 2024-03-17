@@ -1,10 +1,12 @@
 """Fixtures used for testing."""
+
 import pytest
 import torch
+from secmlt.tests.mocks import MockModel
 from torch.utils.data import DataLoader, TensorDataset
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture()
 def data_loader() -> DataLoader[tuple[torch.Tensor]]:
     """
     Create fake data loader.
@@ -21,7 +23,7 @@ def data_loader() -> DataLoader[tuple[torch.Tensor]]:
     return DataLoader(dataset, batch_size=10)
 
 
-@pytest.fixture(autouse=True, scope="session")
+@pytest.fixture()
 def adv_loaders() -> list[DataLoader[tuple[torch.Tensor, ...]]]:
     """
     Create fake adversarial loaders.
@@ -39,3 +41,16 @@ def adv_loaders() -> list[DataLoader[tuple[torch.Tensor, ...]]]:
         adv_dataset = TensorDataset(adv_data, adv_labels)
         loaders.append(DataLoader(adv_dataset, batch_size=10))
     return loaders
+
+
+@pytest.fixture()
+def model() -> torch.nn.Module:
+    """
+    Create fake model.
+
+    Returns
+    -------
+    torch.nn.Module
+        Fake model.
+    """
+    return MockModel()
