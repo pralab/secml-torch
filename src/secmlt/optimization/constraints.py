@@ -108,7 +108,7 @@ class L2Constraint(LpConstraint):
     """L2 constraint."""
 
     def __init__(self, radius: float = 0.0, center: float = 0.0) -> None:
-        super().__init__(radius=radius, center=center, p=2)
+        super().__init__(radius=radius, center=center, p=LpPerturbationModels.L2)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
         """

@@ -27,7 +27,12 @@ class MockModel(torch.nn.Module):
     @staticmethod
     def parameters() -> Iterator[torch.Tensor]:
         """Return fake parameters."""
-        return iter([torch.rand(1, 1)])
+        params = torch.rand(10, 10)
+        return iter(
+            [
+                params,
+            ],
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Return random outputs for classification and add fake gradients to x."""
@@ -38,3 +43,13 @@ class MockModel(torch.nn.Module):
     def decision_function(self, *args, **kwargs) -> torch.Tensor:
         """Return random outputs for classification and add fake gradients to x."""
         return self.forward(*args, **kwargs)
+
+
+class MockLoss(torch.nn.Module):
+    """Fake loss function."""
+
+    def forward(*args) -> torch.Tensor:
+        """Override forward."""
+        x = torch.rand(10)
+        x.backward = lambda: x
+        return x
