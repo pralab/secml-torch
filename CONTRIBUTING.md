@@ -1,4 +1,4 @@
-# SecMLT: Contribution Guide for Adversarial Machine Learning and Robustness Evaluation
+# SecMLT: Contribution Guide
 
 SecMLT is an open-source Python library for Adversarial Machine Learning and robustness evaluation. We welcome contributions from the research community to expand its capabilities, improve its functionality, or add new features. In this guide, we will discuss how to contribute to SecMLT through forks, pull requests, and code formatting using Ruff.
 

@@ -38,6 +38,7 @@ ignore = [
     "ANN",  # annotations
     "T20"  # print
     ]
+"docs/*" = ["ALL"]
 
 [lint.pydocstyle]
 convention = "numpy"
