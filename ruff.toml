@@ -6,7 +6,7 @@ indent-width = 4
 target-version = "py310"
 
 [lint]
-select = ["ALL"]
+select = ["ALL", "D107"]
 ignore = [
     "FA102",  # dynamic type hinting
     "S101",  # use of assert

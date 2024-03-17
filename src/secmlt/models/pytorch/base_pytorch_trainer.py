@@ -16,6 +16,20 @@ class BasePyTorchTrainer(BaseTrainer):
         loss: torch.nn.Module = None,
         scheduler: _LRScheduler = None,
     ) -> None:
+        """
+        Create PyTorch trainer.
+
+        Parameters
+        ----------
+        optimizer : torch.optim.Optimizer
+            Optimizer to use for training the model.
+        epochs : int, optional
+            Number of epochs, by default 5.
+        loss : torch.nn.Module, optional
+            Loss to minimize, by default None.
+        scheduler : _LRScheduler, optional
+            Scheduler for the optimizer, by default None.
+        """
         self._epochs = epochs
         self._optimizer = optimizer
         self._loss = loss if loss is not None else torch.nn.CrossEntropyLoss()

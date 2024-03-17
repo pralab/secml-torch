@@ -17,6 +17,20 @@ class BasePytorchClassifier(BaseModel):
         postprocessing: DataProcessing = None,
         trainer: BasePyTorchTrainer = None,
     ) -> None:
+        """
+        Create wrapped PyTorch classifier.
+
+        Parameters
+        ----------
+        model : torch.nn.Module
+            PyTorch model.
+        preprocessing : DataProcessing, optional
+            Preprocessing to apply before the forward., by default None.
+        postprocessing : DataProcessing, optional
+            Postprocessing to apply after the forward, by default None.
+        trainer : BasePyTorchTrainer, optional
+            Trainer object to train the model, by default None.
+        """
         super().__init__(preprocessing=preprocessing, postprocessing=postprocessing)
         self._model: torch.nn.Module = model
         self._trainer = trainer

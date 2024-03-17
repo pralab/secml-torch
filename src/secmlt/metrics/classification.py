@@ -28,6 +28,7 @@ class Accuracy:
     """Class for computing accuracy of a model on a dataset."""
 
     def __init__(self) -> None:
+        """Create Accuracy metric."""
         self._num_samples = 0
         self._accumulated_accuracy = 0.0
 
@@ -67,6 +68,14 @@ class AttackSuccessRate(Accuracy):
     """Single attack success rate from attack results."""
 
     def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
+        """
+        Create attack success rate metric.
+
+        Parameters
+        ----------
+        y_target : float | torch.Tensor | None, optional
+            Target label for the attack, None for untargeted, by default None
+        """
         super().__init__()
         self.y_target = y_target
 
@@ -123,6 +132,14 @@ class EnsembleSuccessRate(AccuracyEnsemble):
     """Worst-case success rate of multiple attack runs."""
 
     def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
+        """
+        Create ensemble success rate metric.
+
+        Parameters
+        ----------
+        y_target : float | torch.Tensor | None, optional
+            Target label for the attack, None for untargeted,, by default None
+        """
         super().__init__()
         self.y_target = y_target
 

@@ -33,6 +33,16 @@ class RandomLpInitializer(Initializer):
         radius: torch.Tensor,
         perturbation_model: LpPerturbationModels,
     ) -> None:
+        """
+        Create random perturbation initializer.
+
+        Parameters
+        ----------
+        radius : torch.Tensor
+            Radius of the Lp ball for the constraint.
+        perturbation_model : LpPerturbationModels
+            Perturbation model for the constraint.
+        """
         self.radius = radius
         self.perturbation_model = perturbation_model
         self.initializer = RandomPerturb(p=self.perturbation_model, epsilon=self.radius)

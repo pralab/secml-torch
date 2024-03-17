@@ -16,6 +16,16 @@ class TensorboardTracker(Tracker):
     """Tracker for Tensorboard. Uses other trackers as subscribers."""
 
     def __init__(self, logdir: str, trackers: list[Tracker] | None = None) -> None:
+        """
+        Create tensorboard tracker.
+
+        Parameters
+        ----------
+        logdir : str
+            Folder to store tensorboard logs.
+        trackers : list[Tracker] | None, optional
+            List of trackers subsctibed to the updates, by default None.
+        """
         super().__init__(name="Tensorboard")
         if trackers is None:
             trackers = [

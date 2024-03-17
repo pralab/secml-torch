@@ -14,6 +14,16 @@ class Manipulation(ABC):
         domain_constraints: list[Constraint],
         perturbation_constraints: list[Constraint],
     ) -> None:
+        """
+        Create manipulation object.
+
+        Parameters
+        ----------
+        domain_constraints : list[Constraint]
+            Constraints for the domain bounds (x_adv).
+        perturbation_constraints : list[Constraint]
+            Constraints for the perturbation (delta).
+        """
         self.domain_constraints = domain_constraints
         self.perturbation_constraints = perturbation_constraints
 

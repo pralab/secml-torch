@@ -18,6 +18,14 @@ class RandomPerturbBase(ABC):
     """Class implementing the random perturbations in Lp balls."""
 
     def __init__(self, epsilon: float) -> None:
+        """
+        Create random perturbation object.
+
+        Parameters
+        ----------
+        epsilon : float
+            Constraint radius.
+        """
         self.epsilon = epsilon
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:

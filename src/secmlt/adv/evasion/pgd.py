@@ -124,6 +124,38 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         trackers: list[Tracker] | None = None,
         **kwargs,
     ) -> None:
+        """
+        Create Foolbox PGD attack.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            Perturbation model for the attack. Available: 1, 2, inf.
+        epsilon : float
+            Radius of the constraint for the Lp ball.
+        num_steps : int
+            Number of iterations for the attack.
+        step_size : float
+            Attack step size.
+        random_start : bool
+            Whether to use a random initialization onto the Lp ball.
+        y_target : int | None, optional
+            Target label for a targeted attack, None
+            for untargeted attack, by default None.
+        lb : float, optional
+            Lower bound of the input space, by default 0.0.
+        ub : float, optional
+            Upper bound of the input space, by default 1.0.
+        trackers : list[Tracker] | None, optional
+            Trackers to check various attack metrics (see secmlt.trackers),
+            available only for native implementation, by default None.
+
+        Raises
+        ------
+        NotImplementedError
+            Raises NotImplementedError if the requested perturbation
+            model is not defined for this attack.
+        """
         from foolbox.attacks import (
             L1ProjectedGradientDescentAttack,
             L2ProjectedGradientDescentAttack,
@@ -193,6 +225,32 @@ class PGDNative(ModularEvasionAttackFixedEps):
         trackers: list[Tracker] | None = None,
         **kwargs,
     ) -> None:
+        """
+        Create Native PGD attack.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            Perturbation model for the attack. Available: 1, 2, inf.
+        epsilon : float
+            Radius of the constraint for the Lp ball.
+        num_steps : int
+            Number of iterations for the attack.
+        step_size : float
+            Attack step size.
+        random_start : bool
+            Whether to use a random initialization onto the Lp ball.
+        y_target : int | None, optional
+            Target label for a targeted attack, None
+            for untargeted attack, by default None.
+        lb : float, optional
+            Lower bound of the input space, by default 0.0.
+        ub : float, optional
+            Upper bound of the input space, by default 1.0.
+        trackers : list[Tracker] | None, optional
+            Trackers to check various attack metrics (see secmlt.trackers),
+            available only for native implementation, by default None.
+        """
         perturbation_models = {
             LpPerturbationModels.L1: L1Constraint,
             LpPerturbationModels.L2: L2Constraint,

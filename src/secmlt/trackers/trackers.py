@@ -14,6 +14,17 @@ class Tracker(ABC):
     """Class implementing the trackers for the attacks."""
 
     def __init__(self, name: str, tracker_type: str = SCALAR) -> None:
+        """
+        Create tracker.
+
+        Parameters
+        ----------
+        name : str
+            Tracker name.
+        tracker_type : str, optional
+            Type of tracker (mostly used for tensorboard functionalities),
+            by default SCALAR. Available: SCALAR, IMAGE, MULTI_SCALAR.
+        """
         self.name = name
         self.tracked = None
         self.tracked_type = tracker_type
@@ -76,6 +87,7 @@ class LossTracker(Tracker):
     """Tracker for attack loss."""
 
     def __init__(self) -> None:
+        """Create loss tracker."""
         super().__init__("Loss")
         self.tracked = []
 
@@ -113,6 +125,7 @@ class ScoresTracker(Tracker):
     """Tracker for model scores."""
 
     def __init__(self, y: int | torch.Tensor = None) -> None:
+        """Create scores tracker."""
         if y is None:
             super().__init__("Scores", MULTI_SCALAR)
         else:
@@ -157,6 +170,7 @@ class PredictionTracker(Tracker):
     """Tracker for model predictions."""
 
     def __init__(self) -> None:
+        """Create prediction tracker."""
         super().__init__("Prediction")
         self.tracked = []
 
@@ -194,6 +208,14 @@ class PerturbationNormTracker(Tracker):
     """Tracker for perturbation norm."""
 
     def __init__(self, p: LpPerturbationModels = LpPerturbationModels.L2) -> None:
+        """
+        Create perturbation norm tracker.
+
+        Parameters
+        ----------
+        p : LpPerturbationModels, optional
+            Perturbation model to compute the norm, by default LpPerturbationModels.L2.
+        """
         super().__init__("PertNorm")
         self.p = LpPerturbationModels.get_p(p)
         self.tracked = []
@@ -232,6 +254,14 @@ class GradientNormTracker(Tracker):
     """Tracker for gradients."""
 
     def __init__(self, p: LpPerturbationModels = LpPerturbationModels.L2) -> None:
+        """
+        Create gradient norm tracker.
+
+        Parameters
+        ----------
+        p : LpPerturbationModels, optional
+            Perturbation model to compute the norm, by default LpPerturbationModels.L2.
+        """
         super().__init__("GradNorm")
 
         self.p = LpPerturbationModels.get_p(p)

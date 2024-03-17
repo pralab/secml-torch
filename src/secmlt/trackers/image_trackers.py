@@ -8,6 +8,7 @@ class SampleTracker(Tracker):
     """Tracker for adversarial images."""
 
     def __init__(self) -> None:
+        """Create adversarial image tracker."""
         super().__init__("Sample", IMAGE)
 
         self.tracked = []
@@ -46,6 +47,7 @@ class GradientsTracker(Tracker):
     """Tracker for gradient images."""
 
     def __init__(self) -> None:
+        """Create gradients tracker."""
         super().__init__(name="Grad", tracker_type=IMAGE)
 
         self.tracked = []

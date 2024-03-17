@@ -24,6 +24,28 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
         ub: float = 1.0,
         **kwargs,
     ) -> None:
+        """
+        Create PGD attack with Foolbox backend.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            Perturbation model for the attack.
+        epsilon : float
+            Maximum perturbation allowed.
+        num_steps : int
+            Number of iterations for the attack.
+        step_size : float
+            Attack step size.
+        random_start : bool
+            True for randomly initializing the perturbation.
+        y_target : int | None, optional
+            Target label for the attack, None for untargeted, by default None.
+        lb : float, optional
+            Lower bound of the input space, by default 0.0.
+        ub : float, optional
+            Upper bound of the input space, by default 1.0.
+        """
         perturbation_models = {
             LpPerturbationModels.L1: L1ProjectedGradientDescentAttack,
             LpPerturbationModels.L2: L2ProjectedGradientDescentAttack,

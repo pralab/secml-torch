@@ -16,13 +16,31 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
 
     def __init__(
         self,
-        foolbox_attack: Attack,
+        foolbox_attack: type[Attack],
         epsilon: float = torch.inf,
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
         trackers: type[TRACKER_TYPE] | None = None,
     ) -> None:
+        """
+        Wrap Foolbox attacks.
+
+        Parameters
+        ----------
+        foolbox_attack : Type[Attack]
+            Foolbox attack class to wrap.
+        epsilon : float, optional
+            Perturbation constraint, by default torch.inf.
+        y_target : int | None, optional
+            Target label for the attack, None if untargeted, by default None.
+        lb : float, optional
+            Lower bound of the input space, by default 0.0.
+        ub : float, optional
+            Upper bound of the input space, by default 1.0.
+        trackers : type[TRACKER_TYPE] | None, optional
+            Trackers for the attack (unallowed in Foolbox), by default None.
+        """
         self.foolbox_attack = foolbox_attack
         self.lb = lb
         self.ub = ub

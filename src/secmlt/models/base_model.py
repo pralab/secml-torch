@@ -18,6 +18,16 @@ class BaseModel(ABC):
         preprocessing: DataProcessing = None,
         postprocessing: DataProcessing = None,
     ) -> None:
+        """
+        Create base model.
+
+        Parameters
+        ----------
+        preprocessing : DataProcessing, optional
+            Preprocessing to apply before the forward, by default None.
+        postprocessing : DataProcessing, optional
+            Postprocessing to apply after the forward, by default None.
+        """
         self._preprocessing = (
             preprocessing if preprocessing is not None else IdentityDataProcessing()
         )

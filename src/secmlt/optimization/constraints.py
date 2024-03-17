@@ -30,7 +30,17 @@ class Constraint(ABC):
 class ClipConstraint(Constraint):
     """Box constraint, usually for the input space."""
 
-    def __init__(self, lb: float = 0.0, ub: float = 1) -> None:
+    def __init__(self, lb: float = 0.0, ub: float = 1.0) -> None:
+        """
+        Create box constraint.
+
+        Parameters
+        ----------
+        lb : float, optional
+            Lower bound of the domain, by default 0.0.
+        ub : float, optional
+            Upper bound of the domain, by default 1.0.
+        """
         self.lb = lb
         self.ub = ub
 
@@ -60,6 +70,18 @@ class LpConstraint(Constraint, ABC):
         center: float = 0.0,
         p: str = LpPerturbationModels.LINF,
     ) -> None:
+        """
+        Create Lp constraint.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius of the constraint, by default 0.0.
+        center : float, optional
+            Center of the constraint, by default 0.0.
+        p : str, optional
+            Value of p for Lp norm, by default LpPerturbationModels.LINF.
+        """
         self.p = LpPerturbationModels.get_p(p)
         self.center = center
         self.radius = radius
@@ -108,6 +130,16 @@ class L2Constraint(LpConstraint):
     """L2 constraint."""
 
     def __init__(self, radius: float = 0.0, center: float = 0.0) -> None:
+        """
+        Create L2 constraint.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius of the constraint, by default 0.0.
+        center : float, optional
+            Center of the constraint, by default 0.0.
+        """
         super().__init__(radius=radius, center=center, p=LpPerturbationModels.L2)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
@@ -134,6 +166,16 @@ class LInfConstraint(LpConstraint):
     """Linf constraint."""
 
     def __init__(self, radius: float = 0.0, center: float = 0.0) -> None:
+        """
+        Create Linf constraint.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius of the constraint, by default 0.0.
+        center : float, optional
+            Center of the constraint, by default 0.0.
+        """
         super().__init__(radius=radius, center=center, p=LpPerturbationModels.LINF)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
@@ -157,6 +199,16 @@ class L1Constraint(LpConstraint):
     """L1 constraint."""
 
     def __init__(self, radius: float = 0.0, center: float = 0.0) -> None:
+        """
+        Create L1 constraint.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius of the constraint, by default 0.0.
+        center : float, optional
+            Center of the constraint, by default 0.0.
+        """
         super().__init__(radius=radius, center=center, p=1)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
@@ -206,6 +258,16 @@ class L0Constraint(LpConstraint):
     """L0 constraint."""
 
     def __init__(self, radius: float = 0.0, center: float = 0.0) -> None:
+        """
+        Create L0 constraint.
+
+        Parameters
+        ----------
+        radius : float, optional
+            Radius of the constraint, by default 0.0.
+        center : float, optional
+            Center of the constraint, by default 0.0.
+        """
         super().__init__(radius=radius, center=center, p=0)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:

@@ -32,6 +32,20 @@ class LinearProjectionGradientProcessing(GradientProcessing):
     """Linear projection of the gradient onto Lp balls."""
 
     def __init__(self, perturbation_model: str = LpPerturbationModels.L2) -> None:
+        """
+        Create linear projection for the gradient.
+
+        Parameters
+        ----------
+        perturbation_model : str, optional
+            Perturbation model for the Lp ball, by default LpPerturbationModels.L2.
+
+        Raises
+        ------
+        ValueError
+            Raises ValueError if the perturbation model is not implemented.
+            Available, l1, l2, linf.
+        """
         perturbations_models = {
             LpPerturbationModels.L1: 1,
             LpPerturbationModels.L2: 2,

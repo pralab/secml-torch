@@ -40,6 +40,36 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         gradient_processing: GradientProcessing,
         trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
+        """
+        Create modular evasion attack.
+
+        Parameters
+        ----------
+        y_target : int | None
+            Target label for the attack, None for untargeted.
+        num_steps : int
+            Number of iterations for the attack.
+        step_size : float
+            Attack step size.
+        loss_function : str | torch.nn.Module
+            Loss function to minimize.
+        optimizer_cls : str | partial[Optimizer]
+            Algorithm for solving the attack optimization problem.
+        manipulation_function : Manipulation
+            Manipulation function to perturb the inputs.
+        initializer : Initializer
+            Initialization for the perturbation delta.
+        gradient_processing : GradientProcessing
+            Gradient transformation function.
+        trackers : list[Tracker] | Tracker | None, optional
+            Trackers for logging, by default None.
+
+        Raises
+        ------
+        ValueError
+            Raises ValueError if the loss is not in allowed
+            list of loss functions.
+        """
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size

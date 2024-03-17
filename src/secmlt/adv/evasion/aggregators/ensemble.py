@@ -92,6 +92,14 @@ class MinDistanceEnsemble(Ensemble):
     """Wrapper for ensembling results of multiple minimum-distance attacks."""
 
     def __init__(self, perturbation_model: str) -> None:
+        """
+        Create MinDistance Ensemble.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            Perturbation model to use to compute the distance.
+        """
         self.perturbation_model = perturbation_model
 
     def _get_best(
@@ -153,6 +161,18 @@ class FixedEpsilonEnsemble(Ensemble):
         maximize: bool = True,
         y_target: torch.Tensor | None = None,
     ) -> None:
+        """
+        Create fixed epsilon ensemble.
+
+        Parameters
+        ----------
+        loss_fn : torch.nn.Module
+            Loss function to maximize (or minimize).
+        maximize : bool, optional
+            If True maximizes the loss otherwise it minimizes it, by default True.
+        y_target : torch.Tensor | None, optional
+            Target label for targeted attacks, None for untargeted, by default None.
+        """
         self.maximize = maximize
         self.loss_fn = loss_fn
         self.y_target = y_target
