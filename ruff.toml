@@ -30,7 +30,7 @@ ignore = [
     "ANN",  # annotations for tests
     "PT006",  # mark parametrize
     ]
-"*/tests/*" = ["D104"]
+"*/tests/*.py" = ["D104"]
 "setup.py" = ["D"]
 "examples/*" = [
     "D",  # docstrings
