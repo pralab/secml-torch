@@ -17,7 +17,7 @@ jobs:
       - name: Install test requirements
         run: pip install -r requirements-test.txt
       - name: Run tests and collect coverage
-        run: pytest --cov src/*
+        run: pytest --cov src/
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:
