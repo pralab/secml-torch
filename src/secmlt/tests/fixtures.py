@@ -2,6 +2,10 @@
 
 import pytest
 import torch
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion.pgd import PGD
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secmlt.tests.mocks import MockModel
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -17,7 +21,7 @@ def data_loader() -> DataLoader[tuple[torch.Tensor]]:
         A loader with random samples and labels.
     """
     # Create a dummy dataset loader for testing
-    data = torch.randn(100, 3, 32, 32)
+    data = torch.randn(100, 3, 32, 32).clamp(0, 1)
     labels = torch.randint(0, 10, (100,))
     dataset = TensorDataset(data, labels)
     return DataLoader(dataset, batch_size=10)
@@ -53,4 +57,36 @@ def model() -> torch.nn.Module:
     torch.nn.Module
         Fake model.
     """
-    return MockModel()
+    return BasePytorchClassifier(model=MockModel())
+
+
+@pytest.fixture()
+def native_pgd_attack() -> BaseEvasionAttack:
+    """Get native PGD."""
+    return PGD(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.5,
+        num_steps=10,
+        step_size=0.1,
+        random_start=True,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        backend="native",
+    )
+
+
+@pytest.fixture()
+def foolbox_pgd_attack() -> BaseEvasionAttack:
+    """Get foolbox PGD."""
+    return PGD(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.5,
+        num_steps=10,
+        step_size=0.1,
+        random_start=True,
+        y_target=None,
+        lb=0.0,
+        ub=1.0,
+        backend="foolbox",
+    )

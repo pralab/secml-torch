@@ -1,5 +1,7 @@
 """Mock classes for testing."""
 
+from collections.abc import Iterator
+
 import torch
 
 
@@ -21,6 +23,11 @@ class MockLayer(torch.autograd.Function):
 
 class MockModel(torch.nn.Module):
     """Mock class for torch model."""
+
+    @staticmethod
+    def parameters() -> Iterator[torch.Tensor]:
+        """Return fake parameters."""
+        return iter([torch.rand(1, 1)])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Return random outputs for classification and add fake gradients to x."""

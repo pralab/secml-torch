@@ -155,6 +155,27 @@ class PGDFoolbox(BaseFoolboxEvasionAttack):
             trackers=trackers,
         )
 
+    @staticmethod
+    def get_perturbation_models() -> set[str]:
+        """
+        Check the perturbation models implemented for the given attack.
+
+        Returns
+        -------
+        set[str]
+            The set of perturbation models for which the attack is implemented.
+
+        Raises
+        ------
+        NotImplementedError
+            Raises NotImplementedError if not implemented in the inherited class.
+        """
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }
+
 
 class PGDNative(ModularEvasionAttackFixedEps):
     """Native implementation of the Projected Gradient Descent attack."""
