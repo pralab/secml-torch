@@ -10,7 +10,7 @@ class LpPerturbationModels:
     L1 = "l1"
     L2 = "l2"
     LINF = "linf"
-    pert_models: ClassVar[str:float] = {L0: 0, L1: 1, L2: 2, LINF: float("inf")}
+    pert_models: ClassVar[dict[str, float]] = {L0: 0, L1: 1, L2: 2, LINF: float("inf")}
 
     @classmethod
     def is_perturbation_model_available(cls, perturbation_model: str) -> bool:

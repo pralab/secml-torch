@@ -1,7 +1,6 @@
 """Basic wrapper for generic model."""
 
 from abc import ABC, abstractmethod
-from typing import Self
 
 import torch
 from secmlt.models.data_processing.data_processing import DataProcessing
@@ -98,7 +97,7 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def train(self, dataloader: DataLoader) -> Self:
+    def train(self, dataloader: DataLoader) -> "BaseModel":
         """
         Train the model with the given dataloader.
 

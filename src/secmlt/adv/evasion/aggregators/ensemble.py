@@ -92,6 +92,9 @@ class Ensemble(ABC):
 class MinDistanceEnsemble(Ensemble):
     """Wrapper for ensembling results of multiple minimum-distance attacks."""
 
+    def __init__(self, perturbation_model: str) -> None:
+        self.perturbation_model = perturbation_model
+
     def _get_best(
         self,
         model: BaseModel,
