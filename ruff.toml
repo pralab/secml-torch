@@ -25,7 +25,11 @@ ignore = [
     ]
 
 [lint.per-file-ignores]
-"tests/*" = ["D"]
+"src/tests/*" = [
+    "D",  # force docstrings
+    "ANN",  # annotations for tests
+    "PT006",  # mark parametrize
+    ]
 "setup.py" = ["D"]
 "examples/*" = [
     "D",  # docstrings
