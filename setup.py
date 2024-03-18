@@ -27,11 +27,11 @@ Topic :: Scientific/Engineering
 
 setup(
     name="secml-torch",
-    version="0.0.1",
+    version="0.1",
     description="SecML-Torch Library",
     classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     long_description=long_description,
-    long_description_context_type="text/markdown",
+    long_description_content_type="text/markdown",
     package_dir={"": "src"},
     packages=find_packages(
         where="src",
