@@ -1,4 +1,4 @@
-name: readthedocs preview on pull request
+name: readthedocs/actions
 on:
   pull_request_target:
     types:
@@ -8,10 +8,9 @@ permissions:
   pull-requests: write
 
 jobs:
-  pull-request-links:
+  documentation-links:
     runs-on: ubuntu-latest
     steps:
       - uses: readthedocs/actions/preview@v1
         with:
           project-slug: "secml-torch"
-          message-template: "Here is the preview of the documentation for this PR: {docs-pr-index-url}"
