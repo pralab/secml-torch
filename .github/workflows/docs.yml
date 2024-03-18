@@ -36,4 +36,3 @@ jobs:
         -vv
         --jobs=auto
         --keep-going
-        --config-dir=docs/source
