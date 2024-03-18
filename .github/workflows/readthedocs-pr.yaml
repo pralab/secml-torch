@@ -14,3 +14,4 @@ jobs:
       - uses: readthedocs/actions/preview@v1
         with:
           project-slug: "secml-torch"
+          message-template: "Here is the preview of the documentation for this PR: {docs-pr-index-url}"
