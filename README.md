@@ -1,6 +1,11 @@
  # SecML-Torch: A Library for Robustness Evaluation of Deep Learning Models
 
-SecML-Torch (SecMLT) is an open-source Python library designed to facilitate research in the area of Adversarial Machine Learning (AML) and robustness evaluation. 
+ <a href="https://codecov.io/gh/pralab/secml-torch" >  <img src="https://codecov.io/gh/pralab/secml-torch/graph/badge.svg?token=7TM3NA0B5H"/>  </a>
+
+<a href='https://secml-torch.readthedocs.io/en/latest/?badge=latest'><img src='https://readthedocs.org/projects/secml-torch/badge/?version=latest' alt='Documentation Status' /></a>
+
+
+SecML-Torch (SecMLT) is an open-source Python library designed to facilitate research in the area of Adversarial Machine Learning (AML) and robustness evaluation.
 The library provides a simple yet powerful interface for generating various types of adversarial examples, as well as tools for evaluating the robustness of machine learning models against such attacks.
 
 ## Installation
@@ -14,7 +19,7 @@ This will install the core version of SecMLT, including only the main functional
 
 ### Install with extras
 
-The library can be installed together with other plugins that enable further functionalities. 
+The library can be installed together with other plugins that enable further functionalities.
 
 * [Foolbox](https://github.com/bethgelab/foolbox), a Python toolbox to create adversarial examples.
 * [Tensorboard](https://www.tensorflow.org/tensorboard), a visualization toolkit for machine learning experimentation.
@@ -65,7 +70,5 @@ For more detailed usage instructions and examples, please refer to the [official
 
 ## Contributing
 
-We welcome contributions from the research community to expand the library's capabilities or add new features. 
+We welcome contributions from the research community to expand the library's capabilities or add new features.
 If you would like to contribute to SecMLT, please follow our [contribution guidelines](https://github.com/pralab/secml-torch/blob/main/CONTRIBUTING.md).
-
-

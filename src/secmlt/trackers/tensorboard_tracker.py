@@ -1,4 +1,6 @@
-from typing import List, Type
+"""Tensorboard tracking utilities."""
+
+import torch
 from secmlt.trackers.trackers import (
     IMAGE,
     MULTI_SCALAR,
@@ -7,13 +9,24 @@ from secmlt.trackers.trackers import (
     LossTracker,
     Tracker,
 )
-import torch
 from torch.utils.tensorboard import SummaryWriter
 
 
 class TensorboardTracker(Tracker):
-    def __init__(self, logdir: str, trackers: List[Type[Tracker]] = None):
-        super().__init__("Tensorboard")
+    """Tracker for Tensorboard. Uses other trackers as subscribers."""
+
+    def __init__(self, logdir: str, trackers: list[Tracker] | None = None) -> None:
+        """
+        Create tensorboard tracker.
+
+        Parameters
+        ----------
+        logdir : str
+            Folder to store tensorboard logs.
+        trackers : list[Tracker] | None, optional
+            List of trackers subsctibed to the updates, by default None.
+        """
+        super().__init__(name="Tensorboard")
         if trackers is None:
             trackers = [
                 LossTracker(),
@@ -30,14 +43,34 @@ class TensorboardTracker(Tracker):
         x_adv: torch.tensor,
         delta: torch.Tensor,
         grad: torch.Tensor,
-    ):
+    ) -> None:
+        """
+        Update all subscribed trackers.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
         for tracker in self.trackers:
             tracker.track(iteration, loss, scores, x_adv, delta, grad)
             tracked_value = tracker.get_last_tracked()
             for i, sample in enumerate(tracked_value):
                 if tracker.tracked_type == SCALAR:
                     self.writer.add_scalar(
-                        f"Sample #{i}/{tracker.name}", sample, global_step=iteration
+                        f"Sample #{i}/{tracker.name}",
+                        sample,
+                        global_step=iteration,
                     )
                 elif tracker.tracked_type == MULTI_SCALAR:
                     self.writer.add_scalars(
@@ -50,10 +83,13 @@ class TensorboardTracker(Tracker):
                     )
                 elif tracker.tracked_type == IMAGE:
                     self.writer.add_image(
-                        f"Sample #{i}/{tracker.name}", sample, global_step=iteration
+                        f"Sample #{i}/{tracker.name}",
+                        sample,
+                        global_step=iteration,
                     )
 
-    def get_last_tracked(self):
+    def get_last_tracked(self) -> NotImplementedError:
+        """Not implemented for this tracker."""
         return NotImplementedError(
-            "Last tracked value is not available for this tracker."
+            "Last tracked value is not available for this tracker.",
         )

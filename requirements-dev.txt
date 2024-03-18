@@ -1,0 +1,4 @@
+ruff
+pre-commit
+flake8-docstrings
+sphinx

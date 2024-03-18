@@ -1,30 +1,87 @@
+"""Processing functions for gradients."""
+
+from abc import ABC, abstractmethod
+
 import torch.linalg
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from torch.nn.functional import normalize
 
-from secmlt.adv.evasion.perturbation_models import PerturbationModels
 
+class GradientProcessing(ABC):
+    """Gradient processing base class."""
 
-class GradientProcessing:
-    def __call__(self, grad: torch.Tensor) -> torch.Tensor: ...
+    @abstractmethod
+    def __call__(self, grad: torch.Tensor) -> torch.Tensor:
+        """
+        Process the gradient with the given transformation.
+
+        Parameters
+        ----------
+        grad : torch.Tensor
+            Input gradients.
+
+        Returns
+        -------
+        torch.Tensor
+            The processed gradients.
+        """
+        ...
 
 
 class LinearProjectionGradientProcessing(GradientProcessing):
-    def __init__(self, perturbation_model: str = PerturbationModels.L2):
+    """Linear projection of the gradient onto Lp balls."""
+
+    def __init__(self, perturbation_model: str = LpPerturbationModels.L2) -> None:
+        """
+        Create linear projection for the gradient.
+
+        Parameters
+        ----------
+        perturbation_model : str, optional
+            Perturbation model for the Lp ball, by default LpPerturbationModels.L2.
+
+        Raises
+        ------
+        ValueError
+            Raises ValueError if the perturbation model is not implemented.
+            Available, l1, l2, linf.
+        """
         perturbations_models = {
-            PerturbationModels.L1: 1,
-            PerturbationModels.L2: 2,
-            PerturbationModels.LINF: float("inf"),
+            LpPerturbationModels.L1: 1,
+            LpPerturbationModels.L2: 2,
+            LpPerturbationModels.LINF: float("inf"),
         }
         if perturbation_model not in perturbations_models:
-            raise ValueError(
-                f"{perturbation_model} not included in normalizers. Available: {perturbations_models.values()}"
-            )
+            msg = f"{perturbation_model} not available. \
+                Use one of: {perturbations_models.values()}"
+            raise ValueError(msg)
         self.p = perturbations_models[perturbation_model]
 
     def __call__(self, grad: torch.Tensor) -> torch.Tensor:
-        if self.p == 2:
-            grad = normalize(grad.data, p=self.p, dim=0)
-            return grad
+        """
+        Process gradient with linear projection onto the Lp ball.
+
+        Sets the direction by maximizing the scalar product with the
+        gradient over the Lp ball.
+
+        Parameters
+        ----------
+        grad : torch.Tensor
+            Input gradients.
+
+        Returns
+        -------
+        torch.Tensor
+            The gradient linearly projected onto the Lp ball.
+
+        Raises
+        ------
+        NotImplementedError
+            Raises NotImplementedError if the norm is not in 2, inf.
+        """
+        if self.p == 2:  # noqa: PLR2004
+            return normalize(grad.data, p=self.p, dim=0)
         if self.p == float("inf"):
             return torch.sign(grad)
-        raise NotImplementedError("Only L2 and LInf norms implemented now")
+        msg = "Only L2 and LInf norms implemented now"
+        raise NotImplementedError(msg)

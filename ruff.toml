@@ -1,0 +1,57 @@
+# same as black
+line-length = 88
+indent-width = 4
+
+# assume Python 3.10
+target-version = "py310"
+
+[lint]
+select = ["ALL", "D107"]
+ignore = [
+    "FA102",  # dynamic type hinting
+    "S101",  # use of assert
+    "ARG001",  # unused function argument
+    "ARG002",  # unused method argument
+    "ANN101",  # annotation for self
+    "ANN102",  # annotation of cls
+    "PLR0913",  # too many arguments
+    "ANN002",  # type annotations for args
+    "ANN003",  # type annotations for kwargs
+    "ARG004",  # unused kwargs
+    "PLW2901",  # for loop variable overwritten
+    "SLF001",  # use of private methods,
+    "FBT001",  # boolean type positional argument
+    "FBT002",  # boolean type default argument
+    ]
+
+[lint.per-file-ignores]
+"test_*.py" = [
+    "D",  # force docstrings
+    "ANN",  # annotations for tests
+    "PT006",  # mark parametrize
+    ]
+"*/tests/*.py" = ["D104"]
+"setup.py" = ["D"]
+"examples/*" = [
+    "D",  # docstrings
+    "INP001",  # init file in folder
+    "ANN",  # annotations
+    "T20"  # print
+    ]
+"docs/*" = ["ALL"]
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[format]
+# like black, use double quotes for strings.
+quote-style = "double"
+
+# like black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# like black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# like black, automatically detect the appropriate line ending.
+line-ending = "auto"
