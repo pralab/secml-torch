@@ -40,7 +40,7 @@ html_static_path = ["_static"]
 import pathlib
 
 for m in ["Readme.md", "CONTRIBUTING.md"]:
-    source_path = pathlib.Path(__file__).parent.resolve().parent.parent / m
+    source_path = pathlib.Path(__file__).parent.parent.parent / m
     target_path = pathlib.Path(__file__).parent / m.lower().replace(".md", ".rst")
     from m2r import convert
 
