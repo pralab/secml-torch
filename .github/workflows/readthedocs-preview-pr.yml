@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: readthedocs/actions/preview@v1
         with:
-          project-slug: "pralab/secml-torch"
+          project-slug: "secml-torch"
