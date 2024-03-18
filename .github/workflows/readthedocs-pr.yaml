@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  pull-request-links:
+  documentation-links:
     runs-on: ubuntu-latest
     steps:
       - uses: readthedocs/actions/preview@v1

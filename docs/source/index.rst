@@ -10,8 +10,8 @@ Welcome to SecML-Torch's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   readme
-   contributing
+   readme_link
+   contributing_link
    secmlt.adv
    secmlt.data
    secmlt.manipulations
