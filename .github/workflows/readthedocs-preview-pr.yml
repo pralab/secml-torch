@@ -1,4 +1,4 @@
-name: readthedocs/actions
+name: readthedocs preview on pull request
 on:
   pull_request_target:
     types:
