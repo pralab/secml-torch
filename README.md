@@ -66,11 +66,30 @@ robust_accuracy = Accuracy()(model, adversarial_loader)
 
 For more detailed usage instructions and examples, please refer to the [official documentation](https://secml-torch.readthedocs.io/en/latest/) or to the [examples](https://github.com/pralab/secml-torch/tree/main/examples).
 
-### Contributors
-
-
 
 ## Contributing
 
 We welcome contributions from the research community to expand the library's capabilities or add new features.
 If you would like to contribute to SecMLT, please follow our [contribution guidelines](https://github.com/pralab/secml-torch/blob/main/CONTRIBUTING.md).
+
+### Contributors
+
+<table>
+<tr>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/maurapintor>
+            <img src=https://avatars.githubusercontent.com/u/23276849?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Maura Pintor/>
+            <br />
+            <sub style="font-size:14px"><b>maurapintor</b></sub>
+        </a>
+    </td>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/zangobot>
+            <img src=https://avatars.githubusercontent.com/u/6831380?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=zangobot/>
+            <br />
+            <sub style="font-size:14px"><b>zangobot</b></sub>
+        </a>
+    </td>
+</tr>
+</table>
