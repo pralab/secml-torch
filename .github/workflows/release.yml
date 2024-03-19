@@ -118,4 +118,4 @@ jobs:
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: https://github.com/pralab/secml-torch/
+        repository-url: https://test.pypi.org/project/secml-torch/
