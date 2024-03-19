@@ -78,17 +78,17 @@ If you would like to contribute to SecMLT, please follow our [contribution guide
 <tr>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/maurapintor>
-            <img src=https://avatars.githubusercontent.com/u/23276849?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=Maura Pintor/>
+            <img src=https://avatars.githubusercontent.com/u/23276849?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=Maura Pintor/>
             <br />
-            <sub style="font-size:14px"><b>maurapintor</b></sub>
+            <sub style="font-size:14px;padding:10px"><b>maurapintor</b></sub>
         </a>
     </td>
     </td>
     <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
         <a href=https://github.com/zangobot>
-            <img src=https://avatars.githubusercontent.com/u/6831380?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding-top:10px" alt=zangobot/>
+            <img src=https://avatars.githubusercontent.com/u/6831380?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=zangobot/>
             <br />
-            <sub style="font-size:14px"><b>zangobot</b></sub>
+            <sub style="font-size:14px;padding:10px"><b>zangobot</b></sub>
         </a>
     </td>
 </tr>
