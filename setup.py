@@ -43,7 +43,7 @@ setup(
         ],
     ),
     include_package_data=True,
-    url="",
+    url="https://secml-torch.readthedocs.io/en/latest/",
     license="MIT",
     author="Maura Pintor, Luca Demetrio",
     author_email="maura.pintor@unica.it, luca.demetrio@unige.it",
