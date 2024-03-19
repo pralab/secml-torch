@@ -19,5 +19,5 @@ jobs:
         PATH: '/README.md'
         COMMIT_MESSAGE: 'docs(README): update contributors'
         AVATAR_SHAPE: 'round'
-        PULL_REQUEST: 'Update contributors'
-        BRANCH: 'main'
+        PULL_REQUEST: 'main'
+        BRANCH: 'contributors'
