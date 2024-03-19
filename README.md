@@ -66,6 +66,10 @@ robust_accuracy = Accuracy()(model, adversarial_loader)
 
 For more detailed usage instructions and examples, please refer to the [official documentation](https://secml-torch.readthedocs.io/en/latest/) or to the [examples](https://github.com/pralab/secml-torch/tree/main/examples).
 
+### Contributors
+
+
+
 ## Contributing
 
 We welcome contributions from the research community to expand the library's capabilities or add new features.
