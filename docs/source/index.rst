@@ -6,12 +6,22 @@
 Welcome to SecML-Torch's documentation!
 =======================================
 
+.. include:: readme_link.md
+   :parser: myst
+
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Intro:
+   :hidden:
 
    readme_link
-   contributing_link
+
+.. toctree::
+   :maxdepth: 2
+   :caption: APIs:
+   :hidden:
+
    secmlt.adv
    secmlt.data
    secmlt.manipulations
@@ -20,6 +30,13 @@ Welcome to SecML-Torch's documentation!
    secmlt.optimization
    secmlt.trackers
    secmlt.utils
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contribution guide:
+   :hidden:
+
+   contributing_link
 
 Indices and tables
 ==================

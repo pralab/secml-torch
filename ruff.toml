@@ -22,6 +22,8 @@ ignore = [
     "SLF001",  # use of private methods,
     "FBT001",  # boolean type positional argument
     "FBT002",  # boolean type default argument
+    "COM812", # flake8-commas "Trailing comma missing"
+    "ISC001",  # implicitly concatenated string literals on one line
     ]
 
 [lint.per-file-ignores]

@@ -14,7 +14,10 @@ release = "v0.1"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.napoleon", "myst_parser"]
+extensions = [
+    "sphinx.ext.napoleon",
+    "myst_parser",
+]
 
 napoleon_google_docstring = False
 napoleon_use_param = False
