@@ -11,6 +11,8 @@ jobs:
   documentation-links:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - uses: readthedocs/actions/preview@v1
         with:
           project-slug: "secml-torch"

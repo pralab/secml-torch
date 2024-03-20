@@ -12,6 +12,11 @@ copyright = "2024, Maura Pintor, Luca Demetrio"
 author = "Maura Pintor, Luca Demetrio"
 
 
+import secmlt
+
+version = version = secmlt.__version__
+release = version
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
