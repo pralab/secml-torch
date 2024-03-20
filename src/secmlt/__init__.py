@@ -2,7 +2,7 @@
 
 import pathlib
 
-version_path = pathlib.Path(__file__).parent.parent.parent / "VERSION"
+version_path = pathlib.Path(__file__).parent / "VERSION"
 
 with version_path.open() as f:
     __version__ = f.read()

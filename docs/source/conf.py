@@ -18,7 +18,8 @@ copyright = "2024, Maura Pintor, Luca Demetrio"
 author = "Maura Pintor, Luca Demetrio"
 
 
-version_path = pathlib.Path(__file__).parent.parent.parent / "VERSION"
+version_path = pathlib.Path(__file__).parent.parent.parent / "src/secmlt" / "VERSION"
+
 
 # Get the version file from VERSION file
 with version_path.open() as f:
