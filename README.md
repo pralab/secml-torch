@@ -1,6 +1,6 @@
  # SecML-Torch: A Library for Robustness Evaluation of Deep Learning Models
 
-[![pypi](https://img.shields.io/pypi/v/secml-torch.svg)](https://pypi.org/pypi/secml-torch/)
+[![pypi](https://img.shields.io/badge/pypi-latest-blue)](https://pypi.org/pypi/secml-torch/)
 [![py\_versions](https://img.shields.io/badge/python-3.8%2B-blue)](https://pypi.org/pypi/secml-torch/)
 [![build\_status](https://github.com/pralab/secml-torch/actions/workflows/release.yml/badge.svg)](https://github.com/pralab/secml-torch/actions?query=workflow%3ACI)
 [![coverage](https://codecov.io/gh/pralab/secml-torch/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pralab/secml-torch)
