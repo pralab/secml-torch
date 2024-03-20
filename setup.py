@@ -2,16 +2,18 @@ import pathlib
 
 from setuptools import find_packages, setup
 
-readme = pathlib.Path(__file__).parent.resolve() / "README.md"
-version = pathlib.Path(__file__).parent.resolve() / "VERSION"
+here = pathlib.Path.cwd()
+readme_path = here / "README.md"
+version_path = here / "src/secmlt" / "VERSION"
+
 
 # Get the long description from the README file
-with readme.open() as f:
+with readme_path.open() as f:
     long_description = f.read()
 
-# Get the version file from VERSION file
-with version.open() as f:
-    version_nr = f.read()
+# Get the version from VERSION file
+with version_path.open() as f:
+    version = f.read()
 
 
 CLASSIFIERS = """\
@@ -34,7 +36,7 @@ Topic :: Scientific/Engineering
 
 setup(
     name="secml-torch",
-    version=version_nr,
+    version=version,
     description="SecML-Torch Library",
     classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     long_description=long_description,
@@ -49,6 +51,7 @@ setup(
             "tests",
         ],
     ),
+    data_files=[("src/secmlt/VERSION", ["src/secmlt/VERSION"])],
     include_package_data=True,
     url="https://secml-torch.readthedocs.io/en/latest/",
     license="MIT",
