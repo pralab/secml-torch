@@ -58,6 +58,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
+    if: github.event_name == 'release'
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
       and upload them to GitHub Release
