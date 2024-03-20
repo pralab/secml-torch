@@ -1,5 +1,7 @@
 """Classification metrics for machine-learning models and for attack performance."""
 
+from typing import Union
+
 import torch
 from secmlt.models.base_model import BaseModel
 from torch.utils.data import DataLoader
@@ -67,7 +69,7 @@ class Accuracy:
 class AttackSuccessRate(Accuracy):
     """Single attack success rate from attack results."""
 
-    def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
+    def __init__(self, y_target: Union[float, torch.Tensor, None] = None) -> None:
         """
         Create attack success rate metric.
 
@@ -131,7 +133,7 @@ class AccuracyEnsemble(Accuracy):
 class EnsembleSuccessRate(AccuracyEnsemble):
     """Worst-case success rate of multiple attack runs."""
 
-    def __init__(self, y_target: float | torch.Tensor | None = None) -> None:
+    def __init__(self, y_target: Union[float, torch.Tensor, None] = None) -> None:
         """
         Create ensemble success rate metric.
 

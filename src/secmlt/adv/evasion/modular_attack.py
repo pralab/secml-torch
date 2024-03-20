@@ -1,7 +1,7 @@
 """Implementation of modular iterative attacks with customizable components."""
 
 from functools import partial
-from typing import Literal
+from typing import Literal, Union
 
 import torch.nn
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
@@ -33,7 +33,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         y_target: int | None,
         num_steps: int,
         step_size: float,
-        loss_function: str | torch.nn.Module,
+        loss_function: Union[str, torch.nn.Module],
         optimizer_cls: str | partial[Optimizer],
         manipulation_function: Manipulation,
         initializer: Initializer,

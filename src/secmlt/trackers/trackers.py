@@ -1,6 +1,7 @@
 """Trackers for attack metrics."""
 
 from abc import ABC, abstractmethod
+from typing import Union
 
 import torch
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
@@ -69,7 +70,7 @@ class Tracker(ABC):
         """
         return torch.stack(self.tracked, -1)
 
-    def get_last_tracked(self) -> None | torch.Tensor:
+    def get_last_tracked(self) -> Union[None, torch.Tensor]:
         """
         Get last element tracked.
 
@@ -124,7 +125,7 @@ class LossTracker(Tracker):
 class ScoresTracker(Tracker):
     """Tracker for model scores."""
 
-    def __init__(self, y: int | torch.Tensor = None) -> None:
+    def __init__(self, y: Union[int, torch.Tensor] = None) -> None:
         """Create scores tracker."""
         if y is None:
             super().__init__("Scores", MULTI_SCALAR)

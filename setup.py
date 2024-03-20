@@ -2,11 +2,17 @@ import pathlib
 
 from setuptools import find_packages, setup
 
-here = pathlib.Path(__file__).parent.resolve() / "README.md"
+readme = pathlib.Path(__file__).parent.resolve() / "README.md"
+version = pathlib.Path(__file__).parent.resolve() / "VERSION"
 
 # Get the long description from the README file
-with here.open() as f:
+with readme.open() as f:
     long_description = f.read()
+
+# Get the version file from VERSION file
+with version.open() as f:
+    version_nr = f.read()
+
 
 CLASSIFIERS = """\
 Development Status :: 3 - Alpha
@@ -25,9 +31,10 @@ Topic :: Software Development
 Topic :: Scientific/Engineering
 """
 
+
 setup(
     name="secml-torch",
-    version="0.1.1",
+    version=version_nr,
     description="SecML-Torch Library",
     classifiers=[_f for _f in CLASSIFIERS.split("\n") if _f],
     long_description=long_description,

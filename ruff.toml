@@ -24,6 +24,7 @@ ignore = [
     "FBT002",  # boolean type default argument
     "COM812", # flake8-commas "Trailing comma missing"
     "ISC001",  # implicitly concatenated string literals on one line
+    "UP007"
     ]
 
 [lint.per-file-ignores]
