@@ -1,6 +1,7 @@
 """Ensemble metrics for getting best results across multiple attacks."""
 
 from abc import ABC, abstractmethod
+from typing import Union
 
 import torch
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
@@ -159,7 +160,7 @@ class FixedEpsilonEnsemble(Ensemble):
         self,
         loss_fn: torch.nn.Module,
         maximize: bool = True,
-        y_target: torch.Tensor | None = None,
+        y_target: Union[torch.Tensor, None] = None,
     ) -> None:
         """
         Create fixed epsilon ensemble.
