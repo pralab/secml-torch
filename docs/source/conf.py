@@ -6,16 +6,20 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import pathlib
+
 
 project = "SecML-Torch"
 copyright = "2024, Maura Pintor, Luca Demetrio"
 author = "Maura Pintor, Luca Demetrio"
 
 
-import secmlt
+version = pathlib.Path(__file__).parent.parent.parent / "VERSION"
 
-version = version = secmlt.__version__
-release = version
+# Get the version file from VERSION file
+with version.open() as f:
+    version_nr = f.read()
+release = version_nr
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
