@@ -14,12 +14,12 @@ copyright = "2024, Maura Pintor, Luca Demetrio"
 author = "Maura Pintor, Luca Demetrio"
 
 
-version = pathlib.Path(__file__).parent.parent.parent / "VERSION"
+version_path = pathlib.Path(__file__).parent.parent.parent / "VERSION"
 
 # Get the version file from VERSION file
-with version.open() as f:
-    version_nr = f.read()
-release = version_nr
+with version_path.open() as f:
+    version = f.read()
+release = version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
