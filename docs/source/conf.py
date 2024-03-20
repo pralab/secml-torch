@@ -6,10 +6,16 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+
 project = "SecML-Torch"
 copyright = "2024, Maura Pintor, Luca Demetrio"
 author = "Maura Pintor, Luca Demetrio"
-release = "v0.1"
+
+
+import secmlt
+
+release = version = secmlt.__version__
+
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
