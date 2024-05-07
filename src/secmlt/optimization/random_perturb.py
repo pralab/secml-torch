@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import torch
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.data.lp_uniform_sampling import LpUniformSampling
 from secmlt.optimization.constraints import (
     L0Constraint,
     L1Constraint,
@@ -11,7 +12,6 @@ from secmlt.optimization.constraints import (
     LInfConstraint,
     LpConstraint,
 )
-from torch.distributions.laplace import Laplace
 
 
 class RandomPerturbBase(ABC):
@@ -82,7 +82,8 @@ class RandomPerturbLinf(RandomPerturbBase):
         torch.Tensor
             Perturbed samples.
         """
-        return torch.randn_like(x)
+        x_random = LpUniformSampling(p=LpPerturbationModels.LINF).sample_like(x)
+        return x + (x_random * self.epsilon)
 
     @property
     def _constraint(self) -> type[LInfConstraint]:
@@ -106,8 +107,8 @@ class RandomPerturbL1(RandomPerturbBase):
         torch.Tensor
             Perturbed samples.
         """
-        s = Laplace(loc=0, scale=1)
-        return s.sample(x.shape)
+        x_random = LpUniformSampling(p=LpPerturbationModels.L1).sample_like(x)
+        return x + (x_random * self.epsilon)
 
     @property
     def _constraint(self) -> type[L1Constraint]:
@@ -131,7 +132,8 @@ class RandomPerturbL2(RandomPerturbBase):
         torch.Tensor
             Perturbed samples.
         """
-        return torch.randn_like(x)
+        x_random = LpUniformSampling(p=LpPerturbationModels.L2).sample_like(x)
+        return x + (x_random * self.epsilon)
 
     @property
     def _constraint(self) -> type[L2Constraint]:
@@ -155,8 +157,8 @@ class RandomPerturbL0(RandomPerturbBase):
         torch.Tensor
             Perturbed samples.
         """
-        perturbations = torch.randn_like(x)
-        return perturbations.sign()
+        x_random = LpUniformSampling(p=LpPerturbationModels.L0).sample_like(x)
+        return x + (x_random * self.epsilon)
 
     @property
     def _constraint(self) -> type[L0Constraint]:
