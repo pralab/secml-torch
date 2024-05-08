@@ -42,6 +42,54 @@ copy of the SecMLT repository under your GitHub account.
 In our project, we leverage [Ruff](https://docs.astral.sh/ruff/) and [pre-commit](https://pre-commit.com) to enhance code quality and streamline the development process.
 Ruff is a static code linter, while Pre-commit is a framework for defining pre-commit hooks.
 
+## Documentation
+
+When adding new functionalities, modules, or packages to SecMLT, it's essential to document them properly. This includes generating reStructuredText (RST) files, which are used by Sphinx to build the documentation.
+
+To generate documentation RST files for new modules, follow these steps:
+
+1. **Install the documentation requirements**: Ensure you have Sphinx and the docs dependencies installed. You can install it via pip:
+
+   ```bash
+   cd docs
+   pip install -r requirements.txt
+   ```
+
+2. **Write Docstrings**: Ensure your modules and functions/classes have docstrings following the reStructuredText format. This allows Sphinx to parse and generate documentation from your code. The following steps will find automatically the modules if they are properly documented.
+
+3. **Run Autodoc**: Use the `sphinx-apidoc` command to automatically generate RST files for your modules:
+
+   ```bash
+   sphinx-apidoc -o <output_directory> <module_directory> -f
+   ```
+
+   Replace `<output_directory>` with the directory where you want the RST files to be generated, and `<module_directory>` with the directory containing your modules. The `-f` parameter makes it rewrite existing files (so that the new functions are added).
+
+   Specifically, it's easy to do it from the docs folder:
+
+   ```bash
+    cd docs  # skip if you are already in the docs folder from the previous step
+    sphinx-apidoc -o ../docs/source ../src/secmlt -f
+    ```
+
+4. **Build Documentation**: Finally, build the documentation using Sphinx:
+
+   ```bash
+   sphinx-build -b html <source_directory> <build_directory>
+   ```
+
+   Replace `<source_directory>` with the directory containing your Sphinx source files (including the generated RST files), and `<build_directory>` with the directory where you want the HTML documentation to be built.
+
+   Specifically, you can use:
+
+   ```bash
+    cd ..  # skip if you are already in the main project folder
+    sphinx-build -M html ./docs/source ./docs/build
+    ```
+
+By following these steps, you can ensure that your new modules are properly documented and integrated into the SecMLT documentation. A preview will be generated when you create the pull request.
+
+
 ### Using Ruff
 
 Ruff is integrated into our project to perform code linting.

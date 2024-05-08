@@ -1,10 +1,10 @@
-secmlt.metrics
+secmlt.metrics package
 ======================
 
 Submodules
 ----------
 
-secmlt.metrics.classification
+secmlt.metrics.classification module
 ------------------------------------
 
 .. automodule:: secmlt.metrics.classification

@@ -1,4 +1,4 @@
-secmlt.adv.evasion
+secmlt.adv.evasion package
 ==========================
 
 Subpackages
@@ -13,7 +13,7 @@ Subpackages
 Submodules
 ----------
 
-secmlt.adv.evasion.base\_evasion\_attack
+secmlt.adv.evasion.base\_evasion\_attack module
 -----------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.base_evasion_attack
@@ -21,7 +21,7 @@ secmlt.adv.evasion.base\_evasion\_attack
    :undoc-members:
    :show-inheritance:
 
-secmlt.adv.evasion.modular\_attack
+secmlt.adv.evasion.modular\_attack module
 -----------------------------------------
 
 .. automodule:: secmlt.adv.evasion.modular_attack
@@ -29,7 +29,7 @@ secmlt.adv.evasion.modular\_attack
    :undoc-members:
    :show-inheritance:
 
-secmlt.adv.evasion.perturbation\_models
+secmlt.adv.evasion.perturbation\_models module
 ----------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.perturbation_models
@@ -37,7 +37,7 @@ secmlt.adv.evasion.perturbation\_models
    :undoc-members:
    :show-inheritance:
 
-secmlt.adv.evasion.pgd
+secmlt.adv.evasion.pgd module
 -----------------------------
 
 .. automodule:: secmlt.adv.evasion.pgd

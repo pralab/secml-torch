@@ -1,10 +1,10 @@
-secmlt.adv.evasion.aggregators
+secmlt.adv.evasion.aggregators package
 ======================================
 
 Submodules
 ----------
 
-secmlt.adv.evasion.aggregators.ensemble
+secmlt.adv.evasion.aggregators.ensemble module
 ----------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.aggregators.ensemble
