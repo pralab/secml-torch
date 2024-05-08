@@ -1,10 +1,10 @@
-secmlt.utils
+secmlt.utils package
 ====================
 
 Submodules
 ----------
 
-secmlt.utils.tensor\_utils
+secmlt.utils.tensor\_utils module
 ---------------------------------
 
 .. automodule:: secmlt.utils.tensor_utils

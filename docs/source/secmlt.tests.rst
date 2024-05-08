@@ -1,10 +1,10 @@
-secmlt.tests
+secmlt.tests package
 ====================
 
 Submodules
 ----------
 
-secmlt.tests.fixtures
+secmlt.tests.fixtures module
 ----------------------------
 
 .. automodule:: secmlt.tests.fixtures
@@ -12,7 +12,7 @@ secmlt.tests.fixtures
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.mocks
+secmlt.tests.mocks module
 -------------------------
 
 .. automodule:: secmlt.tests.mocks
@@ -20,7 +20,7 @@ secmlt.tests.mocks
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_aggregators
+secmlt.tests.test\_aggregators module
 -------------------------------------
 
 .. automodule:: secmlt.tests.test_aggregators
@@ -28,7 +28,7 @@ secmlt.tests.test\_aggregators
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_attacks
+secmlt.tests.test\_attacks module
 ---------------------------------
 
 .. automodule:: secmlt.tests.test_attacks
@@ -36,7 +36,7 @@ secmlt.tests.test\_attacks
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_constants
+secmlt.tests.test\_constants module
 -----------------------------------
 
 .. automodule:: secmlt.tests.test_constants
@@ -44,7 +44,15 @@ secmlt.tests.test\_constants
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_metrics
+secmlt.tests.test\_data module
+------------------------------
+
+.. automodule:: secmlt.tests.test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.tests.test\_metrics module
 ---------------------------------
 
 .. automodule:: secmlt.tests.test_metrics
@@ -52,7 +60,7 @@ secmlt.tests.test\_metrics
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_trackers
+secmlt.tests.test\_trackers module
 ----------------------------------
 
 .. automodule:: secmlt.tests.test_trackers
@@ -60,7 +68,7 @@ secmlt.tests.test\_trackers
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_trainer
+secmlt.tests.test\_trainer module
 ---------------------------------
 
 .. automodule:: secmlt.tests.test_trainer
@@ -68,7 +76,7 @@ secmlt.tests.test\_trainer
    :undoc-members:
    :show-inheritance:
 
-secmlt.tests.test\_utils
+secmlt.tests.test\_utils module
 -------------------------------
 
 .. automodule:: secmlt.tests.test_utils

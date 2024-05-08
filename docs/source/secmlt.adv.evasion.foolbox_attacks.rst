@@ -1,10 +1,10 @@
-secmlt.adv.evasion.foolbox\_attacks
+secmlt.adv.evasion.foolbox\_attacks package
 ===========================================
 
 Submodules
 ----------
 
-secmlt.adv.evasion.foolbox\_attacks.foolbox\_base
+secmlt.adv.evasion.foolbox\_attacks.foolbox\_base module
 --------------------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.foolbox_attacks.foolbox_base
@@ -12,7 +12,7 @@ secmlt.adv.evasion.foolbox\_attacks.foolbox\_base
    :undoc-members:
    :show-inheritance:
 
-secmlt.adv.evasion.foolbox\_attacks.foolbox\_pgd
+secmlt.adv.evasion.foolbox\_attacks.foolbox\_pgd module
 -------------------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.foolbox_attacks.foolbox_pgd

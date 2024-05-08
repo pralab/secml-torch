@@ -1,10 +1,10 @@
-secmlt.trackers
+secmlt.trackers package
 =======================
 
 Submodules
 ----------
 
-secmlt.trackers.image\_trackers
+secmlt.trackers.image\_trackers module
 --------------------------------------
 
 .. automodule:: secmlt.trackers.image_trackers
@@ -12,7 +12,7 @@ secmlt.trackers.image\_trackers
    :undoc-members:
    :show-inheritance:
 
-secmlt.trackers.tensorboard\_tracker
+secmlt.trackers.tensorboard\_tracker module
 -------------------------------------------
 
 .. automodule:: secmlt.trackers.tensorboard_tracker
@@ -20,7 +20,7 @@ secmlt.trackers.tensorboard\_tracker
    :undoc-members:
    :show-inheritance:
 
-secmlt.trackers.trackers
+secmlt.trackers.trackers module
 -------------------------------
 
 .. automodule:: secmlt.trackers.trackers

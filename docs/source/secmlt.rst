@@ -1,4 +1,4 @@
-secmlt
+secmlt package
 ==============
 
 Subpackages
@@ -13,6 +13,7 @@ Subpackages
    secmlt.metrics
    secmlt.models
    secmlt.optimization
+   secmlt.tests
    secmlt.trackers
    secmlt.utils
 
