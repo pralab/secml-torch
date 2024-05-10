@@ -1,10 +1,10 @@
-secmlt.optimization
+secmlt.optimization package
 ===========================
 
 Submodules
 ----------
 
-secmlt.optimization.constraints
+secmlt.optimization.constraints module
 --------------------------------------
 
 .. automodule:: secmlt.optimization.constraints
@@ -12,7 +12,7 @@ secmlt.optimization.constraints
    :undoc-members:
    :show-inheritance:
 
-secmlt.optimization.gradient\_processing
+secmlt.optimization.gradient\_processing module
 -----------------------------------------------
 
 .. automodule:: secmlt.optimization.gradient_processing
@@ -20,7 +20,7 @@ secmlt.optimization.gradient\_processing
    :undoc-members:
    :show-inheritance:
 
-secmlt.optimization.initializer
+secmlt.optimization.initializer module
 --------------------------------------
 
 .. automodule:: secmlt.optimization.initializer
@@ -28,7 +28,7 @@ secmlt.optimization.initializer
    :undoc-members:
    :show-inheritance:
 
-secmlt.optimization.optimizer\_factory
+secmlt.optimization.optimizer\_factory module
 ---------------------------------------------
 
 .. automodule:: secmlt.optimization.optimizer_factory
@@ -36,7 +36,7 @@ secmlt.optimization.optimizer\_factory
    :undoc-members:
    :show-inheritance:
 
-secmlt.optimization.random\_perturb
+secmlt.optimization.random\_perturb module
 ------------------------------------------
 
 .. automodule:: secmlt.optimization.random_perturb

@@ -1,10 +1,10 @@
-secmlt.manipulations
+secmlt.manipulations package
 ============================
 
 Submodules
 ----------
 
-secmlt.manipulations.manipulation
+secmlt.manipulations.manipulation module
 ----------------------------------------
 
 .. automodule:: secmlt.manipulations.manipulation

@@ -1,4 +1,4 @@
-secmlt.models
+secmlt.models package
 =====================
 
 Subpackages
@@ -13,7 +13,7 @@ Subpackages
 Submodules
 ----------
 
-secmlt.models.base\_model
+secmlt.models.base\_model module
 --------------------------------
 
 .. automodule:: secmlt.models.base_model
@@ -21,7 +21,7 @@ secmlt.models.base\_model
    :undoc-members:
    :show-inheritance:
 
-secmlt.models.base\_trainer
+secmlt.models.base\_trainer module
 ----------------------------------
 
 .. automodule:: secmlt.models.base_trainer
