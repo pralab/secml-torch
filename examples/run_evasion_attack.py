@@ -62,3 +62,20 @@ f_adv_ds = foolbox_attack(model, test_data_loader)
 # Test accuracy on adversarial examples
 f_robust_accuracy = Accuracy()(model, f_adv_ds)
 print("Robust Accuracy (PGD Foolbox): ", n_robust_accuracy.item())
+
+# Create and run attack
+advlib_attack = PGD(
+    perturbation_model=perturbation_model,
+    epsilon=epsilon,
+    num_steps=num_steps,
+    step_size=step_size,
+    random_start=False,
+    loss_function="dlr",
+    y_target=y_target,
+    backend=Backends.ADVLIB,
+)
+al_adv_ds = advlib_attack(model, test_data_loader)
+
+# Test accuracy on adversarial examples
+f_robust_accuracy = Accuracy()(model, al_adv_ds)
+print("Robust Accuracy (PGD AdvLib): ", n_robust_accuracy.item())
