@@ -227,7 +227,7 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
         epsilon: float,
         num_steps: int,
         random_start: bool,
-        relative_step_size: float = 0.01 / 0.3,
+        step_size: float,
         restarts: int = 1,
         loss_function: str = "ce",
         y_target: int | None = None,
@@ -248,9 +248,8 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
             The number of iterations for the attack.
         random_start : bool
             If True, the perturbation will be randomly initialized.
-        relative_step_size : float, optional
-            The relative attack step size. The actual step size is
-            calculated as `eps * relative_step_size`. The default value is 0.01 / 0.3.
+        step_size : float
+            The attack step size.
         restarts : int, optional
             The number of attack restarts. The default value is 1.
         loss_function : str, optional
@@ -265,8 +264,8 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
         Raises
         ------
         ValueError
-        If the provided `loss_function` is not supported by the PGD attack
-        using the Adversarial Library backend.
+            If the provided `loss_function` is not supported by the PGD attack
+            using the Adversarial Library backend.
         """
         from adv_lib.attacks import pgd_linf
 
@@ -288,7 +287,7 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
             random_init=random_start,
             restarts=restarts,
             loss_function=loss_function,
-            relative_step_size=relative_step_size,
+            absolute_step_size=step_size,
         )
 
         super().__init__(

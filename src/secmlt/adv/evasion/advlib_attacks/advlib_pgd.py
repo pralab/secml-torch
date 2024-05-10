@@ -1,7 +1,6 @@
 """Wrapper of the PGD attack implemented in Adversarial Library."""
 
 from functools import partial
-from typing import Optional
 
 from adv_lib.attacks import pgd_linf
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
@@ -17,7 +16,7 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
         epsilon: float,
         num_steps: int,
         random_start: bool,
-        step_size: Optional[float] = None,
+        step_size: float,
         restarts: int = 1,
         loss_function: str = "ce",
         y_target: int | None = None,
@@ -38,8 +37,8 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
             The number of iterations for the attack.
         random_start : bool
             If True, the perturbation will be randomly initialized.
-        absolute_step_size : float, optional
-            The absolute attack step size.
+        step_size : float
+            The attack step size.
         restarts : int, optional
             The number of attack restarts. The default value is 1.
         loss_function : str, optional
