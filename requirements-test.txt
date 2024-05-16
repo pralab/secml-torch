@@ -1,3 +1,4 @@
 pytest
 pytest-cov
 foolbox
+git+https://github.com/jeromerony/adversarial-library

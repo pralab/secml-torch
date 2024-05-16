@@ -5,4 +5,5 @@ class Backends:
     """Available backends."""
 
     FOOLBOX = "foolbox"
+    ADVLIB = "advlib"
     NATIVE = "native"

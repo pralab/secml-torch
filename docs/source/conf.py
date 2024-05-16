@@ -59,7 +59,7 @@ napoleon_use_ivar = True
 napoleon_use_param = True
 napoleon_use_rtype = True
 
-autodoc_mock_imports = ["foolbox", "torch", "tensorboard"]
+autodoc_mock_imports = ["foolbox", "torch", "tensorboard", "adv_lib"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["*tests*"]
