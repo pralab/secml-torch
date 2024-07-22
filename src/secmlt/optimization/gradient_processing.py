@@ -79,7 +79,7 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         NotImplementedError
             Raises NotImplementedError if the norm is not in 2, inf.
         """
-        if self.p in [1, 2]:  # noqa: PLR2004
+        if self.p in [1, 2]:
             return normalize(grad.data, p=self.p, dim=0)
         if self.p == float("inf"):
             return torch.sign(grad)
