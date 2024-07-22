@@ -26,7 +26,7 @@ accuracy = Accuracy()(model, test_loader)
 print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
-epsilon = 0.3
+epsilon = 1
 num_steps = 10
 step_size = 0.05
 perturbation_model = LpPerturbationModels.LINF
@@ -35,7 +35,7 @@ y_target = None
 trackers = [
     LossTracker(),
     PredictionTracker(),
-    PerturbationNormTracker("linf"),
+    PerturbationNormTracker(perturbation_model),
 ]
 
 native_attack = PGD(
@@ -79,10 +79,11 @@ native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))
 real_data, real_labels = next(iter(test_loader))
 
+
 distance = torch.linalg.norm(
     native_data.detach().cpu().flatten(start_dim=1)
     - f_data.detach().cpu().flatten(start_dim=1),
-    ord=float("inf"),
+    ord=LpPerturbationModels.pert_models[perturbation_model],
     dim=1,
 )
-print("Solutions are :", distance, "linf distant")
+print("Solutions are :", distance, f"{perturbation_model} distant")

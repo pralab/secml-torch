@@ -209,7 +209,7 @@ class L1Constraint(LpConstraint):
         center : float, optional
             Center of the constraint, by default 0.0.
         """
-        super().__init__(radius=radius, center=center, p=1)
+        super().__init__(radius=radius, center=center, p=LpPerturbationModels.L1)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -268,7 +268,7 @@ class L0Constraint(LpConstraint):
         center : float, optional
             Center of the constraint, by default 0.0.
         """
-        super().__init__(radius=radius, center=center, p=0)
+        super().__init__(radius=radius, center=center, p=LpPerturbationModels.L0)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -288,5 +288,5 @@ class L0Constraint(LpConstraint):
             Samples projected onto L0 constraint.
         """
         flat_x = x.flatten(start_dim=1)
-        positions, topk = torch.topk(flat_x, k=self.radius)
+        positions, topk = torch.topk(flat_x, k=int(self.radius))
         return torch.zeros_like(flat_x).scatter_(positions, topk).reshape(x.shape)

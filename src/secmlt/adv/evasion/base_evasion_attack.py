@@ -196,7 +196,7 @@ class BaseEvasionAttack:
             Raises NotImplementedError if not implemented in the inherited class.
         """
         if perturbation_model in cls.get_perturbation_models():
-            return
+            return True
         msg = "Unsupported or not-implemented perturbation model."
         raise NotImplementedError(msg)
 
@@ -225,5 +225,4 @@ class BaseEvasionAttack:
         model: BaseModel,
         samples: torch.Tensor,
         labels: torch.Tensor,
-    ) -> torch.Tensor:
-        ...
+    ) -> torch.Tensor: ...

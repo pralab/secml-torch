@@ -109,7 +109,11 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         set[str]
             Set of perturbation models available for this attack.
         """
-        return {LpPerturbationModels.L2, LpPerturbationModels.LINF}
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
@@ -129,7 +133,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
         **optim_kwargs,
-    ) -> torch.Tensor:
+    ) -> [torch.Tensor, torch.Tensor]:
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
