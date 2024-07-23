@@ -26,7 +26,20 @@ def atleast_kd(x: torch.Tensor, k: int) -> torch.Tensor:
     return x.reshape(shape)
 
 
-def normalize_l1_norm(x: torch.Tensor):
+def normalize_l1_norm(x: torch.Tensor) -> torch.Tensor:
+    """
+    Sample-wise normalization of the input tensor x to unit L1 norm.
+
+    Parameters
+    ----------
+    x:  torch.Tensor
+        input tensor
+
+    Returns
+    -------
+    torch.Tensor
+        normalized sample-wise tensor x
+    """
     abs_x = torch.abs(x.data)
     sorted_indices = torch.argsort(-abs_x, dim=1)
     sorted_abs_x = torch.gather(abs_x, 1, sorted_indices)
@@ -42,6 +55,4 @@ def normalize_l1_norm(x: torch.Tensor):
 
     adjusted_x = selected_x + residual * residual_mask
 
-    result = torch.zeros_like(x).scatter(1, sorted_indices, adjusted_x * torch.sign(x))
-
-    return result
+    return torch.zeros_like(x).scatter(1, sorted_indices, adjusted_x * torch.sign(x))

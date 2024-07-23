@@ -4,9 +4,8 @@ from abc import ABC, abstractmethod
 
 import torch.linalg
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from torch.nn.functional import normalize
-
 from secmlt.utils.tensor_utils import normalize_l1_norm
+from torch.nn.functional import normalize
 
 
 class GradientProcessing(ABC):
@@ -81,9 +80,9 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         NotImplementedError
             Raises NotImplementedError if the norm is not in 2, inf.
         """
-        if self.p == 1:
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L1):
             return normalize_l1_norm(grad.data)
-        if self.p == 2:
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L2):
             return normalize(grad.data, p=self.p, dim=0)
         if self.p == float("inf"):
             return torch.sign(grad)
