@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 
 import torch.linalg
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.utils.tensor_utils import normalize_l1_norm
 from torch.nn.functional import normalize
 
 
@@ -80,10 +79,13 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         NotImplementedError
             Raises NotImplementedError if the norm is not in 2, inf.
         """
-        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L1):
-            return normalize_l1_norm(grad.data)
-        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L2):
-            return normalize(grad.data, p=self.p, dim=0)
+        if self.p == LpPerturbationModels.get_p(
+            LpPerturbationModels.L1
+        ) or self.p == LpPerturbationModels.get_p(LpPerturbationModels.L2):
+            original_shape = grad.data.shape
+            return normalize(grad.data.flatten(start_dim=1), p=self.p, dim=1).view(
+                original_shape
+            )
         if self.p == float("inf"):
             return torch.sign(grad)
         msg = "Only L2 and LInf norms implemented now"
