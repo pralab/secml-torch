@@ -1,6 +1,7 @@
 """Initializers for the attacks."""
 
 import torch
+
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.optimization.random_perturb import RandomPerturb
 
