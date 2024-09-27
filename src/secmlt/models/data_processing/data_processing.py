@@ -9,8 +9,7 @@ class DataProcessing(ABC):
     """Abstract data processing class."""
 
     @abstractmethod
-    def _process(self, x: torch.Tensor) -> torch.Tensor:
-        ...
+    def _process(self, x: torch.Tensor) -> torch.Tensor: ...
 
     @abstractmethod
     def invert(self, x: torch.Tensor) -> torch.Tensor:
