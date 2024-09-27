@@ -1,11 +1,12 @@
 import torchvision.datasets
 from robustbench.utils import load_model
+from torch.utils.data import DataLoader, Subset
+
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.metrics.classification import Accuracy
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from torch.utils.data import DataLoader, Subset
 
 net = load_model(model_name="Rony2019Decoupling", dataset="cifar10", threat_model="L2")
 device = "cpu"

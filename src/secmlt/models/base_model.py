@@ -3,11 +3,12 @@
 from abc import ABC, abstractmethod
 
 import torch
+from torch.utils.data import DataLoader
+
 from secmlt.models.data_processing.data_processing import DataProcessing
 from secmlt.models.data_processing.identity_data_processing import (
     IdentityDataProcessing,
 )
-from torch.utils.data import DataLoader
 
 
 class BaseModel(ABC):

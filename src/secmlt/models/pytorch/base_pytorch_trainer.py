@@ -1,9 +1,10 @@
 """PyTorch model trainers."""
 
 import torch.nn
-from secmlt.models.base_trainer import BaseTrainer
 from torch.optim.lr_scheduler import _LRScheduler
 from torch.utils.data import DataLoader
+
+from secmlt.models.base_trainer import BaseTrainer
 
 
 class BasePyTorchTrainer(BaseTrainer):

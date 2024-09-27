@@ -2,12 +2,13 @@
 
 import pytest
 import torch
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from secmlt.tests.mocks import MockModel
 from torch.utils.data import DataLoader, TensorDataset
 
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.tests.mocks import MockModel
 
-@pytest.fixture()
+
+@pytest.fixture
 def data_loader() -> DataLoader[tuple[torch.Tensor]]:
     """
     Create fake data loader.
@@ -24,7 +25,7 @@ def data_loader() -> DataLoader[tuple[torch.Tensor]]:
     return DataLoader(dataset, batch_size=10)
 
 
-@pytest.fixture()
+@pytest.fixture
 def adv_loaders() -> list[DataLoader[tuple[torch.Tensor, ...]]]:
     """
     Create fake adversarial loaders.
@@ -44,7 +45,7 @@ def adv_loaders() -> list[DataLoader[tuple[torch.Tensor, ...]]]:
     return loaders
 
 
-@pytest.fixture()
+@pytest.fixture
 def model() -> torch.nn.Module:
     """
     Create fake model.
@@ -57,7 +58,7 @@ def model() -> torch.nn.Module:
     return BasePytorchClassifier(model=MockModel())
 
 
-@pytest.fixture()
+@pytest.fixture
 def data() -> torch.Tensor:
     """
     Get random samples.
@@ -70,7 +71,7 @@ def data() -> torch.Tensor:
     return torch.randn(10, 3, 32, 32).clamp(0.0, 1.0)
 
 
-@pytest.fixture()
+@pytest.fixture
 def labels() -> torch.Tensor:
     """
     Get random labels.
@@ -83,7 +84,7 @@ def labels() -> torch.Tensor:
     return torch.randint(0, 9, 10)
 
 
-@pytest.fixture()
+@pytest.fixture
 def loss_values() -> torch.Tensor:
     """
     Get random model outputs.
@@ -96,7 +97,7 @@ def loss_values() -> torch.Tensor:
     return torch.randn(10)
 
 
-@pytest.fixture()
+@pytest.fixture
 def output_values() -> torch.Tensor:
     """
     Get random model outputs.

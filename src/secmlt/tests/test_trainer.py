@@ -1,7 +1,8 @@
 import torch
+from torch.optim import SGD
+
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from secmlt.tests.mocks import MockLoss
-from torch.optim import SGD
 
 
 def test_pytorch_trainer(model, data_loader) -> None:

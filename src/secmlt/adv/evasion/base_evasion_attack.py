@@ -5,9 +5,10 @@ from abc import abstractmethod
 from typing import Literal
 
 import torch
+from torch.utils.data import DataLoader, TensorDataset
+
 from secmlt.adv.backends import Backends
 from secmlt.models.base_model import BaseModel
-from torch.utils.data import DataLoader, TensorDataset
 
 # lazy evaluation to avoid circular imports
 TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"
@@ -222,7 +223,7 @@ class BaseEvasionAttack:
             Raises NotImplementedError if not implemented in the inherited class.
         """
         if perturbation_model in cls.get_perturbation_models():
-            return
+            return True
         msg = "Unsupported or not-implemented perturbation model."
         raise NotImplementedError(msg)
 
@@ -251,5 +252,4 @@ class BaseEvasionAttack:
         model: BaseModel,
         samples: torch.Tensor,
         labels: torch.Tensor,
-    ) -> torch.Tensor:
-        ...
+    ) -> torch.Tensor: ...
