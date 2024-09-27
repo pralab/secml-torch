@@ -225,4 +225,5 @@ class BaseEvasionAttack:
         model: BaseModel,
         samples: torch.Tensor,
         labels: torch.Tensor,
-    ) -> torch.Tensor: ...
+    ) -> torch.Tensor:
+        ...
