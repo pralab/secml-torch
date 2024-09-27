@@ -4,6 +4,9 @@ from functools import partial
 from typing import Literal, Union
 
 import torch.nn
+from torch.nn import CrossEntropyLoss
+from torch.optim import Optimizer
+
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
@@ -14,8 +17,6 @@ from secmlt.optimization.initializer import Initializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.trackers.trackers import Tracker
 from secmlt.utils.tensor_utils import atleast_kd
-from torch.nn import CrossEntropyLoss
-from torch.optim import Optimizer
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"
@@ -109,7 +110,11 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         set[str]
             Set of perturbation models available for this attack.
         """
-        return {LpPerturbationModels.L2, LpPerturbationModels.LINF}
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
@@ -129,7 +134,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
         **optim_kwargs,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target

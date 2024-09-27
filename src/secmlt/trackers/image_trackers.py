@@ -1,6 +1,7 @@
 """Image-specific trackers."""
 
 import torch
+
 from secmlt.trackers.trackers import IMAGE, Tracker
 
 
