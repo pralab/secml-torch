@@ -99,14 +99,14 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         NotImplementedError
             Raises NotImplementedError if the norm is not in 2, inf.
         """
+        original_shape = grad.data.shape
         if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L2):
-            original_shape = grad.data.shape
             return normalize(grad.data.flatten(start_dim=1), p=self.p, dim=1).view(
                 original_shape
             )
         if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L1):
             return lin_proj_l1(grad.data.flatten(start_dim=1)).view(original_shape)
-        if self.p == float("inf"):
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.LINF):
             return torch.sign(grad)
         msg = "Only L2 and LInf norms implemented now"
         raise NotImplementedError(msg)
