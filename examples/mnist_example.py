@@ -1,7 +1,7 @@
 import torch
 from loaders.get_loaders import get_mnist_loader
-from models.mnist_net import get_mnist_model
 
+from models.mnist_net import get_mnist_model
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
@@ -72,9 +72,25 @@ foolbox_attack = PGD(
 )
 f_adv_ds = foolbox_attack(model, test_loader)
 
-# Test accuracy on adversarial examples
+advlib_attack = PGD(
+    perturbation_model=perturbation_model,
+    epsilon=epsilon,
+    num_steps=num_steps,
+    step_size=step_size,
+    random_start=False,
+    loss_function="dlr",
+    y_target=y_target,
+    backend=Backends.ADVLIB,
+)
+al_adv_ds = advlib_attack(model, test_loader)
+
+# Test accuracy on foolbox
 f_robust_accuracy = Accuracy()(model, f_adv_ds)
 print("robust accuracy foolbox: ", f_robust_accuracy)
+
+# Test accuracy on adv lib
+al_robust_accuracy = Accuracy()(model, al_adv_ds)
+print("robust accuracy AdvLib: ", al_robust_accuracy)
 
 native_data, native_labels = next(iter(native_adv_ds))
 f_data, f_labels = next(iter(f_adv_ds))

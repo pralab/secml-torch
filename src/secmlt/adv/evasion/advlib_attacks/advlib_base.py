@@ -4,6 +4,7 @@ from collections.abc import Callable
 from typing import Literal
 
 import torch
+
 from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
 from secmlt.models.base_model import BaseModel
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
