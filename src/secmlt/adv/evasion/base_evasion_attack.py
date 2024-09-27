@@ -35,6 +35,7 @@ class BaseEvasionAttackCreator:
         """
         implementations = {
             Backends.FOOLBOX: cls.get_foolbox_implementation,
+            Backends.ADVLIB: cls.get_advlib_implementation,
             Backends.NATIVE: cls._get_native_implementation,
         }
         cls.check_backend_available(backend)
@@ -89,6 +90,31 @@ class BaseEvasionAttackCreator:
     @staticmethod
     def _get_foolbox_implementation() -> "BaseEvasionAttack":
         msg = "Foolbox implementation not available."
+        raise NotImplementedError(msg)
+
+    @classmethod
+    def get_advlib_implementation(cls) -> "BaseEvasionAttack":
+        """
+        Get the Adversarial Library implementation of the attack.
+
+        Returns
+        -------
+        BaseEvasionAttack
+            Adversarial Library implementation of the attack.
+
+        Raises
+        ------
+        ImportError
+            Raises ImportError if Adversarial Library extra is not installed.
+        """
+        if importlib.util.find_spec("adv_lib", None) is not None:
+            return cls._get_advlib_implementation()
+        msg = "Adversarial Library extra not installed."
+        raise ImportError(msg)
+
+    @staticmethod
+    def _get_advlib_implementation() -> "BaseEvasionAttack":
+        msg = "Adversarial Library implementation not available."
         raise NotImplementedError(msg)
 
     @staticmethod
