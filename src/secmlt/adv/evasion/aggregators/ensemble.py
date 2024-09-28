@@ -4,11 +4,10 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.models.base_model import BaseModel
 from secmlt.utils.tensor_utils import atleast_kd
+from torch.utils.data import DataLoader, TensorDataset
 
 
 class Ensemble(ABC):

@@ -1,5 +1,4 @@
 import torch
-
 from secmlt.metrics.classification import (
     Accuracy,
     AccuracyEnsemble,

@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 
 import torch
-
 from secmlt.optimization.constraints import Constraint
 
 

@@ -4,6 +4,7 @@ indent-width = 4
 
 # assume Python 3.10
 target-version = "py310"
+src = ["../src"]
 
 [lint]
 select = ["ALL", "D107"]

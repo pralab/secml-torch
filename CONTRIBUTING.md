@@ -152,3 +152,11 @@ When contributing code to the project, follow these guidelines to ensure a smoot
 5. The SecMLT maintainers will review your pull request, provide feedback, or merge it into the main repository as appropriate.
 
 We appreciate your contributions to SecMLT! If you have any questions or need assistance during the process, please don't hesitate to reach out to us on GitHub or other communication channels.
+
+## Useful tips
+
+You can use [```act```](https://nektosact.com/usage/index.html) to try out the actions. We recommend using it only for the linter, as the other workflows can be tested with common tools (e.g., pytest).
+
+```bash
+act -W '.github/workflows/lint.yml'
+```
