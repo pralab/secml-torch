@@ -6,7 +6,7 @@ from secmlt.optimization.constraints import (
     L1Constraint,
     L2Constraint,
     LInfConstraint,
-    QuantizationConstratint,
+    QuantizationConstraint,
 )
 
 
@@ -104,7 +104,7 @@ def test_l0_constraint_invalid_radius():
     ],
 )
 def test_quantization_constraint(x, levels, expected):
-    constraint = QuantizationConstratint(levels=levels)
+    constraint = QuantizationConstraint(levels=levels)
     projected = constraint(x)
     assert_tensor_equal(projected, expected)
 
@@ -112,4 +112,4 @@ def test_quantization_constraint(x, levels, expected):
 def test_quantization_constraint_invalid_levels():
     # test that passing a non-integer levels value raises an error
     with pytest.raises(ValueError):  # noqa: PT011
-        QuantizationConstratint(levels=2.5)
+        QuantizationConstraint(levels=2.5)

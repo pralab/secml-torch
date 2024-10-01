@@ -301,7 +301,7 @@ class L0Constraint(LpConstraint):
         return proj.view_as(x)
 
 
-class QuantizationConstratint(Constraint):
+class QuantizationConstraint(Constraint):
     """Constraint for ensuring quantized outputs into specified levels."""
 
     def __init__(self, levels: int) -> None:
