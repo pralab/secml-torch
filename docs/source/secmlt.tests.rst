@@ -44,10 +44,26 @@ secmlt.tests.test\_constants module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.test\_constraints module
+-------------------------------------
+
+.. automodule:: secmlt.tests.test_constraints
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_data module
 ------------------------------
 
 .. automodule:: secmlt.tests.test_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.tests.test\_manipulations module
+---------------------------------------
+
+.. automodule:: secmlt.tests.test_manipulations
    :members:
    :undoc-members:
    :show-inheritance:
