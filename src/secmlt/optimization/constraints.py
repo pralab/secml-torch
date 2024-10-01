@@ -294,8 +294,11 @@ class L0Constraint(LpConstraint):
             Samples projected onto L0 constraint.
         """
         flat_x = x.flatten(start_dim=1)
-        positions, topk = torch.topk(flat_x, k=int(self.radius))
-        return torch.zeros_like(flat_x).scatter_(positions, topk).reshape(x.shape)
+        _, topk_indices = torch.topk(flat_x.abs(), k=int(self.radius), dim=1)
+        # zero out all values and scatter the top k values back
+        proj = torch.zeros_like(flat_x)
+        proj.scatter_(1, topk_indices, flat_x.gather(1, topk_indices))
+        return proj.view_as(x)
 
 
 class QuantizationConstratint(Constraint):
