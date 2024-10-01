@@ -93,12 +93,12 @@ def test_l0_constraint_invalid_radius():
     [
         (
             torch.tensor([[0.2, 0.7], [0.4, 0.8]]),
-            4,
+            5,
             torch.tensor([[0.25, 0.75], [0.5, 0.75]]),
         ),
         (
             torch.tensor([[0.1, 0.9], [0.3, 0.6]]),
-            2,
+            3,
             torch.tensor([[0.0, 1.0], [0.5, 0.5]]),
         ),
     ],

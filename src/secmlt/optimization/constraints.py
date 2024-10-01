@@ -337,4 +337,5 @@ class QuantizationConstraint(Constraint):
             Input with values quantized on the specified
             number of levels.
         """
-        return (x * self.levels).round() / self.levels
+        # the -1 there is to count for the 0
+        return (x * (self.levels - 1)).round() / (self.levels - 1)
