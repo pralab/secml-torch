@@ -268,6 +268,12 @@ class L0Constraint(LpConstraint):
         center : float, optional
             Center of the constraint, by default 0.0.
         """
+        if int(radius) != radius:
+            msg = (
+                f"Pass either an integer or a float with no decimals for "
+                f"the radius of an L0 constraint (current value: {radius})."
+            )
+            raise ValueError(msg)
         super().__init__(radius=radius, center=center, p=LpPerturbationModels.L0)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
@@ -290,3 +296,42 @@ class L0Constraint(LpConstraint):
         flat_x = x.flatten(start_dim=1)
         positions, topk = torch.topk(flat_x, k=int(self.radius))
         return torch.zeros_like(flat_x).scatter_(positions, topk).reshape(x.shape)
+
+
+class QuantizationConstratint(Constraint):
+    """Constraint for ensuring quantized outputs into specified levels."""
+
+    def __init__(self, levels: int) -> None:
+        """
+        Create the QuantizationConstraint.
+
+        Parameters
+        ----------
+        levels : int
+            Number of levels
+        """
+        if int(levels) != levels:
+            msg = (
+                f"Pass either an integer or a float with no decimals for "
+                f"the number of levels (current value: {levels})."
+            )
+            raise ValueError(msg)
+        self.levels = levels
+        super().__init__()
+
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Enforce the quantization constraint.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Non-quantized input tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Input with values quantized on the specified
+            number of levels.
+        """
+        return (x * self.levels).round() / self.levels
