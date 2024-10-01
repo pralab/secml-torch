@@ -93,11 +93,35 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
         self.optimizer_cls = optimizer_cls
 
-        self.manipulation_function = manipulation_function
+        self._manipulation_function = manipulation_function
         self.initializer = initializer
         self.gradient_processing = gradient_processing
 
         super().__init__()
+
+    @property
+    def manipulation_function(self) -> Manipulation:
+        """
+        Get the manipulation function for the attack.
+
+        Returns
+        -------
+        Manipulation
+            The manipulation function used in the attack.
+        """
+        return self._manipulation_function
+
+    @manipulation_function.setter
+    def manipulation_function(self, manipulation_function: Manipulation) -> None:
+        """
+        Set the manipulation function for the attack.
+
+        Parameters
+        ----------
+        manipulation_function : Manipulation
+            The manipulation function to be used in the attack.
+        """
+        self._manipulation_function = manipulation_function
 
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
