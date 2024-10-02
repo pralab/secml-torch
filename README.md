@@ -30,6 +30,12 @@ Install one or more extras with the command:
 pip install secml-torch[foolbox,tensorboard]
 ```
 
+To enable the `adv_lib` extra, you have to manually install the library from the original repository:
+
+```bash
+pip install git+https://github.com/jeromerony/adversarial-library
+```
+
 ## Key Features
 
 - **Built for Deep Learning:** SecMLT is compatible with the popular machine learning framework PyTorch.
