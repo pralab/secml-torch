@@ -24,8 +24,42 @@ class Manipulation(ABC):
         perturbation_constraints : list[Constraint]
             Constraints for the perturbation (delta).
         """
-        self.domain_constraints = domain_constraints
-        self.perturbation_constraints = perturbation_constraints
+        self._domain_constraints = domain_constraints
+        self._perturbation_constraints = perturbation_constraints
+
+    @property
+    def domain_constraints(self) -> list[Constraint]:
+        """
+        Get the domain constraints for the manipulation.
+
+        Returns
+        -------
+        list[Constraint]
+            List of domain constraints for the manipulation.
+        """
+        return self._domain_constraints
+
+    @domain_constraints.setter
+    def domain_constraints(self, domain_constraints: list[Constraint]) -> None:
+        self._domain_constraints = domain_constraints
+
+    @property
+    def perturbation_constraints(self) -> list[Constraint]:
+        """
+        Get the perturbation constraints for the manipulation.
+
+        Returns
+        -------
+        list[Constraint]
+            List of perturbation constraints for the manipulation.
+        """
+        return self._perturbation_constraints
+
+    @perturbation_constraints.setter
+    def perturbation_constraints(
+        self, perturbation_constraints: list[Constraint]
+    ) -> None:
+        self._perturbation_constraints = perturbation_constraints
 
     def _apply_domain_constraints(self, x: torch.Tensor) -> torch.Tensor:
         for constraint in self.domain_constraints:
