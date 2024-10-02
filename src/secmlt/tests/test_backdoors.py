@@ -25,7 +25,7 @@ def test_backdoors(model, dataset, portion, poison_indexes) -> None:
     backdoored_loader = MockBackdoor(
         dataset, trigger_label=0, portion=portion, poisoned_indexes=poison_indexes
     )
-    # train the model
+    assert len(backdoored_loader)
     trained_model = trainer.train(pytorch_model, backdoored_loader)
     assert isinstance(trained_model, torch.nn.Module)
 

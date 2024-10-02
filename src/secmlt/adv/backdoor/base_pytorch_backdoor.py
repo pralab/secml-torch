@@ -38,8 +38,8 @@ class BackdoorDatasetPyTorch(Dataset):
             if poisoned_indexes is not None:
                 msg = "Specify either portion or poisoned_indexes, not both."
                 raise ValueError(msg)
-            if 0.0 > portion > 1.0:
-                msg = f"Posion ratio should be between 0.0 and 1.0. Passed {portion}."
+            if portion < 0.0 or portion > 1.0:
+                msg = f"Poison ratio should be between 0.0 and 1.0. Passed {portion}."
                 raise ValueError(msg)
             # calculate number of samples to poison
             num_poisoned_samples = int(portion * self.data_len)
@@ -55,8 +55,7 @@ class BackdoorDatasetPyTorch(Dataset):
 
     def add_trigger(self, x: torch.Tensor) -> torch.Tensor:
         """Modify the input by adding the backdoor."""
-        x = x.clone()
-        return self._add_trigger(x)
+        return self._add_trigger(x.clone())
 
     @abstractmethod
     def _add_trigger(self, x: torch.Tensor) -> torch.Tensor:
