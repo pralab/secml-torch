@@ -61,7 +61,6 @@ setup(
     extras_require={
         "foolbox": ["foolbox>=3.3.0"],
         "tensorboard": ["tensorboard"],
-        "adv_lib": ["adv_lib @ git+https://github.com/jeromerony/adversarial-library"],
     },
     python_requires=">=3.7",
 )
