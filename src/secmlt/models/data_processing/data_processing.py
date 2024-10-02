@@ -9,10 +9,10 @@ class DataProcessing(ABC):
     """Abstract data processing class."""
 
     @abstractmethod
-    def _process(self, x: torch.Tensor) -> torch.Tensor: ...
+    def _process(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor: ...
 
     @abstractmethod
-    def invert(self, x: torch.Tensor) -> torch.Tensor:
+    def invert(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Apply the inverted transform (if defined).
 
@@ -28,7 +28,7 @@ class DataProcessing(ABC):
         """
         ...
 
-    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+    def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Apply the forward transformation.
 
@@ -42,4 +42,4 @@ class DataProcessing(ABC):
         torch.Tensor
             The samples after transformation.
         """
-        return self._process(x)
+        return self._process(x, *args, **kwargs)

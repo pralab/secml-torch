@@ -36,7 +36,7 @@ class BaseModel(ABC):
         )
 
     @abstractmethod
-    def predict(self, x: torch.Tensor) -> torch.Tensor:
+    def predict(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Return output predictions for given model.
 
@@ -52,9 +52,11 @@ class BaseModel(ABC):
         """
         ...
 
-    def decision_function(self, x: torch.Tensor) -> torch.Tensor:
+    def decision_function(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Return the decision function from the model.
+
+        Requires override to specify custom args and kwargs passing.
 
         Parameters
         ----------
@@ -71,7 +73,7 @@ class BaseModel(ABC):
         return self._postprocessing(x)
 
     @abstractmethod
-    def _decision_function(self, x: torch.Tensor) -> torch.Tensor:
+    def _decision_function(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Specific decision function of the model (data already preprocessed).
 
@@ -88,7 +90,7 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
+    def gradient(self, x: torch.Tensor, y: int, *args, **kwargs) -> torch.Tensor:
         """
         Compute gradients of the score y w.r.t. x.
 
@@ -118,7 +120,7 @@ class BaseModel(ABC):
         """
         ...
 
-    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+    def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Forward function of the model.
 
@@ -132,4 +134,4 @@ class BaseModel(ABC):
         torch.Tensor
             Model ouptut scores.
         """
-        return self.decision_function(x)
+        return self.decision_function(x, *args, **kwargs)
