@@ -1,7 +1,7 @@
 import torch
 import torchvision.datasets
 from models.mnist_net import MNISTNet
-from secmlt.adv.poisoning.base_pytorch_backdoor import BackdoorDatasetPyTorch
+from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
 from secmlt.metrics.classification import Accuracy, AttackSuccessRate
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer

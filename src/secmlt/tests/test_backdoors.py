@@ -1,6 +1,6 @@
 import pytest
 import torch
-from secmlt.adv.poisoning.base_pytorch_backdoor import BackdoorDatasetPyTorch
+from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from secmlt.tests.mocks import MockLoss
 from torch.optim import SGD
