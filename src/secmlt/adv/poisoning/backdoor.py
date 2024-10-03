@@ -1,7 +1,5 @@
 """Simple backdoor attack in PyTorch."""
 
-import random
-
 import torch
 from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
 from torch.utils.data import Dataset
@@ -34,26 +32,10 @@ class BackdoorDatasetPyTorch(PoisoningDatasetPyTorch):
         poisoned_indexes: list[int] | torch.Tensor
             Specific indexes of samples to perturb. Alternative to portion.
         """
-        self.dataset = dataset
-        self.trigger_label = trigger_label
-        self.data_len = len(dataset)
-        if portion is not None:
-            if poisoned_indexes is not None:
-                msg = "Specify either portion or poisoned_indexes, not both."
-                raise ValueError(msg)
-            if portion < 0.0 or portion > 1.0:
-                msg = f"Poison ratio should be between 0.0 and 1.0. Passed {portion}."
-                raise ValueError(msg)
-            # calculate number of samples to poison
-            num_poisoned_samples = int(portion * self.data_len)
-
-            # randomly select indices to poison
-            self.poisoned_indexes = set(
-                random.sample(range(self.data_len), num_poisoned_samples)
-            )
-        elif poisoned_indexes is not None:
-            self.poisoned_indexes = poisoned_indexes
-        else:
-            self.poisoned_indexes = range(self.data_len)
-        self.data_manipulation_func = data_manipulation_func
-        self.label_manipulation_func = lambda _: trigger_label
+        super().__init__(
+            dataset=dataset,
+            data_manipulation_func=data_manipulation_func,
+            label_manipulation_func=lambda _: trigger_label,
+            portion=portion,
+            poisoned_indexes=poisoned_indexes,
+        )
