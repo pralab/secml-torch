@@ -6,6 +6,7 @@ from secmlt.optimization.constraints import (
     L1Constraint,
     L2Constraint,
     LInfConstraint,
+    MaskConstraint,
     QuantizationConstraint,
 )
 
@@ -113,3 +114,36 @@ def test_quantization_constraint_invalid_levels():
     # test that passing a non-integer levels value raises an error
     with pytest.raises(ValueError):  # noqa: PT011
         QuantizationConstraint(levels=2.5)
+
+
+@pytest.mark.parametrize(
+    "x, mask, expected",
+    [
+        (
+            torch.tensor([[0.2, 0.7], [0.4, 0.8]]),
+            torch.tensor([[True, True], [False, False]]),
+            torch.tensor([[0.2, 0.7], [0.0, 0.0]]),
+        ),
+        (
+            torch.tensor([0.1, -0.9, 0.1, -0.2]),
+            torch.tensor(data=[False, True, False, False]),
+            torch.tensor([0.0, -0.9, 0.0, 0.0]),
+        ),
+        (
+            torch.tensor([[0.1, -0.9, 0.1, -0.2]]),
+            torch.tensor(data=[False, True, False, False]),
+            torch.tensor([0.0, -0.9, 0.0, 0.0]),
+        ),
+    ],
+)
+def test_mask_constraint(x, mask, expected):
+    constraint = MaskConstraint(mask=mask)
+    projected = constraint(x)
+    assert_tensor_equal(projected, expected)
+
+
+def test_quantization_constraint_invalid_mask():
+    # test that passing a mask with shape different than x raises an error
+    constraint = MaskConstraint(mask=torch.Tensor([1, 0]))
+    with pytest.raises(ValueError):  # noqa: PT011
+        constraint(torch.Tensor([[0]]))
