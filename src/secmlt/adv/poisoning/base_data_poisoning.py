@@ -12,8 +12,8 @@ class PoisoningDatasetPyTorch(Dataset):
     def __init__(
         self,
         dataset: Dataset,
-        data_manipulation_func: callable,
-        label_manipulation_func: callable,
+        data_manipulation_func: callable = lambda x: x,
+        label_manipulation_func: callable = lambda x: x,
         portion: float | None = None,
         poisoned_indexes: list[int] | torch.Tensor = None,
     ) -> None:
