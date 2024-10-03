@@ -7,8 +7,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   secmlt.adv.backdoor
    secmlt.adv.evasion
+   secmlt.adv.poisoning
 
 Submodules
 ----------
