@@ -1,14 +1,13 @@
 import pytest
 import torch
-from secmlt.adv.backdoor.base_pytorch_backdoor import BackdoorDatasetPyTorch
+from secmlt.adv.poisoning.base_pytorch_backdoor import BackdoorDatasetPyTorch
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from secmlt.tests.mocks import MockLoss
 from torch.optim import SGD
 
 
-class MockBackdoor(BackdoorDatasetPyTorch):
-    def add_trigger(self, x: torch.Tensor) -> torch.Tensor:
-        return x
+def add_trigger(x: torch.Tensor) -> torch.Tensor:
+    return x
 
 
 @pytest.mark.parametrize(
@@ -22,8 +21,12 @@ def test_backdoors(model, dataset, portion, poison_indexes) -> None:
     # create the trainer instance
     trainer = BasePyTorchTrainer(optimizer=optimizer, loss=criterion)
 
-    backdoored_loader = MockBackdoor(
-        dataset, trigger_label=0, portion=portion, poisoned_indexes=poison_indexes
+    backdoored_loader = BackdoorDatasetPyTorch(
+        dataset,
+        trigger_label=0,
+        data_manipulation_func=add_trigger,
+        portion=portion,
+        poisoned_indexes=poison_indexes,
     )
     assert len(backdoored_loader)
     trained_model = trainer.train(pytorch_model, backdoored_loader)
@@ -35,6 +38,10 @@ def test_backdoors(model, dataset, portion, poison_indexes) -> None:
 )
 def test_backdoors_errors(dataset, portion, poison_indexes) -> None:
     with pytest.raises(ValueError):  # noqa: PT011
-        MockBackdoor(
-            dataset, trigger_label=0, portion=portion, poisoned_indexes=poison_indexes
+        BackdoorDatasetPyTorch(
+            dataset,
+            trigger_label=0,
+            data_manipulation_func=add_trigger,
+            portion=portion,
+            poisoned_indexes=poison_indexes,
         )

@@ -1,38 +1,39 @@
-"""Simple backdoor attack in PyTorch."""
+"""Base class for data poisoning."""
 
 import random
-from abc import abstractmethod
 
 import torch
 from torch.utils.data import Dataset
 
 
-class BackdoorDatasetPyTorch(Dataset):
-    """Dataset class for adding triggers for backdoor attacks."""
+class PoisoningDatasetPyTorch(Dataset):
+    """Dataset class for adding poisoning samples."""
 
     def __init__(
         self,
         dataset: Dataset,
-        trigger_label: int = 0,
+        data_manipulation_func: callable,
+        label_manipulation_func: callable,
         portion: float | None = None,
         poisoned_indexes: list[int] | torch.Tensor = None,
     ) -> None:
         """
-        Create the backdoored dataset.
+        Create the poisoned dataset.
 
         Parameters
         ----------
         dataset : torch.utils.data.Dataset
             PyTorch dataset.
-        trigger_label : int, optional
-            Label to associate with the backdoored data (default 0).
+        data_manipulation_func : callable
+            Function that manipulates the data.
+        label_manipulation_func: callable
+            Function that returns the label to associate with the poisoned data.
         portion : float, optional
-            Percentage of samples on which the backdoor will be injected (default 0.1).
+            Percentage of samples on which the poisoning will be injected (default 0.1).
         poisoned_indexes: list[int] | torch.Tensor
             Specific indexes of samples to perturb. Alternative to portion.
         """
         self.dataset = dataset
-        self.trigger_label = trigger_label
         self.data_len = len(dataset)
         if portion is not None:
             if poisoned_indexes is not None:
@@ -53,13 +54,8 @@ class BackdoorDatasetPyTorch(Dataset):
         else:
             self.poisoned_indexes = range(self.data_len)
 
-    def add_trigger(self, x: torch.Tensor) -> torch.Tensor:
-        """Modify the input by adding the backdoor."""
-        return self._add_trigger(x.clone())
-
-    @abstractmethod
-    def _add_trigger(self, x: torch.Tensor) -> torch.Tensor:
-        """Implement custom manipulation to add the backdoor."""
+        self.data_manipulation_func = data_manipulation_func
+        self.label_manipulation_func = label_manipulation_func
 
     def __len__(self) -> int:
         """Get number of samples."""
@@ -82,10 +78,11 @@ class BackdoorDatasetPyTorch(Dataset):
         x, label = self.dataset[idx]
         # poison portion of the data
         if idx in self.poisoned_indexes:
-            x = self.add_trigger(x=x.unsqueeze(0)).squeeze(0)
+            x = self.data_manipulation_func(x=x.unsqueeze(0)).squeeze(0)
+            target_label = self.label_manipulation_func(label)
             label = (
-                label
+                target_label
                 if isinstance(label, int)
-                else torch.Tensor(label).type(label.dtype)
+                else torch.Tensor(target_label).type(label.dtype)
             )
         return x, label
