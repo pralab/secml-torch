@@ -150,6 +150,31 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], **kwargs)
 
+    def forward_loss(
+        self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Compute the forward for the loss function.
+
+        Parameters
+        ----------
+        model : BaseModel
+            Model used by the attack run.
+        x : torch.Tensor
+            Input sample.
+        target : torch.Tensor
+            Target for computing the loss.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Output scores and loss.
+        """
+        scores = model.decision_function(x)
+        target = target.to(scores.device)
+        losses = self.loss_function(scores, target)
+        return scores, losses
+
     def _run(
         self,
         model: BaseModel,
@@ -180,9 +205,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         best_delta = torch.zeros_like(samples)
 
         for i in range(self.num_steps):
-            scores = model.decision_function(x_adv)
-            target = target.to(scores.device)
-            losses = self.loss_function(scores, target) * multiplier
+            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
+            losses *= multiplier
             loss = losses.sum()
             optimizer.zero_grad()
             loss.backward()
