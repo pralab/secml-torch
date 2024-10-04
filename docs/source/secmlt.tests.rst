@@ -36,6 +36,14 @@ secmlt.tests.test\_attacks module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.test\_backdoors module
+-----------------------------------
+
+.. automodule:: secmlt.tests.test_backdoors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_constants module
 -----------------------------------
 

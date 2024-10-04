@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    secmlt.adv.evasion
+   secmlt.adv.poisoning
 
 Submodules
 ----------

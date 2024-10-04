@@ -8,19 +8,30 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 @pytest.fixture
-def data_loader() -> DataLoader[tuple[torch.Tensor]]:
+def dataset() -> TensorDataset:
+    """Create fake dataset."""
+    data = torch.randn(100, 3, 32, 32).clamp(0, 1)
+    labels = torch.randint(0, 10, (100,))
+    return TensorDataset(data, labels)
+
+
+@pytest.fixture
+def data_loader(dataset: TensorDataset) -> DataLoader[tuple[torch.Tensor]]:
     """
     Create fake data loader.
+
+    Parameters
+    ----------
+    dataset : TensorDataset
+        Dataset to wrap in the loader
 
     Returns
     -------
     DataLoader[tuple[torch.Tensor]]
         A loader with random samples and labels.
+
     """
     # Create a dummy dataset loader for testing
-    data = torch.randn(100, 3, 32, 32).clamp(0, 1)
-    labels = torch.randint(0, 10, (100,))
-    dataset = TensorDataset(data, labels)
     return DataLoader(dataset, batch_size=10)
 
 
