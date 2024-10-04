@@ -1,6 +1,6 @@
 """Base classes for implementing attacks and wrapping backends."""
 
-import importlib
+import importlib.util
 from abc import abstractmethod
 from typing import Literal
 
