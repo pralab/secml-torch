@@ -339,3 +339,40 @@ class QuantizationConstraint(Constraint):
         """
         # the -1 there is to count for the 0
         return (x * (self.levels - 1)).round() / (self.levels - 1)
+
+
+class MaskConstraint(Constraint):
+    """Constraint for keeping components only on the given mask."""
+
+    def __init__(self, mask: torch.Tensor) -> None:
+        """
+        Create the MaskConstraint.
+
+        Parameters
+        ----------
+        mask : torch.Tensor
+            Mask (1=apply, 0=mask) to enforce where the components are kept.
+        """
+        self.mask = mask.type(torch.bool)
+        super().__init__()
+
+    def __call__(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Enforce the mask constraint.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Masked input tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Input active only on the non-masked components.
+        """
+        if self.mask.shape != x.squeeze().shape:
+            msg = (
+                f"Shape of input ({x.shape}) and mask {self.mask.shape} does not match."
+            )
+            raise ValueError(msg)
+        return torch.where(self.mask, x, torch.zeros_like(x))
