@@ -1,11 +1,10 @@
 """Wrappers for PyTorch models."""
 
 import torch
-from torch.utils.data import DataLoader
-
 from secmlt.models.base_model import BaseModel
 from secmlt.models.data_processing.data_processing import DataProcessing
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from torch.utils.data import DataLoader
 
 
 class BasePytorchClassifier(BaseModel):

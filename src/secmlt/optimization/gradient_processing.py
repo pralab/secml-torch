@@ -3,9 +3,8 @@
 from abc import ABC, abstractmethod
 
 import torch.linalg
-from torch.nn.functional import normalize
-
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from torch.nn.functional import normalize
 
 
 def lin_proj_l1(x: torch.Tensor) -> torch.Tensor:

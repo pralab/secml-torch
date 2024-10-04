@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 
 import torch
-
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 

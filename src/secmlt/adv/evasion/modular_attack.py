@@ -4,9 +4,6 @@ from functools import partial
 from typing import Literal, Union
 
 import torch.nn
-from torch.nn import CrossEntropyLoss
-from torch.optim import Optimizer
-
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
@@ -17,6 +14,8 @@ from secmlt.optimization.initializer import Initializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.trackers.trackers import Tracker
 from secmlt.utils.tensor_utils import atleast_kd
+from torch.nn import CrossEntropyLoss
+from torch.optim import Optimizer
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"

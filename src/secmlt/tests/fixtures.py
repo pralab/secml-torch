@@ -2,10 +2,9 @@
 
 import pytest
 import torch
-from torch.utils.data import DataLoader, TensorDataset
-
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secmlt.tests.mocks import MockModel
+from torch.utils.data import DataLoader, TensorDataset
 
 
 @pytest.fixture

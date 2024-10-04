@@ -2,9 +2,8 @@
 
 from abc import ABCMeta, abstractmethod
 
-from torch.utils.data import DataLoader
-
 from secmlt.models.base_model import BaseModel
+from torch.utils.data import DataLoader
 
 
 class BaseTrainer(metaclass=ABCMeta):
