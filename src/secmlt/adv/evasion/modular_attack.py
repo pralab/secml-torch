@@ -230,13 +230,13 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
             # keep perturbation with highest loss
             best_delta.data = torch.where(
-                atleast_kd(losses < best_losses, len(samples.shape)),
+                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
                 delta.data,
                 best_delta.data,
             )
             best_losses.data = torch.where(
-                losses < best_losses,
-                losses.data,
+                losses.detach().cpu() < best_losses,
+                losses.detach().cpu(),
                 best_losses.data,
             )
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
