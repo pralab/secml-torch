@@ -58,6 +58,9 @@ setup(
     author="Maura Pintor, Luca Demetrio",
     author_email="maura.pintor@unica.it, luca.demetrio@unige.it",
     install_requires=["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
-    extras_require={"foolbox": ["foolbox>=3.3.0"], "tensorboard": ["tensorboard"]},
+    extras_require={
+        "foolbox": ["foolbox>=3.3.0"],
+        "tensorboard": ["tensorboard"],
+    },
     python_requires=">=3.7",
 )

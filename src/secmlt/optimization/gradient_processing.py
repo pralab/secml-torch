@@ -8,6 +8,25 @@ from torch.nn.functional import normalize
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
+def lin_proj_l1(x: torch.Tensor) -> torch.Tensor:
+    """Return the linear projection of x onto an L1 unit ball.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Input tensor to project.
+
+    Returns
+    -------
+    torch.Tensor
+    Linear projection of x onto unit L1 ball.
+    """
+    w = abs(x)
+    num_max = (w == w.max()).sum()
+    w = torch.where(w == w.max(), 1 / num_max, 0)
+    return w * x.sign()
+
+
 class GradientProcessing(ABC):
     """Gradient processing base class."""
 
@@ -80,9 +99,14 @@ class LinearProjectionGradientProcessing(GradientProcessing):
         NotImplementedError
             Raises NotImplementedError if the norm is not in 2, inf.
         """
-        if self.p == 2:  # noqa: PLR2004
-            return normalize(grad.data, p=self.p, dim=0)
-        if self.p == float("inf"):
+        original_shape = grad.data.shape
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L2):
+            return normalize(grad.data.flatten(start_dim=1), p=self.p, dim=1).view(
+                original_shape
+            )
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.L1):
+            return lin_proj_l1(grad.data.flatten(start_dim=1)).view(original_shape)
+        if self.p == LpPerturbationModels.get_p(LpPerturbationModels.LINF):
             return torch.sign(grad)
         msg = "Only L2 and LInf norms implemented now"
         raise NotImplementedError(msg)

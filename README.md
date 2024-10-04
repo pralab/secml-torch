@@ -2,7 +2,6 @@
 
 [![pypi](https://img.shields.io/badge/pypi-latest-blue)](https://pypi.org/pypi/secml-torch/)
 [![py\_versions](https://img.shields.io/badge/python-3.8%2B-blue)](https://pypi.org/pypi/secml-torch/)
-[![build\_status](https://github.com/pralab/secml-torch/actions/workflows/release.yml/badge.svg)](https://github.com/pralab/secml-torch/actions?query=workflow%3ACI)
 [![coverage](https://codecov.io/gh/pralab/secml-torch/branch/main/graph/badge.svg)](https://app.codecov.io/gh/pralab/secml-torch)
 [![docs](https://readthedocs.org/projects/secml-torch/badge/?version=latest)](https://secml-torch.readthedocs.io/en/latest/#)
 
@@ -28,6 +27,12 @@ The library can be installed together with other plugins that enable further fun
 Install one or more extras with the command:
 ```bash
 pip install secml-torch[foolbox,tensorboard]
+```
+
+To enable the `adv_lib` extra, you have to manually install the library from the original repository:
+
+```bash
+pip install git+https://github.com/jeromerony/adversarial-library
 ```
 
 ## Key Features
@@ -91,6 +96,13 @@ If you would like to contribute to SecMLT, please follow our [contribution guide
             <img src=https://avatars.githubusercontent.com/u/6831380?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=zangobot/>
             <br />
             <sub style="font-size:14px;padding:10px"><b>zangobot</b></sub>
+        </a>
+    </td>
+    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
+        <a href=https://github.com/lucascionis>
+            <img src=https://avatars.githubusercontent.com/u/46931538?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=lucascionis/>
+            <br />
+            <sub style="font-size:14px;padding:10px"><b>lucascionis</b></sub>
         </a>
     </td>
 </tr>

@@ -62,8 +62,7 @@ class RandomPerturbBase(ABC):
         ...
 
     @abstractmethod
-    def _constraint(self) -> LpConstraint:
-        ...
+    def _constraint(self) -> LpConstraint: ...
 
 
 class RandomPerturbLinf(RandomPerturbBase):

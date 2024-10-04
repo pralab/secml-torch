@@ -94,11 +94,35 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
         self.optimizer_cls = optimizer_cls
 
-        self.manipulation_function = manipulation_function
+        self._manipulation_function = manipulation_function
         self.initializer = initializer
         self.gradient_processing = gradient_processing
 
         super().__init__()
+
+    @property
+    def manipulation_function(self) -> Manipulation:
+        """
+        Get the manipulation function for the attack.
+
+        Returns
+        -------
+        Manipulation
+            The manipulation function used in the attack.
+        """
+        return self._manipulation_function
+
+    @manipulation_function.setter
+    def manipulation_function(self, manipulation_function: Manipulation) -> None:
+        """
+        Set the manipulation function for the attack.
+
+        Parameters
+        ----------
+        manipulation_function : Manipulation
+            The manipulation function to be used in the attack.
+        """
+        self._manipulation_function = manipulation_function
 
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
@@ -110,7 +134,11 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         set[str]
             Set of perturbation models available for this attack.
         """
-        return {LpPerturbationModels.L2, LpPerturbationModels.LINF}
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
@@ -123,6 +151,31 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], **kwargs)
 
+    def forward_loss(
+        self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Compute the forward for the loss function.
+
+        Parameters
+        ----------
+        model : BaseModel
+            Model used by the attack run.
+        x : torch.Tensor
+            Input sample.
+        target : torch.Tensor
+            Target for computing the loss.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Output scores and loss.
+        """
+        scores = model.decision_function(x)
+        target = target.to(scores.device)
+        losses = self.loss_function(scores, target)
+        return scores, losses
+
     def _run(
         self,
         model: BaseModel,
@@ -130,7 +183,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
         **optim_kwargs,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
@@ -153,9 +206,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         best_delta = torch.zeros_like(samples)
 
         for i in range(self.num_steps):
-            scores = model.decision_function(x_adv)
-            target = target.to(scores.device)
-            losses = self.loss_function(scores, target) * multiplier
+            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
+            losses *= multiplier
             loss = losses.sum()
             optimizer.zero_grad()
             loss.backward()

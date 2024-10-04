@@ -1,6 +1,6 @@
 import pytest
-from torch.utils.data import DataLoader
 
+from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
@@ -24,6 +24,10 @@ from secmlt.adv.evasion.pgd import PGD, PGDNative
         (
             "foolbox",
             PGDFoolbox.get_perturbation_models(),
+        ),
+        (
+            "advlib",
+            PGDAdvLib.get_perturbation_models(),
         ),
         (
             "native",

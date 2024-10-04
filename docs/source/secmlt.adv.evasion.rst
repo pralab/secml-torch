@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   secmlt.adv.evasion.advlib_attacks
    secmlt.adv.evasion.aggregators
    secmlt.adv.evasion.foolbox_attacks
 
