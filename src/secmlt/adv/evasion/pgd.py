@@ -1,6 +1,6 @@
 """Implementations of the Projected Gradient Descent evasion attack."""
 
-import importlib
+import importlib.util
 from functools import partial
 
 from secmlt.adv.backends import Backends
