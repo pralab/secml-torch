@@ -3,8 +3,9 @@
 from abc import ABC, abstractmethod
 
 import torch.linalg
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from torch.nn.functional import normalize
+
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class GradientProcessing(ABC):

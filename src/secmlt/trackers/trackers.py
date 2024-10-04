@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import torch
+
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 SCALAR = "scalar"

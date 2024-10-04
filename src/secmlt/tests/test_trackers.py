@@ -1,5 +1,6 @@
 import pytest
 import torch
+
 from secmlt.trackers.image_trackers import (
     GradientsTracker,
     SampleTracker,

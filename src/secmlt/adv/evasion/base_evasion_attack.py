@@ -5,9 +5,10 @@ from abc import abstractmethod
 from typing import Literal
 
 import torch
+from torch.utils.data import DataLoader, TensorDataset
+
 from secmlt.adv.backends import Backends
 from secmlt.models.base_model import BaseModel
-from torch.utils.data import DataLoader, TensorDataset
 
 # lazy evaluation to avoid circular imports
 TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"

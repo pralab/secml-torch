@@ -1,6 +1,7 @@
 """Identity data processing, returns the samples as they are."""
 
 import torch
+
 from secmlt.models.data_processing.data_processing import DataProcessing
 
 

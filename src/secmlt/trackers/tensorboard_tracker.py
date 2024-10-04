@@ -1,6 +1,8 @@
 """Tensorboard tracking utilities."""
 
 import torch
+from torch.utils.tensorboard import SummaryWriter
+
 from secmlt.trackers.trackers import (
     IMAGE,
     MULTI_SCALAR,
@@ -9,7 +11,6 @@ from secmlt.trackers.trackers import (
     LossTracker,
     Tracker,
 )
-from torch.utils.tensorboard import SummaryWriter
 
 
 class TensorboardTracker(Tracker):
