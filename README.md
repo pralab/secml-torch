@@ -23,16 +23,12 @@ The library can be installed together with other plugins that enable further fun
 
 * [Foolbox](https://github.com/bethgelab/foolbox), a Python toolbox to create adversarial examples.
 * [Tensorboard](https://www.tensorflow.org/tensorboard), a visualization toolkit for machine learning experimentation.
+* [Adversarial Library](https://github.com/jeromerony/adversarial-library), a powerful library of various adversarial attacks resources in PyTorch.
+
 
 Install one or more extras with the command:
 ```bash
-pip install secml-torch[foolbox,tensorboard]
-```
-
-To enable the `adv_lib` extra, you have to manually install the library from the original repository:
-
-```bash
-pip install git+https://github.com/jeromerony/adversarial-library
+pip install secml-torch[foolbox,tensorboard, adv_lib]
 ```
 
 ## Key Features
