@@ -6,6 +6,9 @@ from typing import Union
 import torch
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.models.data_processing.data_processing import DataProcessing
+from secmlt.models.data_processing.identity_data_processing import (
+    IdentityDataProcessing,
+)
 
 
 class Constraint(ABC):
@@ -47,6 +50,8 @@ class InputSpaceConstraint(Constraint, ABC):
         preprocessing : DataProcessing
             Preprocessing to invert to apply the constraint on the input space.
         """
+        if preprocessing is None:
+            preprocessing = IdentityDataProcessing()
         self.preprocessing = preprocessing
 
     def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
@@ -349,7 +354,7 @@ class QuantizationConstraint(InputSpaceConstraint):
     def __init__(
         self,
         preprocessing: DataProcessing = None,
-        levels: Union[list, torch.Tensor, int] = 255,
+        levels: Union[list[float], torch.Tensor, int] = 255,
     ) -> None:
         """
         Create the QuantizationConstraint.
@@ -358,15 +363,18 @@ class QuantizationConstraint(InputSpaceConstraint):
         ----------
         preprocessing: DataProcessing
             Preprocessing to apply the constraint in the input space.
-        levels : int | torch.Tensor, int
+        levels : int, list[float] | torch.Tensor
             Number of levels or specified levels.
         """
-        if isinstance(levels, int):
+        if isinstance(levels, int | float):
             if levels < 2:  # noqa: PLR2004
                 msg = "Number of levels must be at least 2."
                 raise ValueError(msg)
+            if int(levels) != levels:
+                msg = "Pass an integer number of levels."
+                raise ValueError(msg)
             # create uniform levels if an integer is provided
-            self.levels = torch.linspace(0, 1, levels)
+            self.levels = torch.linspace(0, 1, int(levels))
         elif isinstance(levels, list):
             self.levels = torch.tensor(levels, dtype=torch.float32)
         elif isinstance(levels, torch.Tensor):
