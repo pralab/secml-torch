@@ -99,8 +99,13 @@ def test_l0_constraint_invalid_radius():
         ),
         (
             torch.tensor([[0.1, 0.9], [0.3, 0.6]]),
-            3,
-            torch.tensor([[0.0, 1.0], [0.5, 0.5]]),
+            torch.Tensor([0.1, 0.2, 0.5]),
+            torch.tensor([[0.1, 0.5], [0.2, 0.5]]),
+        ),
+        (
+            torch.tensor([[0.1, 0.9], [0.3, 0.6]]),
+            [0.1, 0.2, 0.5],
+            torch.tensor([[0.1, 0.5], [0.2, 0.5]]),
         ),
     ],
 )
@@ -114,6 +119,12 @@ def test_quantization_constraint_invalid_levels():
     # test that passing a non-integer levels value raises an error
     with pytest.raises(ValueError):  # noqa: PT011
         QuantizationConstraint(levels=2.5)
+
+
+def test_quantization_constraint_not_enough_levels():
+    # test that passing a number of levels < 2 values raises an error
+    with pytest.raises(ValueError):  # noqa: PT011
+        QuantizationConstraint(levels=1)
 
 
 @pytest.mark.parametrize(
