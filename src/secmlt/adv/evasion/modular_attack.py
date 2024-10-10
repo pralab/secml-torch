@@ -148,7 +148,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         raise NotImplementedError(msg)
 
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
-        return self.optimizer_cls([delta], **kwargs)
+        return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
 
     def forward_loss(
         self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
@@ -181,8 +181,10 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
-        **optim_kwargs,
+        optim_kwargs: dict | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        if optim_kwargs is None:
+            optim_kwargs = {}
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
@@ -198,7 +200,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             delta = self.initializer(samples.data)
         delta.requires_grad = True
 
-        optimizer = self._create_optimizer(delta, **optim_kwargs)
+        optimizer = self._create_optimizer(delta, optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
         x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
