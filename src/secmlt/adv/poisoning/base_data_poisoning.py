@@ -1,6 +1,7 @@
 """Base class for data poisoning."""
 
 import random
+from typing import Union
 
 import torch
 from torch.utils.data import Dataset
@@ -15,7 +16,7 @@ class PoisoningDatasetPyTorch(Dataset):
         data_manipulation_func: callable = lambda x: x,
         label_manipulation_func: callable = lambda x: x,
         portion: float | None = None,
-        poisoned_indexes: list[int] | torch.Tensor = None,
+        poisoned_indexes: Union[list[int], torch.Tensor] = None,
     ) -> None:
         """
         Create the poisoned dataset.

@@ -1,5 +1,6 @@
 """Simple backdoor attack in PyTorch."""
 
+from typing import Union
 import torch
 from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
 from torch.utils.data import Dataset
@@ -14,7 +15,7 @@ class BackdoorDatasetPyTorch(PoisoningDatasetPyTorch):
         data_manipulation_func: callable,
         trigger_label: int = 0,
         portion: float | None = None,
-        poisoned_indexes: list[int] | torch.Tensor = None,
+        poisoned_indexes: Union[list[int], torch.Tensor] = None,
     ) -> None:
         """
         Create the backdoored dataset.
