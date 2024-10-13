@@ -1,6 +1,7 @@
 """Simple backdoor attack in PyTorch."""
 
 from typing import Union
+
 import torch
 from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
 from torch.utils.data import Dataset
