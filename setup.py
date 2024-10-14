@@ -61,6 +61,7 @@ setup(
     extras_require={
         "foolbox": ["foolbox>=3.3.0"],
         "tensorboard": ["tensorboard"],
+        "adv_lib": ["adv_lib"],
     },
     python_requires=">=3.7",
 )

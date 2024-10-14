@@ -8,7 +8,7 @@ class MockConstraint(Constraint):
     def __init__(self, mock_return):
         self.mock_return = mock_return
 
-    def __call__(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+    def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         return self.mock_return
 
 
