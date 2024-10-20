@@ -103,7 +103,7 @@ class EarlyStoppingPyTorchTrainer(BasePyTorchTrainer):
 
     def validate(self,
                  model: torch.nn.Module,
-                 dataloader: DataLoader) -> torch.nn.Module:
+                 dataloader: DataLoader) -> float:
         """
         Validate model with given loader.
 
