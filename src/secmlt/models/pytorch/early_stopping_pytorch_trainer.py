@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 
 class EarlyStoppingPyTorchTrainer(BasePyTorchTrainer):
-    """Trainer for PyTorch models."""
+    """Trainer for PyTorch models with early stopping."""
 
     def __init__(self, optimizer: torch.optim.Optimizer, epochs: int = 5,
                  loss: torch.nn.Module = None, scheduler: _LRScheduler = None) -> None:
