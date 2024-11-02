@@ -18,7 +18,7 @@ class Ensemble(ABC):
         model: BaseModel,
         data_loader: DataLoader,
         adv_loaders: list[DataLoader],
-    ) -> DataLoader[torch.Tuple[torch.Tensor]]:
+    ) -> DataLoader[tuple[torch.Tensor]]:
         """
         Get the worst-case of the metric with the given implemented criterion.
 
