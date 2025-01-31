@@ -107,6 +107,6 @@ If you would like to contribute to SecMLT, please follow our [contribution guide
 ## Acknowledgements
 SecML has been partially developed with the support of European Union’s [ELSA – European Lighthouse on Secure and Safe AI](https://elsa-ai.eu), Horizon Europe, grant agreement No. 101070617, and [Sec4AI4Sec - Cybersecurity for AI-Augmented Systems](https://www.sec4ai4sec-project.eu), Horizon Europe, grant agreement No. 101120393.
 
-<img src="https://github.com/pralab/secml-torch/blob/main/assets/logos/sec4AI4sec.png" alt="sec4ai4sec" style="width:70px;"/> &nbsp;&nbsp; 
-<img src="https://github.com/pralab/secml-torch/blob/main/assets/logos//elsa.jpg" alt="elsa" style="width:70px;"/> &nbsp;&nbsp; 
-<img src="https://github.com/pralab/secml-torch/blob/main/assets/logos/FundedbytheEU.png" alt="europe" style="width:240px;"/>
+<img src="https://www.sec4ai4sec-project.eu/wp-content/uploads/2024/02/logo2.png" alt="sec4ai4sec" style="width:70px;"/> &nbsp;&nbsp; 
+<img src="https://elsa-ai.eu/wp-content/uploads/2024/01/elsa_logo_RGB_twocolor.png" alt="elsa" style="width:70px;"/> &nbsp;&nbsp; 
+<img src="https://ec.europa.eu/regional_policy/images/information-sources/logo-download-center/eu_funded_en.jpg" alt="europe" style="width:240px;"/>
