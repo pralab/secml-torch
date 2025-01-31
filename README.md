@@ -109,4 +109,4 @@ SecML has been partially developed with the support of European Union’s [ELSA 
 
 <img src="https://github.com/pralab/secml-torch/blob/main/assets/logos/sec4AI4sec.png" alt="sec4ai4sec" style="width:70px;"/> &nbsp;&nbsp; 
 <img src="https://github.com/pralab/secml-torch/blob/main/assets/logos//elsa.jpg" alt="elsa" style="width:70px;"/> &nbsp;&nbsp; 
-<img src="https://github.com/pralab/secml-torch/blob/main/assets/logos/FundedbytheEU.png" alt="LInf" style="width:240px;"/>
+<img src="https://github.com/pralab/secml-torch/blob/main/assets/logos/FundedbytheEU.png" alt="europe" style="width:240px;"/>
