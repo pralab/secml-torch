@@ -388,7 +388,7 @@ class QuantizationConstraint(InputSpaceConstraint):
             msg = "Levels must be an integer, list, or torch.Tensor."
             raise TypeError(msg)
         # sort levels to ensure they are in ascending order
-        self.levels = self.levels.sort().values  # noqa: PD011
+        self.levels = self.levels.sort().values
         super().__init__(preprocessing)
 
     def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
