@@ -20,6 +20,14 @@ secmlt.models.pytorch.base\_pytorch\_trainer module
    :undoc-members:
    :show-inheritance:
 
+secmlt.models.pytorch.early\_stopping\_pytorch\_trainer module
+--------------------------------------------------------------
+
+.. automodule:: secmlt.models.pytorch.early_stopping_pytorch_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
