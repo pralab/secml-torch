@@ -7,7 +7,7 @@ SecMLT is an open-source Python library for Adversarial Machine Learning and rob
 Before contributing to SecMLT:
 
 1. Familiarize yourself with the library by reviewing the [official documentation](https://secml-torch.readthedocs.io/en/latest/) and exploring the existing codebase.
-2. Install the required dependencies (refer to [the installation guide](https://secml-torch.readthedocs.io/en/latest/installation.html)).
+2. Install the required dependencies (refer to [the installation guide](https://secml-torch.readthedocs.io/en/latest/#installation)).
 
 ## Setting up your development environment
 
