@@ -46,7 +46,7 @@ class NevergradOptimizerFactory:
         return NevergradOptimizerFactory.create(optimizer_name, **kwargs)
 
     @staticmethod
-    def create(optim_cls: Union[str, ClassVar[ConfiguredOptimizer]],
+    def create(optim_cls: Union[str, type[ConfiguredOptimizer]],
                **optimizer_args) -> ConfiguredOptimizer:
         """
         Create a Nevergrad optimization algorithm.
@@ -74,7 +74,7 @@ class NevergradOptimizerFactory:
         raise ValueError(msg)
 
     @staticmethod
-    def create_ga(population_size: int = 10, crossover: str = "twopoints",
+    def create_ga(population_size: int = 10, crossover: str = "onepoint",
                   **kwargs) -> ConfiguredOptimizer:
         """
         Create a Differential Evolution (genetic algorithm) using Nevergrad as backend.

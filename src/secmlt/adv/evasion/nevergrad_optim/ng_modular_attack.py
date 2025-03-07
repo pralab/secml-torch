@@ -1,11 +1,19 @@
 """Modular iterative attacks with customizable components with nevergrad."""
+from functools import partial
+from typing import Literal, Optional, Union
 
 import nevergrad
 import torch
+from nevergrad.optimization.base import ConfiguredOptimizer
 from nevergrad.parametrization.core import Parameter
 from secmlt.adv.evasion.modular_attack import ModularEvasionAttackFixedEps
+from secmlt.manipulations.manipulation import Manipulation
 from secmlt.models.base_model import BaseModel
 from secmlt.optimization.constraints import ClipConstraint
+from secmlt.optimization.gradient_processing import NoGradientProcessing
+from secmlt.optimization.initializer import Initializer
+from secmlt.trackers import Tracker
+from secmlt.utils.tensor_utils import atleast_kd
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -13,7 +21,56 @@ from torch.utils.data import DataLoader, TensorDataset
 class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
     """Modular evasion attack for fixed-epsilon attacks, using nevergrad as backend."""
 
-    def _optimizer_step(
+    def __init__(
+            self,
+            y_target: int | None,
+            num_steps: int,
+            loss_function: Union[str, torch.nn.Module],
+            optimizer_cls: str | partial[ConfiguredOptimizer] | ConfiguredOptimizer,
+            manipulation_function: Manipulation,
+            initializer: Initializer,
+            budget: Optional[int],
+            trackers: list[Tracker] | Tracker | None = None,
+    ) -> None:
+        """
+        Create the generic modular attack using an optimizer from nevergrad.
+
+        Parameters
+        ----------
+         y_target : int | None, optional
+            Target label for a targeted attack, None
+            for untargeted attack, by default None.
+        num_steps : int
+            number of maximum steps
+        loss_function : Union[str, torch.nn.Module]
+            a Pytorch loss function, specified as string or object
+        optimizer_cls : str | partial[ConfiguredOptimizer]
+            the optimizer from nevergrad, specified as string or class
+        manipulation_function : Manipulation
+            the type of manipulation to apply
+        initializer: Initializer
+            the type of initialization for the manipulation
+        budget: Optional[int]
+            the amount of the query budget of the attack
+        trackers : list[Tracker] | None, optional
+            Trackers to check various attack metrics (see secmlt.trackers),
+            available only for native implementation, by default None.
+        """
+        super().__init__(y_target=y_target,
+                         num_steps=num_steps,
+                         loss_function=loss_function,
+                         optimizer_cls=optimizer_cls,
+                         manipulation_function=manipulation_function,
+                         initializer=initializer,
+                         gradient_processing=NoGradientProcessing(), budget=budget,
+                         trackers=trackers,
+                         step_size=0)
+
+    @classmethod
+    def _trackers_allowed(cls) -> Literal[False]:
+        return False
+
+    def optimizer_step(
             self, optimizer: nevergrad.optimization.base.Optimizer,
             delta: nevergrad.p.Array,
             loss: torch.Tensor
@@ -38,11 +95,27 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         optimizer.tell(delta, loss.item())
         return optimizer.ask()
 
-    def _apply_manipulation(
+    def apply_manipulation(
             self, x: torch.Tensor, delta: nevergrad.p.Array
     ) -> (torch.Tensor, torch.Tensor):
+        """
+        Apply the manipulation during the attack.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            input sample to manipulate
+        delta : nevergrad.p.Array
+            manipulation to apply
+
+        Returns
+        -------
+        torch.Tensor, torch.Tensor
+            the manipulated sample and the manipulation itself
+        """
         p_delta = torch.from_numpy(delta.value)
-        return self.manipulation_function(x.data, p_delta)
+        x_adv, _ = self.manipulation_function(x.data, p_delta)
+        return x_adv, delta
 
     def _create_optimizer(self, delta: nevergrad.p.Array, **kwargs) -> Optimizer:
         constraints = self.manipulation_function.domain_constraints
@@ -55,6 +128,35 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
             parametrization=nevergrad.p.Array(
                 shape=delta.value.shape, lower=lower, upper=upper)
         )
+
+    def _set_best_results(self,
+                          best_delta: torch.Tensor,
+                          best_losses: torch.Tensor,
+                          delta: nevergrad.p.Array,
+                          losses: torch.Tensor,
+                          samples: torch.Tensor) -> None:
+        best_delta.data = torch.where(
+            atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
+            torch.Tensor(delta.value),
+            best_delta,
+        )
+        best_losses.data = torch.where(
+            losses.detach().cpu() < best_losses,
+            losses.detach().cpu(),
+            best_losses.data,
+        )
+
+    @classmethod
+    def consumed_budget(cls) -> int:
+        """
+        Return the amount of budget consumed by the attack.
+
+        Returns
+        -------
+        int
+            The amount of queries (forward + backward).
+        """
+        return 1
 
     def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
         """

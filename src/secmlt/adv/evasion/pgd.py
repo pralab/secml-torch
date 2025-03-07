@@ -192,4 +192,5 @@ class PGDNative(ModularEvasionAttackFixedEps):
             gradient_processing=gradient_processing,
             initializer=initializer,
             trackers=trackers,
+            budget=2*num_steps
         )

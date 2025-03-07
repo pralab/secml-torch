@@ -188,6 +188,7 @@ class BaseEvasionAttack:
 
     @trackers.setter
     def trackers(self, trackers: list[TRACKER_TYPE] | None = None) -> None:
+        self._trackers = None
         if self._trackers_allowed():
             if trackers is not None and not isinstance(trackers, list):
                 trackers = [trackers]
@@ -247,8 +248,9 @@ class BaseEvasionAttack:
 
     @abstractmethod
     def _run(
-        self,
-        model: BaseModel,
-        samples: torch.Tensor,
-        labels: torch.Tensor,
-    ) -> torch.Tensor: ...
+            self,
+            model: BaseModel,
+            samples: torch.Tensor,
+            labels: torch.Tensor,
+    ) -> torch.Tensor:
+        ...

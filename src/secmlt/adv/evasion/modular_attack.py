@@ -1,7 +1,7 @@
 """Implementation of modular iterative attacks with customizable components."""
 
 from functools import partial
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import torch.nn
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
@@ -38,6 +38,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             manipulation_function: Manipulation,
             initializer: Initializer,
             gradient_processing: GradientProcessing,
+            budget: Optional[int],
             trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
         """
@@ -61,6 +62,9 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             Initialization for the perturbation delta.
         gradient_processing : GradientProcessing
             Gradient transformation function.
+        budget: int
+            The maximum allowed number of queries (forward + backward).
+            If left to None, it will be double the num_steps.
         trackers : list[Tracker] | Tracker | None, optional
             Trackers for logging, by default None.
 
@@ -74,6 +78,9 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         self.num_steps = num_steps
         self.step_size = step_size
         self.trackers = trackers
+        self.budget = budget
+        if self.budget is None:
+            self.budget = 2 * num_steps
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
                 self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
@@ -150,6 +157,18 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
 
+    @classmethod
+    def consumed_budget(cls) -> int:
+        """
+        Return the amount of budget needed at each iteration.
+
+        Returns
+        -------
+        int
+            The amount of queries (forward + backward).
+        """
+        return 2
+
     def optimizer_step(self, optimizer: Optimizer, delta: torch.Tensor,
                        loss: torch.Tensor) -> torch.Tensor:
         """
@@ -175,6 +194,26 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         optimizer.step()
         return delta
 
+    def apply_manipulation(
+            self, x: torch.Tensor, delta: torch.Tensor
+    ) -> (torch.Tensor, torch.Tensor):
+        """
+        Apply the manipulation during the attack.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            input sample to manipulate
+        delta : torch.Tensor
+            manipulation to apply
+
+        Returns
+        -------
+        torch.Tensor, torch.Tensor
+            the manipulated sample and the manipulation itself
+        """
+        return self.manipulation_function(x, delta)
+
     def forward_loss(
             self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -199,8 +238,6 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         target = target.to(scores.device)
         losses = self.loss_function(scores, target)
         return scores, losses
-
-
 
     def _run(
             self,
@@ -228,40 +265,56 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         delta.requires_grad = True
 
         optimizer = self._create_optimizer(delta, **optim_kwargs)
-        x_adv, delta = self.manipulation_function(samples, delta)
+        x_adv, delta = self.apply_manipulation(samples, delta)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
-
+        available_budget = self.budget
         for i in range(self.num_steps):
             scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
             losses *= multiplier
             loss = losses.sum()
             delta = self.optimizer_step(optimizer, delta, loss)
-            x_adv.data, delta.data = self.manipulation_function(
+            x_adv.data, delta = self.apply_manipulation(
                 samples.data,
-                delta.data,
+                delta,
             )
-            if self.trackers is not None:
-                for tracker in self.trackers:
-                    tracker.track(
-                        i,
-                        losses.detach().cpu().data,
-                        scores.detach().cpu().data,
-                        x_adv.detach().cpu().data,
-                        delta.detach().cpu().data,
-                        delta.grad.detach().cpu().data,
-                    )
-
-            # keep perturbation with highest loss
-            best_delta.data = torch.where(
-                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
-                delta.data,
-                best_delta.data,
-            )
-            best_losses.data = torch.where(
-                losses.detach().cpu() < best_losses,
-                losses.detach().cpu(),
-                best_losses.data,
-            )
-        x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
+            self._track(delta, i, losses, scores, x_adv)
+            self._set_best_results(best_delta, best_losses, delta, losses, samples)
+            available_budget -= self.consumed_budget()
+            if available_budget <= 0:
+                break
+        x_adv, _ = self.apply_manipulation(samples.data, best_delta)
         return x_adv, best_delta
+
+    def _set_best_results(self,
+                          best_delta: torch.Tensor,
+                          best_losses: torch.Tensor,
+                          delta: torch.Tensor,
+                          losses: torch.Tensor,
+                          samples: torch.Tensor) -> None:
+        best_delta.data = torch.where(
+            atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
+            delta.data,
+            best_delta.data,
+        )
+        best_losses.data = torch.where(
+            losses.detach().cpu() < best_losses,
+            losses.detach().cpu(),
+            best_losses.data,
+        )
+
+    def _track(self, delta: torch.Tensor,
+               i: int,
+               losses: torch.Tensor,
+               scores: torch.Tensor,
+               x_adv: torch.Tensor) -> None:
+        if self.trackers is not None:
+            for tracker in self.trackers:
+                tracker.track(
+                    i,
+                    losses.detach().cpu().data,
+                    scores.detach().cpu().data,
+                    x_adv.detach().cpu().data,
+                    delta.detach().cpu().data,
+                    delta.grad.detach().cpu().data,
+                )
