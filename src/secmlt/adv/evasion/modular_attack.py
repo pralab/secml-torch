@@ -29,16 +29,16 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     """Modular evasion attack for fixed-epsilon attacks."""
 
     def __init__(
-        self,
-        y_target: int | None,
-        num_steps: int,
-        step_size: float,
-        loss_function: Union[str, torch.nn.Module],
-        optimizer_cls: str | partial[Optimizer],
-        manipulation_function: Manipulation,
-        initializer: Initializer,
-        gradient_processing: GradientProcessing,
-        trackers: list[Tracker] | Tracker | None = None,
+            self,
+            y_target: int | None,
+            num_steps: int,
+            step_size: float,
+            loss_function: Union[str, torch.nn.Module],
+            optimizer_cls: str | partial[Optimizer],
+            manipulation_function: Manipulation,
+            initializer: Initializer,
+            gradient_processing: GradientProcessing,
+            trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
         """
         Create modular evasion attack.
@@ -150,8 +150,33 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
 
+    def optimizer_step(self, optimizer: Optimizer, delta: torch.Tensor,
+                       loss: torch.Tensor) -> torch.Tensor:
+        """
+        Perform the optimization step to optimize the attack.
+
+        Parameters
+        ----------
+        optimizer : Optimizer
+            The optimizer used by the attack
+        delta : torch.Tensor
+            The manipulation computed by the attack
+        loss : torch.Tensor
+            The loss computed by the attack for the provided delta
+
+        Returns
+        -------
+        torch.Tensor
+            Resulting manipulation after the optimization step
+        """
+        optimizer.zero_grad()
+        loss.backward()
+        delta.grad.data = self.gradient_processing(delta.grad.data)
+        optimizer.step()
+        return delta
+
     def forward_loss(
-        self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
+            self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Compute the forward for the loss function.
@@ -176,12 +201,12 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         return scores, losses
 
     def _run(
-        self,
-        model: BaseModel,
-        samples: torch.Tensor,
-        labels: torch.Tensor,
-        init_deltas: torch.Tensor = None,
-        optim_kwargs: dict | None = None,
+            self,
+            model: BaseModel,
+            samples: torch.Tensor,
+            labels: torch.Tensor,
+            init_deltas: torch.Tensor = None,
+            optim_kwargs: dict | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if optim_kwargs is None:
             optim_kwargs = {}
@@ -202,7 +227,6 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
         optimizer = self._create_optimizer(delta, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
-        x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
 
@@ -210,11 +234,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
             losses *= multiplier
             loss = losses.sum()
-            optimizer.zero_grad()
-            loss.backward()
-            grad_before_processing = delta.grad.data
-            delta.grad.data = self.gradient_processing(delta.grad.data)
-            optimizer.step()
+            delta = self.optimizer_step(optimizer, delta, loss)
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,
@@ -227,7 +247,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                         scores.detach().cpu().data,
                         x_adv.detach().cpu().data,
                         delta.detach().cpu().data,
-                        grad_before_processing.detach().cpu().data,
+                        delta.grad.detach().cpu().data,
                     )
 
             # keep perturbation with highest loss

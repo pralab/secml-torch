@@ -112,10 +112,10 @@ class LpConstraint(Constraint, ABC):
     """Abstract class for Lp constraint."""
 
     def __init__(
-        self,
-        radius: float = 0.0,
-        center: float = 0.0,
-        p: str = LpPerturbationModels.LINF,
+            self,
+            radius: float = 0.0,
+            center: float = 0.0,
+            p: str = LpPerturbationModels.LINF,
     ) -> None:
         """
         Create Lp constraint.
@@ -354,9 +354,9 @@ class QuantizationConstraint(InputSpaceConstraint):
     """Constraint for ensuring quantized outputs into specified levels."""
 
     def __init__(
-        self,
-        preprocessing: DataProcessing = None,
-        levels: Union[list[float], torch.Tensor, int] = 255,
+            self,
+            preprocessing: DataProcessing = None,
+            levels: Union[list[float], torch.Tensor, int] = 255,
     ) -> None:
         """
         Create the QuantizationConstraint.
@@ -388,10 +388,10 @@ class QuantizationConstraint(InputSpaceConstraint):
             msg = "Levels must be an integer, list, or torch.Tensor."
             raise TypeError(msg)
         # sort levels to ensure they are in ascending order
-        self.levels = self.levels.sort().values
+        self.levels = self.levels.sort().values # noqa: PD011
         super().__init__(preprocessing)
 
-    def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
+    def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         # reshape x to facilitate broadcasting with custom levels
         x_expanded = x.unsqueeze(-1)
         # calculate the absolute difference between x and each custom level
@@ -417,7 +417,7 @@ class MaskConstraint(Constraint):
         self.mask = mask.type(torch.bool)
         super().__init__()
 
-    def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
+    def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Enforce the mask constraint.
 
