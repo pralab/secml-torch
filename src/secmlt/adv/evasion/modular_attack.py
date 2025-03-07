@@ -200,6 +200,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         losses = self.loss_function(scores, target)
         return scores, losses
 
+
+
     def _run(
             self,
             model: BaseModel,

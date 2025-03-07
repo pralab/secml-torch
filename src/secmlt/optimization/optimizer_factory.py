@@ -25,6 +25,7 @@ class OptimizerFactory:
         **kwargs,
     ) -> functools.partial[Adam] | functools.partial[SGD]:
         """
+
         Create an optimizer.
 
         Parameters
@@ -44,6 +45,7 @@ class OptimizerFactory:
         ValueError
             Raises ValueError when the requested optimizer is not in the list
             of implemented optimizers.
+
         """
         if optimizer_name == ADAM:
             return OptimizerFactory.create_adam(lr)
@@ -56,6 +58,7 @@ class OptimizerFactory:
     @staticmethod
     def create_adam(lr: float) -> functools.partial[Adam]:
         """
+
         Create the Adam optimizer.
 
         Parameters
@@ -67,6 +70,7 @@ class OptimizerFactory:
         -------
         functools.partial[Adam]
             Adam optimizer.
+
         """
         return functools.partial(Adam, lr=lr)
 
