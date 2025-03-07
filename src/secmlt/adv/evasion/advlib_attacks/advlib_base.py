@@ -67,7 +67,9 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         if not isinstance(model, BasePytorchClassifier):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
-
+        device = model._get_device()
+        samples = samples.to(device)
+        labels = labels.to(device)
         advx = self.advlib_attack(
             model=model,
             inputs=samples,
