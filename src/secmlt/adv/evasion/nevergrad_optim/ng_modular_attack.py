@@ -113,7 +113,10 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         torch.Tensor, torch.Tensor
             the manipulated sample and the manipulation itself
         """
-        p_delta = torch.from_numpy(delta.value)
+        if not isinstance(delta, torch.Tensor):
+            p_delta = torch.from_numpy(delta.value).float()
+        else:
+            p_delta = delta.data
         x_adv, _ = self.manipulation_function(x.data, p_delta)
         return x_adv, delta
 

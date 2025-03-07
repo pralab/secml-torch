@@ -20,18 +20,16 @@ print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
 epsilon = 1
-num_steps = 10
-step_size = 0.05
+num_steps = 100
 perturbation_model = LpPerturbationModels.LINF
 y_target = None
 
 native_attack = NevergradGeneticAlgorithm(
     perturbation_model=perturbation_model,
-    population_size=10,
+    population_size=30,
     epsilon=epsilon,
     num_steps=num_steps,
     budget=num_steps,
-    step_size=step_size,
     random_start=True,
     y_target=y_target,
 )
