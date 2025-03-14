@@ -10,6 +10,7 @@ Subpackages
    secmlt.adv.evasion.advlib_attacks
    secmlt.adv.evasion.aggregators
    secmlt.adv.evasion.foolbox_attacks
+   secmlt.adv.evasion.nevergrad_optim
 
 Submodules
 ----------
@@ -18,6 +19,14 @@ secmlt.adv.evasion.base\_evasion\_attack module
 -----------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.base_evasion_attack
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.adv.evasion.ga module
+----------------------------
+
+.. automodule:: secmlt.adv.evasion.ga
    :members:
    :undoc-members:
    :show-inheritance:
