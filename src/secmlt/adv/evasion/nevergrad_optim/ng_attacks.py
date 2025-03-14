@@ -64,7 +64,9 @@ class NevergradGeneticAlgorithm(NgModularEvasionAttackFixedEps):
             LpPerturbationModels.L2: L2Constraint,
             LpPerturbationModels.LINF: LInfConstraint,
         }
-
+        if perturbation_model not in perturbation_models:
+            msg = f"Perturbation model {perturbation_model} not yet implemented."
+            raise NotImplementedError(msg)
         if random_start:
             initializer = RandomLpInitializer(
                 perturbation_model=perturbation_model,
@@ -92,3 +94,19 @@ class NevergradGeneticAlgorithm(NgModularEvasionAttackFixedEps):
             trackers=trackers,
             budget=budget
         )
+
+    @classmethod
+    def get_perturbation_models(cls) -> set[str]:
+        """
+        Check if a given perturbation model is implemented.
+
+        Returns
+        -------
+        set[str]
+            Set of perturbation models available for this attack.
+        """
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }
