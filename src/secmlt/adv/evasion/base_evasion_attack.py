@@ -123,7 +123,7 @@ class BaseEvasionAttackCreator:
 
     @staticmethod
     @abstractmethod
-    def get_backends() -> set[str]:
+    def get_backends() -> list[str]:
         """
         Get the available backends for the given attack.
 

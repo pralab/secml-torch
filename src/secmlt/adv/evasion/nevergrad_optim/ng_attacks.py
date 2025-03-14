@@ -32,10 +32,9 @@ class NevergradGeneticAlgorithm(NgModularEvasionAttackFixedEps):
             lb: float = 0.0,
             ub: float = 1.0,
             trackers: list[Tracker] | None = None,
-            **kwargs,
     ) -> None:
         """
-        Create Native PGD attack.
+        Create Nevergrad Genetic Algorithm attack.
 
         Parameters
         ----------

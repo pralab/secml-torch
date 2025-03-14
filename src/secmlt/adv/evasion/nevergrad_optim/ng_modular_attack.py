@@ -62,7 +62,8 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
                          optimizer_cls=optimizer_cls,
                          manipulation_function=manipulation_function,
                          initializer=initializer,
-                         gradient_processing=NoGradientProcessing(), budget=budget,
+                         gradient_processing=NoGradientProcessing(),
+                         budget=budget,
                          trackers=trackers,
                          step_size=0)
 
