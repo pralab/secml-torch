@@ -105,7 +105,7 @@ class GeneticAlgorithm(BaseEvasionAttackCreator):
             Attack implementation.
         """
         implementations = {
-            Backends.NEVERGRAD: cls.get_foolbox_implementation,
+            Backends.NEVERGRAD: cls.get_nevergrad_implementation,
         }
         cls.check_backend_available(backend)
         return implementations[backend]()

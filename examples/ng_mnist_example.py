@@ -1,5 +1,7 @@
 from loaders.get_loaders import get_mnist_loader
 from models.mnist_net import get_mnist_model
+from secmlt.adv.backends import Backends
+from secmlt.adv.evasion.ga import GeneticAlgorithm
 from secmlt.adv.evasion.nevergrad_optim.ng_attacks import NevergradGeneticAlgorithm
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.metrics.classification import Accuracy
@@ -24,7 +26,7 @@ num_steps = 100
 perturbation_model = LpPerturbationModels.LINF
 y_target = None
 
-native_attack = NevergradGeneticAlgorithm(
+native_attack = GeneticAlgorithm(
     perturbation_model=perturbation_model,
     population_size=30,
     epsilon=epsilon,
@@ -32,6 +34,7 @@ native_attack = NevergradGeneticAlgorithm(
     budget=num_steps,
     random_start=True,
     y_target=y_target,
+    backend=Backends.NEVERGRAD
 )
 
 native_adv_ds = native_attack(model, test_loader)
