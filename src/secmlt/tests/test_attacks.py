@@ -1,5 +1,4 @@
 import pytest
-from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
