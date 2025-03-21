@@ -1,4 +1,5 @@
 """Modular iterative attacks with customizable components with nevergrad."""
+
 from functools import partial
 from typing import Literal, Optional, Union
 
@@ -22,15 +23,15 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
     """Modular evasion attack for fixed-epsilon attacks, using nevergrad as backend."""
 
     def __init__(
-            self,
-            y_target: int | None,
-            num_steps: int,
-            loss_function: Union[str, torch.nn.Module],
-            optimizer_cls: str | partial[ConfiguredOptimizer] | ConfiguredOptimizer,
-            manipulation_function: Manipulation,
-            initializer: Initializer,
-            budget: Optional[int],
-            trackers: list[Tracker] | Tracker | None = None,
+        self,
+        y_target: int | None,
+        num_steps: int,
+        loss_function: Union[str, torch.nn.Module],
+        optimizer_cls: str | partial[ConfiguredOptimizer] | ConfiguredOptimizer,
+        manipulation_function: Manipulation,
+        initializer: Initializer,
+        budget: Optional[int],
+        trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
         """
         Create the generic modular attack using an optimizer from nevergrad.
@@ -56,25 +57,28 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
             Trackers to check various attack metrics (see secmlt.trackers),
             available only for native implementation, by default None.
         """
-        super().__init__(y_target=y_target,
-                         num_steps=num_steps,
-                         loss_function=loss_function,
-                         optimizer_cls=optimizer_cls,
-                         manipulation_function=manipulation_function,
-                         initializer=initializer,
-                         gradient_processing=NoGradientProcessing(),
-                         budget=budget,
-                         trackers=trackers,
-                         step_size=0)
+        super().__init__(
+            y_target=y_target,
+            num_steps=num_steps,
+            loss_function=loss_function,
+            optimizer_cls=optimizer_cls,
+            manipulation_function=manipulation_function,
+            initializer=initializer,
+            gradient_processing=NoGradientProcessing(),
+            budget=budget,
+            trackers=trackers,
+            step_size=0,
+        )
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[False]:
         return False
 
     def optimizer_step(
-            self, optimizer: nevergrad.optimization.base.Optimizer,
-            delta: nevergrad.p.Array,
-            loss: torch.Tensor
+        self,
+        optimizer: nevergrad.optimization.base.Optimizer,
+        delta: nevergrad.p.Array,
+        loss: torch.Tensor,
     ) -> Parameter:
         """
         Perform the optimization step to optimize the attack.
@@ -93,11 +97,13 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         nevergrad.p.Array
             Resulting manipulation after the optimization step
         """
+        if isinstance(delta, torch.Tensor):
+            delta = optimizer.parametrization.spawn_child(new_value=delta.numpy())
         optimizer.tell(delta, loss.item())
         return optimizer.ask()
 
     def apply_manipulation(
-            self, x: torch.Tensor, delta: nevergrad.p.Array
+        self, x: torch.Tensor, delta: nevergrad.p.Array
     ) -> (torch.Tensor, torch.Tensor):
         """
         Apply the manipulation during the attack.
@@ -118,8 +124,8 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
             p_delta = torch.from_numpy(delta.value).float()
         else:
             p_delta = delta.data
-        x_adv, _ = self.manipulation_function(x.data, p_delta)
-        return x_adv, delta
+        x_adv, proj_delta = self.manipulation_function(x.data, p_delta)
+        return x_adv, proj_delta
 
     def _create_optimizer(self, delta: nevergrad.p.Array, **kwargs) -> Optimizer:
         constraints = self.manipulation_function.domain_constraints
@@ -127,21 +133,24 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         if constraints is not None:
             for constraint in constraints:
                 if isinstance(constraint, ClipConstraint):
-                    upper, lower = max(upper, constraint.ub), min(lower, constraint.lb)
+                    upper, lower = max(upper, constraint.ub), -max(upper, constraint.ub)
         return self.optimizer_cls(
             parametrization=nevergrad.p.Array(
-                shape=delta.value.shape, lower=lower, upper=upper)
+                shape=delta.value.shape, lower=lower, upper=upper
+            )
         )
 
-    def _set_best_results(self,
-                          best_delta: torch.Tensor,
-                          best_losses: torch.Tensor,
-                          delta: nevergrad.p.Array,
-                          losses: torch.Tensor,
-                          samples: torch.Tensor) -> None:
+    def _set_best_results(
+        self,
+        best_delta: torch.Tensor,
+        best_losses: torch.Tensor,
+        delta: nevergrad.p.Array,
+        losses: torch.Tensor,
+        samples: torch.Tensor,
+    ) -> None:
         best_delta.data = torch.where(
             atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
-            torch.Tensor(delta.value),
+            delta,
             best_delta,
         )
         best_losses.data = torch.where(
@@ -176,7 +185,7 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         Returns
         -------
         DataLoader
-            Dataloader with adversarial examples and original labels.
+            Data loader with adversarial examples and original labels.
         """
         adversarials = []
         original_labels = []
@@ -188,7 +197,7 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
                 adversarials.append(x_adv)
                 original_labels.append(label)
         adversarials = torch.vstack(adversarials)
-        original_labels = torch.vstack(original_labels)
+        original_labels = torch.vstack(original_labels).flatten()
         adversarial_dataset = TensorDataset(adversarials, original_labels)
         return DataLoader(
             adversarial_dataset,
