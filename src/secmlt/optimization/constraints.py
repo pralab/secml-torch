@@ -391,7 +391,7 @@ class QuantizationConstraint(InputSpaceConstraint):
         self.levels = self.levels.sort().values
         super().__init__(preprocessing)
 
-    def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
+    def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         # reshape x to facilitate broadcasting with custom levels
         x_expanded = x.unsqueeze(-1)
         # calculate the absolute difference between x and each custom level
@@ -417,7 +417,7 @@ class MaskConstraint(Constraint):
         self.mask = mask.type(torch.bool)
         super().__init__()
 
-    def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
+    def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
         Enforce the mask constraint.
 

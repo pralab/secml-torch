@@ -7,3 +7,4 @@ class Backends:
     FOOLBOX = "foolbox"
     ADVLIB = "advlib"
     NATIVE = "native"
+    NEVERGRAD = "nevergrad"

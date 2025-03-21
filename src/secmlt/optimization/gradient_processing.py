@@ -47,6 +47,26 @@ class GradientProcessing(ABC):
         ...
 
 
+class NoGradientProcessing(GradientProcessing):
+    """Absence of processing."""
+
+    def __call__(self, grad: torch.Tensor) -> torch.Tensor:
+        """
+        Gradient is not processed.
+
+        Parameters
+        ----------
+        grad : torch.Tensor
+            Input gradients.
+
+        Returns
+        -------
+        torch.Tensor
+            The unaltered gradient.
+        """
+        return grad
+
+
 class LinearProjectionGradientProcessing(GradientProcessing):
     """Linear projection of the gradient onto Lp balls."""
 
