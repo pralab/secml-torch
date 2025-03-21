@@ -1,4 +1,5 @@
 """Implementation of Genetic Algorithm attack."""
+
 import importlib
 from typing import Optional
 
@@ -14,19 +15,20 @@ class GeneticAlgorithm(BaseEvasionAttackCreator):
     """Implementation of Genetic Algorithm."""
 
     def __new__(
-            cls,
-            perturbation_model: str,
-            epsilon: float,
-            num_steps: int,
-            budget: Optional[int] = None,
-            population_size: int = 10,
-            random_start: bool = False,
-            y_target: int | None = None,
-            lb: float = 0.0,
-            ub: float = 1.0,
-            backend: str = Backends.NEVERGRAD,
-            trackers: list[Tracker] | None = None,
-            **kwargs,
+        cls,
+        perturbation_model: str,
+        epsilon: float,
+        num_steps: int,
+        budget: Optional[int] = None,
+        population_size: int = 10,
+        random_start: bool = False,
+        y_target: int | None = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        backend: str = Backends.NEVERGRAD,
+        trackers: list[Tracker] | None = None,
+        random_state: Optional[int] = None,
+        **kwargs,
     ) -> BaseEvasionAttack:
         """
         Create the PGD attack.
@@ -60,6 +62,9 @@ class GeneticAlgorithm(BaseEvasionAttackCreator):
         trackers : list[Tracker] | None, optional
             Trackers to check various attack metrics (see secmlt.trackers),
             available only for native implementation, by default None.
+        random_state : Optional[int]:
+            set random seed of the optimization algorithm.
+            Set None to keep randomness.
 
         Returns
         -------

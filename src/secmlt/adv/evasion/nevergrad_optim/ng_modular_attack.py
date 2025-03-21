@@ -4,6 +4,7 @@ from functools import partial
 from typing import Literal, Optional, Union
 
 import nevergrad
+import numpy as np
 import torch
 from nevergrad.optimization.base import ConfiguredOptimizer
 from nevergrad.parametrization.core import Parameter
@@ -32,6 +33,7 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         initializer: Initializer,
         budget: Optional[int],
         trackers: list[Tracker] | Tracker | None = None,
+        random_state: Optional[int] = None,
     ) -> None:
         """
         Create the generic modular attack using an optimizer from nevergrad.
@@ -56,6 +58,9 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
         trackers : list[Tracker] | None, optional
             Trackers to check various attack metrics (see secmlt.trackers),
             available only for native implementation, by default None.
+        random_state: Optional[int]
+            set the random seed of the nevergrad algorithm.
+            Set None to keep randomness.
         """
         super().__init__(
             y_target=y_target,
@@ -69,6 +74,7 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
             trackers=trackers,
             step_size=0,
         )
+        self.random_state = random_state
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[False]:
@@ -134,11 +140,16 @@ class NgModularEvasionAttackFixedEps(ModularEvasionAttackFixedEps):
             for constraint in constraints:
                 if isinstance(constraint, ClipConstraint):
                     upper, lower = max(upper, constraint.ub), -max(upper, constraint.ub)
-        return self.optimizer_cls(
+        optimizer = self.optimizer_cls(
             parametrization=nevergrad.p.Array(
                 shape=delta.value.shape, lower=lower, upper=upper
-            )
+            ),
         )
+        if self.random_state is not None:
+            random_state = np.random.RandomState(self.random_state)
+            optimizer.random_state = random_state
+            optimizer.parametrization.random_state = random_state
+        return optimizer
 
     def _set_best_results(
         self,
