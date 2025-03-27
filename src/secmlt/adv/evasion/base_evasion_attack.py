@@ -2,7 +2,7 @@
 
 import importlib.util
 from abc import abstractmethod
-from typing import Literal
+from typing import Literal, Union
 
 import torch
 from secmlt.adv.backends import Backends
@@ -144,14 +144,14 @@ class BaseEvasionAttackCreator:
 class BaseEvasionAttack:
     """Base class for evasion attacks."""
 
-    def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
+    def __call__(self, model: Union[BaseModel, list[BaseModel]], data_loader: DataLoader) -> DataLoader:
         """
         Compute the attack against the model, using the input data.
 
         Parameters
         ----------
-        model : BaseModel
-            Model to test.
+        model : BaseModel | list[BaseModel]
+            Model or list of models to test.
         data_loader : DataLoader
             Test dataloader.
 
