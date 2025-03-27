@@ -158,8 +158,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
         Parameters
         ----------
-        model : BaseModel
-            Model used by the attack run.
+        model : BaseModel | list[BaseModel]
+            Model(s) used by the attack run.
         x : torch.Tensor
             Input sample.
         target : torch.Tensor
@@ -170,9 +170,17 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         tuple[torch.Tensor, torch.Tensor]
             Output scores and loss.
         """
-        scores = model.decision_function(x)
-        target = target.to(scores.device)
-        losses = self.loss_function(scores, target)
+        if isinstance(model, list):
+            scores_list = [m.decision_function(x) for m in model]
+            scores = torch.stack(scores_list).mean(dim=0)
+            losses = torch.stack(
+                [self.loss_function(scores, target.to(scores.device)) 
+                    for scores in scores_list]
+            ).mean(dim=0) 
+        else:
+            scores = model.decision_function(x)
+            losses = self.loss_function(scores, 
+                target.to(scores.device))
         return scores, losses
 
     def _run(
