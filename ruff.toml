@@ -13,8 +13,6 @@ ignore = [
     "S101",  # use of assert
     "ARG001",  # unused function argument
     "ARG002",  # unused method argument
-    "ANN101",  # annotation for self
-    "ANN102",  # annotation of cls
     "PLR0913",  # too many arguments
     "ANN002",  # type annotations for args
     "ANN003",  # type annotations for kwargs
@@ -26,7 +24,8 @@ ignore = [
     "COM812", # flake8-commas "Trailing comma missing"
     "ISC001",  # implicitly concatenated string literals on one line
     "UP007", # conflict non-pep8 annotations
-    "S311"  # random generator not suitable for cryptographic purposes
+    "S311",  # random generator not suitable for cryptographic purposes,
+    "PLC0415"  # import should be at the top-level of a file
     ]
 
 [lint.per-file-ignores]
