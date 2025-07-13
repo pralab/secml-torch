@@ -1,10 +1,13 @@
 """Simple backdoor attack in PyTorch."""
 
-from typing import Union
+from __future__ import annotations  # noqa: I001
+from typing import Union, TYPE_CHECKING
 
-import torch
 from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
-from torch.utils.data import Dataset
+
+if TYPE_CHECKING:
+    import torch
+    from torch.utils.data import Dataset
 
 
 class BackdoorDatasetPyTorch(PoisoningDatasetPyTorch):

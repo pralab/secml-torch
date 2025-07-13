@@ -1,10 +1,14 @@
 """Optimizer creation tools."""
 
-import functools
-from typing import ClassVar
+from __future__ import annotations  # noqa: I001
 
-import torch
+import functools
+from typing import ClassVar, TYPE_CHECKING
+
 from torch.optim import SGD, Adam
+
+if TYPE_CHECKING:
+    import torch
 
 ADAM = "adam"
 StochasticGD = "sgd"

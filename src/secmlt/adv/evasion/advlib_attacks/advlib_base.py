@@ -1,12 +1,18 @@
 """Generic wrapper for Adversarial Library evasion attacks."""
 
-from collections.abc import Callable
-from typing import Literal
+from __future__ import annotations  # noqa: I001
+
+from typing import TYPE_CHECKING, Literal
 
 import torch
 from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
-from secmlt.models.base_model import BaseModel
+
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from secmlt.models.base_model import BaseModel
 
 
 class BaseAdvLibEvasionAttack(BaseEvasionAttack):

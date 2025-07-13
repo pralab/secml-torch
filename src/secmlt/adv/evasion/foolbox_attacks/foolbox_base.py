@@ -1,14 +1,18 @@
 """Generic wrapper for Foolbox evasion attacks."""
 
-from typing import Literal
+from __future__ import annotations  # noqa: I001
+
+from typing import Literal, TYPE_CHECKING
 
 import torch
-from foolbox.attacks.base import Attack
 from foolbox.criteria import Misclassification, TargetedMisclassification
 from foolbox.models.pytorch import PyTorchModel
 from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
-from secmlt.models.base_model import BaseModel
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+
+if TYPE_CHECKING:
+    from foolbox.attacks.base import Attack
+    from secmlt.models.base_model import BaseModel
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):

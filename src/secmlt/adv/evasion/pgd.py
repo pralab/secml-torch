@@ -1,5 +1,7 @@
 """Implementations of the Projected Gradient Descent evasion attack."""
 
+from __future__ import annotations  # noqa: I001
+
 import importlib.util
 
 from secmlt.adv.backends import Backends
@@ -19,7 +21,10 @@ from secmlt.optimization.constraints import (
 from secmlt.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secmlt.optimization.initializer import Initializer, RandomLpInitializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
-from secmlt.trackers.trackers import Tracker
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from secmlt.trackers.trackers import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):
@@ -95,7 +100,7 @@ class PGD(BaseEvasionAttackCreator):
         return [Backends.FOOLBOX, Backends.ADVLIB, Backends.NATIVE]
 
     @staticmethod
-    def _get_foolbox_implementation() -> type["PGDFoolbox"]:  # noqa: F821
+    def _get_foolbox_implementation() -> type[PGDFoolbox]:  # noqa: F821
         if importlib.util.find_spec("foolbox", None) is not None:
             from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 
@@ -104,7 +109,7 @@ class PGD(BaseEvasionAttackCreator):
         raise ImportError(msg)
 
     @staticmethod
-    def _get_advlib_implementation() -> type["PGDAdvLib"]:  # noqa: F821
+    def _get_advlib_implementation() -> type[PGDAdvLib]:  # noqa: F821
         if importlib.util.find_spec("adv_lib", None) is not None:
             from secmlt.adv.evasion.advlib_attacks import PGDAdvLib
 
@@ -113,7 +118,7 @@ class PGD(BaseEvasionAttackCreator):
         raise ImportError(msg)
 
     @staticmethod
-    def _get_native_implementation() -> type["PGDNative"]:
+    def _get_native_implementation() -> type[PGDNative]:
         return PGDNative
 
 

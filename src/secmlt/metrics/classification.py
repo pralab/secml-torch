@@ -112,7 +112,7 @@ class AccuracyEnsemble(Accuracy):
         torch.Tensor
             The metric computed across multiple attack runs.
         """
-        for advs in zip(*dataloaders, strict=False):
+        for advs in zip(*dataloaders):  # noqa: B905
             y_pred = []
             for x, y in advs:
                 y_pred.append(model.predict(x).cpu().detach())
