@@ -75,11 +75,15 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             raise NotImplementedError(msg)
         device = model._get_device()
         samples = samples.to(device)
-        labels = labels.to(device)
+        if self.y_target is not None:
+            targets = torch.ones_like(labels) * self.y_target
+        else:
+            labels = labels.to(device)
+            targets = labels
         advx = self.advlib_attack(
             model=model,
             inputs=samples,
-            labels=labels,
+            labels=targets,
             ε=self.epsilon,
             targeted=(self.y_target is not None),
             loss_function=self.loss_function,
