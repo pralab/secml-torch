@@ -32,6 +32,7 @@ html:
   use_repository_button: true
 
 sphinx:
+  config_path: conf.py
   extra_extensions:
     - sphinx.ext.autodoc
     - sphinx.ext.autosummary
@@ -43,5 +44,3 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
-  local_extensions:
-    - ../../src
