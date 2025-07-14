@@ -1,4 +1,4 @@
--e ../[adv_lib,foolbox,tensorboard]
+-e ../../[adv_lib,foolbox,tensorboard]
 sphinx
 sphinx_rtd_theme
 numpydoc
