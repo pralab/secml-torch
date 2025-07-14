@@ -35,4 +35,4 @@ jobs:
 
       - name: Render the documentation
         run: |
-          jupyter-book build docs/ --path-output docs/_build/html --keep-going --verbose
+          jupyter-book build docs/
