@@ -68,6 +68,10 @@ class Tracker(ABC):
         torch.Tensor
             History of tracked parameters.
         """
+        # Dropout of the last batch element if there is a size mismatch
+        reference_size = self.tracked[0].size()
+        if self.tracked[-1].size() != reference_size:
+            self.tracked.pop()
         return torch.stack(self.tracked, -1)
 
     def get_last_tracked(self) -> Union[None, torch.Tensor]:
