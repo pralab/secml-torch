@@ -1,0 +1,13 @@
+format: jb-book
+root: readme_link
+parts:
+  - caption: Tutorials
+    chapters:
+      - file: tutorials/index
+  - caption: Contributing
+    chapters:
+      - file: contributing_link
+  - caption: API Reference
+    chapters:
+      - file: reference/secmlt
+

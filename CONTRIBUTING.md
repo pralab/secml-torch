@@ -69,7 +69,7 @@ To generate documentation RST files for new modules, follow these steps:
 
    ```bash
     cd docs  # skip if you are already in the docs folder from the previous step
-    sphinx-apidoc -o ../docs/source ../src/secmlt -f
+    sphinx-apidoc -o ../docs/reference ../src/secmlt -f
     ```
 
 4. **Build Documentation**: Finally, build the documentation using Sphinx:

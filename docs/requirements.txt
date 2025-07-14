@@ -4,3 +4,9 @@ numpydoc
 myst-parser
 sphinx-autodoc-typehints
 sphinx-copybutton
+nbsphinx
+nbsphinx_link
+ipython
+jupyter-book
+matplotlib
+numpy
