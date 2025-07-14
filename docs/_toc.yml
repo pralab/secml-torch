@@ -1,0 +1,18 @@
+format: jb-book
+root: readme_link
+
+parts:
+  - caption: Tutorials
+    numbered: true
+    chapters:
+      - file: tutorials/machine-learning
+        sections:
+          - file: tutorials/01-introduction.ipynb
+
+  - caption: Contributing
+    chapters:
+      - file: contributing_link
+
+  - caption: API Reference
+    chapters:
+      - file: reference/secmlt

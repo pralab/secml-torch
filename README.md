@@ -28,7 +28,7 @@ The library can be installed together with other plugins that enable further fun
 
 Install one or more extras with the command:
 ```bash
-pip install secml-torch[foolbox,tensorboard, adv_lib]
+pip install secml-torch[foolbox,tensorboard,adv_lib]
 ```
 
 ## Key Features
