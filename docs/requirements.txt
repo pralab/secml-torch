@@ -10,3 +10,8 @@ ipython
 jupyter-book>0.15
 matplotlib
 numpy
+torch
+torchvision
+adv_lib
+foolbox
+tensorboard
