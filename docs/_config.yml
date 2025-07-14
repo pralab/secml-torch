@@ -34,3 +34,13 @@ html:
 sphinx:
   extra_extensions:
     - sphinx.ext.autodoc
+    - sphinx.ext.autosummary
+    - sphinx.ext.napoleon
+    - sphinx.ext.viewcode
+    - sphinx.ext.doctest
+    - sphinx.ext.intersphinx
+    - sphinx.ext.todo
+    - sphinx.ext.coverage
+    - sphinx.ext.autosectionlabel
+    - sphinx_copybutton
+    - myst_parser
