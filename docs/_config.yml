@@ -33,5 +33,5 @@ html:
 
 sphinx:
   extra_extensions:
-    - sphinx.autodoc
+    - sphinx_autodoc
     - napoleon
