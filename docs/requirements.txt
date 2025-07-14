@@ -1,3 +1,4 @@
+-e ../[adv_lib,foolbox,tensorboard]
 sphinx
 sphinx_rtd_theme
 numpydoc
@@ -10,8 +11,3 @@ ipython
 jupyter-book>0.15
 matplotlib
 numpy
-torch
-torchvision
-adv_lib
-foolbox
-tensorboard
