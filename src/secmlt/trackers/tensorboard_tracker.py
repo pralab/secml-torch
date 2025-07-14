@@ -1,6 +1,8 @@
 """Tensorboard tracking utilities."""
 
-import torch
+from __future__ import annotations  # noqa: I001
+
+
 from secmlt.trackers.trackers import (
     IMAGE,
     MULTI_SCALAR,
@@ -10,6 +12,10 @@ from secmlt.trackers.trackers import (
     Tracker,
 )
 from torch.utils.tensorboard import SummaryWriter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import torch
 
 
 class TensorboardTracker(Tracker):

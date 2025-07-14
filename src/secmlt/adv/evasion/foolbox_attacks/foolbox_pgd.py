@@ -1,5 +1,7 @@
 """Wrapper of the PGD attack implemented in Foolbox."""
 
+from __future__ import annotations
+
 from foolbox.attacks.projected_gradient_descent import (
     L1ProjectedGradientDescentAttack,
     L2ProjectedGradientDescentAttack,

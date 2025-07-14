@@ -1,5 +1,6 @@
 """Base class for data poisoning."""
 
+from __future__ import annotations  # noqa: I001
 import random
 from typing import Union
 

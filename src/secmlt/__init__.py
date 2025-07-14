@@ -1,5 +1,4 @@
 # noqa: D104
-
 import pathlib
 
 version_path = pathlib.Path(__file__).parent / "VERSION"

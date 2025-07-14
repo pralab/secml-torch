@@ -1,13 +1,17 @@
 """Base classes for implementing attacks and wrapping backends."""
 
+from __future__ import annotations
+
 import importlib.util
 from abc import abstractmethod
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import torch
 from secmlt.adv.backends import Backends
-from secmlt.models.base_model import BaseModel
 from torch.utils.data import DataLoader, TensorDataset
+
+if TYPE_CHECKING:
+    from secmlt.models.base_model import BaseModel
 
 # lazy evaluation to avoid circular imports
 TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"
@@ -17,7 +21,7 @@ class BaseEvasionAttackCreator:
     """Generic creator for attacks."""
 
     @classmethod
-    def get_implementation(cls, backend: str) -> "BaseEvasionAttack":
+    def get_implementation(cls, backend: str) -> BaseEvasionAttack:
         """
         Get the implementation of the attack with the given backend.
 
@@ -67,7 +71,7 @@ class BaseEvasionAttackCreator:
         raise NotImplementedError(msg)
 
     @classmethod
-    def get_foolbox_implementation(cls) -> "BaseEvasionAttack":
+    def get_foolbox_implementation(cls) -> BaseEvasionAttack:
         """
         Get the Foolbox implementation of the attack.
 
@@ -87,12 +91,12 @@ class BaseEvasionAttackCreator:
         raise ImportError(msg)
 
     @staticmethod
-    def _get_foolbox_implementation() -> "BaseEvasionAttack":
+    def _get_foolbox_implementation() -> BaseEvasionAttack:
         msg = "Foolbox implementation not available."
         raise NotImplementedError(msg)
 
     @classmethod
-    def get_advlib_implementation(cls) -> "BaseEvasionAttack":
+    def get_advlib_implementation(cls) -> BaseEvasionAttack:
         """
         Get the Adversarial Library implementation of the attack.
 
@@ -112,12 +116,12 @@ class BaseEvasionAttackCreator:
         raise ImportError(msg)
 
     @staticmethod
-    def _get_advlib_implementation() -> "BaseEvasionAttack":
+    def _get_advlib_implementation() -> BaseEvasionAttack:
         msg = "Adversarial Library implementation not available."
         raise NotImplementedError(msg)
 
     @staticmethod
-    def _get_native_implementation() -> "BaseEvasionAttack":
+    def _get_native_implementation() -> BaseEvasionAttack:
         msg = "Native implementation not available."
         raise NotImplementedError(msg)
 

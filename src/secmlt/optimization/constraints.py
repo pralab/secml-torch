@@ -1,14 +1,17 @@
 """Constraints for tensors and the corresponding batch-wise projections."""
 
+from __future__ import annotations  # noqa: I001
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
 import torch
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.models.data_processing.data_processing import DataProcessing
 from secmlt.models.data_processing.identity_data_processing import (
     IdentityDataProcessing,
 )
+
+if TYPE_CHECKING:
+    from secmlt.models.data_processing.data_processing import DataProcessing
 
 
 class Constraint(ABC):
@@ -368,7 +371,7 @@ class QuantizationConstraint(InputSpaceConstraint):
         levels : int, list[float] | torch.Tensor
             Number of levels or specified levels.
         """
-        if isinstance(levels, int | float):
+        if isinstance(levels, (int, float)):
             if levels < 2:  # noqa: PLR2004
                 msg = "Number of levels must be at least 2."
                 raise ValueError(msg)

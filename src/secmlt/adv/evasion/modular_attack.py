@@ -1,21 +1,28 @@
 """Implementation of modular iterative attacks with customizable components."""
 
-from functools import partial
-from typing import Literal, Union
+from __future__ import annotations  # noqa: I001
 
+from typing import Literal, Union, TYPE_CHECKING
 import torch.nn
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
-from secmlt.models.base_model import BaseModel
-from secmlt.optimization.constraints import Constraint
-from secmlt.optimization.gradient_processing import GradientProcessing
-from secmlt.optimization.initializer import Initializer
-from secmlt.optimization.optimizer_factory import OptimizerFactory
-from secmlt.trackers.trackers import Tracker
 from secmlt.utils.tensor_utils import atleast_kd
 from torch.nn import CrossEntropyLoss
-from torch.optim import Optimizer
+from secmlt.optimization.optimizer_factory import OptimizerFactory
+
+
+if TYPE_CHECKING:
+    from functools import partial
+
+    from secmlt.manipulations.manipulation import Manipulation
+    from secmlt.models.base_model import BaseModel
+    from secmlt.optimization.constraints import Constraint
+    from secmlt.optimization.gradient_processing import GradientProcessing
+    from secmlt.optimization.initializer import Initializer
+    from secmlt.trackers.trackers import Tracker
+    from torch.optim import Optimizer
+
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"

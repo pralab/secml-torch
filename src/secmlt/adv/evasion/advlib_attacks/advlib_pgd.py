@@ -1,5 +1,6 @@
 """Wrapper of the PGD attack implemented in Adversarial Library."""
 
+from __future__ import annotations  # noqa: I001
 from functools import partial
 
 from adv_lib.attacks import pgd_linf
