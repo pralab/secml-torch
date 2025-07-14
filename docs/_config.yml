@@ -43,3 +43,5 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
+  local_extensions:
+    - ../../src

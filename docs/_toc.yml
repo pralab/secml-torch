@@ -2,8 +2,9 @@ format: jb-book
 root: readme_link
 parts:
   - caption: Tutorials
+    numbered: True
     chapters:
-      - file: tutorials/index
+      - file: tutorials/01-introduction.ipynb
   - caption: Contributing
     chapters:
       - file: contributing_link
