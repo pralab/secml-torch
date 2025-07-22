@@ -223,7 +223,6 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         optimizer = self._create_optimizer(delta, **optim_kwargs)
         scheduler = self._create_scheduler(optimizer, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
-        x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
 
