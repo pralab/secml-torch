@@ -10,6 +10,7 @@ from secmlt.manipulations.manipulation import Manipulation
 from secmlt.utils.tensor_utils import atleast_kd
 from torch.nn import CrossEntropyLoss
 from secmlt.optimization.optimizer_factory import OptimizerFactory
+from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 
 
 if TYPE_CHECKING:
@@ -21,8 +22,7 @@ if TYPE_CHECKING:
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
     from secmlt.trackers.trackers import Tracker
-    from torch.optim import Optimizer
-
+    from torch.optim import LRScheduler, Optimizer
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"
@@ -42,6 +42,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         step_size: float,
         loss_function: Union[str, torch.nn.Module],
         optimizer_cls: str | partial[Optimizer],
+        scheduler_cls: str | partial[LRScheduler],
         manipulation_function: Manipulation,
         initializer: Initializer,
         gradient_processing: GradientProcessing,
@@ -62,6 +63,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             Loss function to minimize.
         optimizer_cls : str | partial[Optimizer]
             Algorithm for solving the attack optimization problem.
+        scheduler_cls : str | partial[LRScheduler]
+            Learning rate scheduler for the optimizer.
         manipulation_function : Manipulation
             Manipulation function to perturb the inputs.
         initializer : Initializer
@@ -98,7 +101,14 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                 lr=step_size,
             )
 
+        if isinstance(scheduler_cls, str):
+            scheduler_cls = LRSchedulerFactory.create_scheduler_from_name(
+                scheduler_cls,
+                optimizer_cls=optimizer_cls,
+            )
+
         self.optimizer_cls = optimizer_cls
+        self.scheduler_cls = scheduler_cls
 
         self._manipulation_function = manipulation_function
         self.initializer = initializer
@@ -157,6 +167,9 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
 
+    def _create_scheduler(self, optimizer: Optimizer, **kwargs) -> LRScheduler:
+        return self.scheduler_cls(optimizer, **kwargs)
+
     def forward_loss(
         self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor]:
@@ -208,6 +221,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         delta.requires_grad = True
 
         optimizer = self._create_optimizer(delta, **optim_kwargs)
+        scheduler = self._create_scheduler(optimizer, **optim_kwargs)
         x_adv, delta = self.manipulation_function(samples, delta)
         x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
@@ -222,6 +236,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
+            scheduler.step(epoch=i)
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,

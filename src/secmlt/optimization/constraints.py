@@ -371,7 +371,7 @@ class QuantizationConstraint(InputSpaceConstraint):
         levels : int, list[float] | torch.Tensor
             Number of levels or specified levels.
         """
-        if isinstance(levels, (int, float)):
+        if isinstance(levels, (int | float)):
             if levels < 2:  # noqa: PLR2004
                 msg = "Number of levels must be at least 2."
                 raise ValueError(msg)

@@ -21,6 +21,7 @@ from secmlt.optimization.constraints import (
 from secmlt.optimization.gradient_processing import LinearProjectionGradientProcessing
 from secmlt.optimization.initializer import Initializer, RandomLpInitializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
+from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -193,6 +194,7 @@ class PGDNative(ModularEvasionAttackFixedEps):
             step_size=step_size,
             loss_function=CE_LOSS,
             optimizer_cls=OptimizerFactory.create_sgd(step_size),
+            scheduler_cls=LRSchedulerFactory.create_no_scheduler(),
             manipulation_function=manipulation_function,
             gradient_processing=gradient_processing,
             initializer=initializer,
