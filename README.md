@@ -109,4 +109,5 @@ SecML has been partially developed with the support of European Union’s [ELSA 
 
 <img src="_static/assets/logos/sec4AI4sec.png" alt="sec4ai4sec" style="width:70px;"/> &nbsp;&nbsp; 
 <img src="_static/assets/logos/elsa.jpg" alt="elsa" style="width:70px;"/> &nbsp;&nbsp; 
+<img src="_static/assets/logos/coevolution.svg" alt="coevolution" style="width:70px;"/> &nbsp;&nbsp; 
 <img src="_static/assets/logos/FundedbytheEU.png" alt="europe" style="width:240px;"/>
