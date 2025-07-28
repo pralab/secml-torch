@@ -74,7 +74,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             model=model,
             inputs=samples,
             labels=labels,
-            ε=self.epsilon,
+            eps=self.epsilon,
             targeted=(self.y_target is not None),
             loss_function=self.loss_function,
         )
