@@ -64,7 +64,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
     ) -> torch.Tensor:
-        if not isinstance(model, BasePytorchClassifier):
+        if not isinstance(model, BasePytorchClassifier) and not isinstance(model, EnsembleModel):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
         device = model._get_device()
