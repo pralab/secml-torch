@@ -8,6 +8,7 @@ parts:
       - file: tutorials/machine-learning
         sections:
           - file: tutorials/01-introduction.ipynb
+          - file: tutorials/02-introduction.ipynb
 
   - caption: Contributing
     chapters:
