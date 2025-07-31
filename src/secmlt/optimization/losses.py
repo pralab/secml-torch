@@ -18,9 +18,10 @@ class LogitDifferenceLoss(_WeightedLoss):
         The loss is defined as:
 
         .. math::
-        \mathcal{L}(x, y) = -(z_y - \max_{j \ne y} z_j)
+            \mathcal{L}(x, y) = -(z_y - \max_{j \ne y} z_j)
 
         where:
+
         - :math:`z` are the model's output logits for input :math:`x`,
         - :math:`y` is the true class index,
         - :math:`z_y` is the logit corresponding to the true class,
