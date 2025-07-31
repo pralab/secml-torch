@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from foolbox.attacks.fast_minimum_norm import (
     L0FMNAttack,
     L1FMNAttack,
@@ -22,7 +20,7 @@ class FMNFoolbox(BaseFoolboxEvasionAttack):
         perturbation_model: str,
         num_steps: int,
         max_step_size: float,
-        min_step_size: Optional[float] = None,
+        min_step_size: float | None = None,
         gamma: float = 0.05,
         y_target: int | None = None,
         lb: float = 0.0,

@@ -9,7 +9,10 @@ from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttack,
     BaseEvasionAttackCreator,
 )
-from secmlt.adv.evasion.modular_attack import CE_LOSS, ModularEvasionAttackFixedEps
+from secmlt.adv.evasion.modular_attacks.modular_attack import CE_LOSS
+from secmlt.adv.evasion.modular_attacks.modular_attack_fixed_eps import (
+    ModularEvasionAttackFixedEps,
+)
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.constraints import (
@@ -200,3 +203,19 @@ class PGDNative(ModularEvasionAttackFixedEps):
             initializer=initializer,
             trackers=trackers,
         )
+
+    @classmethod
+    def get_perturbation_models(cls) -> set[str]:
+        """
+        Check if a given perturbation model is implemented.
+
+        Returns
+        -------
+        set[str]
+            Set of perturbation models available for this attack.
+        """
+        return {
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }

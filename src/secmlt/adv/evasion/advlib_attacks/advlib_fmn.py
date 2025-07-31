@@ -2,7 +2,6 @@
 
 from __future__ import annotations  # noqa: I001
 from functools import partial
-from typing import Optional
 
 from adv_lib.attacks import fmn
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
@@ -17,8 +16,8 @@ class FMNAdvLib(BaseAdvLibEvasionAttack):
         perturbation_model: str,
         num_steps: int,
         max_step_size: float,
-        min_step_size: Optional[float] = None,
-        gamma: Optional[float] = 0.05,
+        min_step_size: float | None = None,
+        gamma: float | None = 0.05,
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,

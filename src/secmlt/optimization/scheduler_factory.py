@@ -5,10 +5,9 @@ from __future__ import annotations  # noqa: I001
 import functools
 from typing import ClassVar, TYPE_CHECKING
 
-from torch.optim.lr_scheduler import LRScheduler, CosineAnnealingLR
+from torch.optim.lr_scheduler import _LRScheduler, CosineAnnealingLR
 
 if TYPE_CHECKING:
-    from typing import Optional
 
     from torch.optim import Optimizer
 
@@ -17,21 +16,21 @@ COSINE_ANNEALING = "cosine_annealing"
 NO_SCHEDULER = "no_scheduler"
 
 
-class NoScheduler(LRScheduler):
+class NoScheduler(_LRScheduler):
     """No learning rate scheduler, does nothing."""
 
-    def __init__(self, optimizer: Optimizer, last_epoch: Optional[int] = -1) -> None:
+    def __init__(self, optimizer: Optimizer, last_epoch: int | None = -1) -> None:
         """Create a NoScheduler instance."""
         super().__init__(optimizer, last_epoch)
 
-    def step(self, epoch: Optional[int] = None) -> None:
+    def step(self, epoch: int | None = None) -> None:
         """No operation."""
 
 
 class LRSchedulerFactory:
     """Creator class for learning rate schedulers."""
 
-    SCHEDULERS: ClassVar[dict[str, LRScheduler]] = {
+    SCHEDULERS: ClassVar[dict[str, _LRScheduler]] = {
         NO_SCHEDULER: NoScheduler,
         COSINE_ANNEALING: CosineAnnealingLR,
     }
@@ -40,7 +39,7 @@ class LRSchedulerFactory:
     def create_from_name(
         scheduler_name: str,
         **kwargs,
-    ) -> functools.partial[LRScheduler]:
+    ) -> functools.partial[_LRScheduler]:
         """
         Create a learning rate scheduler.
 
@@ -67,7 +66,7 @@ class LRSchedulerFactory:
         raise ValueError(msg)
 
     @staticmethod
-    def create_no_scheduler() -> functools.partial[LRScheduler]:
+    def create_no_scheduler() -> functools.partial[_LRScheduler]:
         """
         Create a NoScheduler instance.
 
@@ -79,7 +78,7 @@ class LRSchedulerFactory:
         return functools.partial(NoScheduler)
 
     @staticmethod
-    def create_cosine_annealing() -> functools.partial[LRScheduler]:
+    def create_cosine_annealing() -> functools.partial[_LRScheduler]:
         """
         Create the Cosine Annealing scheduler.
 

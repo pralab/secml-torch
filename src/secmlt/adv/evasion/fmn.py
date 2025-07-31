@@ -9,7 +9,12 @@ from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttack,
     BaseEvasionAttackCreator,
 )
-from secmlt.adv.evasion.modular_attack import LOGIT_LOSS, ModularEvasionAttackFixedEps
+from secmlt.adv.evasion.modular_attacks.modular_attack import (
+    LOGIT_LOSS,
+)
+from secmlt.adv.evasion.modular_attacks.modular_attack_min_distance import (
+    ModularEvasionAttackMinDistance,
+)
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.constraints import (
@@ -23,7 +28,7 @@ from secmlt.optimization.gradient_processing import LinearProjectionGradientProc
 from secmlt.optimization.initializer import Initializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from secmlt.trackers.trackers import Tracker
@@ -37,7 +42,7 @@ class FMN(BaseEvasionAttackCreator):
         perturbation_model: str,
         num_steps: int,
         step_size: float,
-        min_step_size: Optional[float] = None,
+        min_step_size: float | None = None,
         gamma: float = 0.05,
         y_target: int | None = None,
         lb: float = 0.0,
@@ -123,14 +128,14 @@ class FMN(BaseEvasionAttackCreator):
         return FMNNative
 
 
-class FMNNative(ModularEvasionAttackFixedEps):
+class FMNNative(ModularEvasionAttackMinDistance):
     """Native implementation of the Fast Minimum-Norm attack."""
 
     def __init__(
         self,
         perturbation_model: str,
         num_steps: int,
-        step_size: float,
+        max_step_size: float,
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
@@ -170,27 +175,49 @@ class FMNNative(ModularEvasionAttackFixedEps):
             LpPerturbationModels.LINF: LInfConstraint,
         }
 
+        # TODO create initializer with line search for the boundary
         initializer = Initializer()
         gradient_processing = LinearProjectionGradientProcessing(
             LpPerturbationModels.L2
         )
+        # TODO check if this is needed
         perturbation_constraints = [
-            perturbation_models[perturbation_model](radius=self.epsilon),
+            perturbation_models[perturbation_model](radius=float("inf")),
         ]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation(
             domain_constraints=domain_constraints,
             perturbation_constraints=perturbation_constraints,
         )
+
+        self.perturbation_model = LpPerturbationModels.get_p(perturbation_model)
+
         super().__init__(
             y_target=y_target,
             num_steps=num_steps,
-            step_size=step_size,
+            step_size=max_step_size,
             loss_function=LOGIT_LOSS,
-            optimizer_cls=OptimizerFactory.create_sgd(step_size),
-            lr_scheduler=LRSchedulerFactory.create_calr(),
+            optimizer_cls=OptimizerFactory.create_sgd(lr=max_step_size),
+            scheduler_cls=LRSchedulerFactory.create_cosine_annealing(),
             manipulation_function=manipulation_function,
             gradient_processing=gradient_processing,
             initializer=initializer,
             trackers=trackers,
         )
+
+    @classmethod
+    def get_perturbation_models(cls) -> set[str]:
+        """
+        Check if a given perturbation model is implemented.
+
+        Returns
+        -------
+        set[str]
+            Set of perturbation models available for this attack.
+        """
+        return {
+            LpPerturbationModels.L0,
+            LpPerturbationModels.L1,
+            LpPerturbationModels.L2,
+            LpPerturbationModels.LINF,
+        }

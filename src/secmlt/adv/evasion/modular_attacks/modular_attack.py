@@ -6,10 +6,9 @@ from abc import abstractmethod
 from typing import Literal, Union, TYPE_CHECKING
 import torch.nn
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
-from secmlt.utils.tensor_utils import atleast_kd
 from torch.nn import CrossEntropyLoss
+from secmlt.optimization.losses import LogitDifferenceLoss
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 
@@ -23,13 +22,14 @@ if TYPE_CHECKING:
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
     from secmlt.trackers.trackers import Tracker
-    from torch.optim import LRScheduler, Optimizer
+    from torch.optim import Optimizer, _LRScheduler
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
+    LOGIT_LOSS: LogitDifferenceLoss,
 }
 
 
@@ -43,11 +43,13 @@ class ModularEvasionAttack(BaseEvasionAttack):
         step_size: float,
         loss_function: Union[str, torch.nn.Module],
         optimizer_cls: str | partial[Optimizer],
-        scheduler_cls: str | partial[LRScheduler],
+        scheduler_cls: str | partial[_LRScheduler],
         manipulation_function: Manipulation,
         initializer: Initializer,
         gradient_processing: GradientProcessing,
         trackers: list[Tracker] | Tracker | None = None,
+        optimizer_kwargs: dict | None = None,
+        scheduler_kwargs: dict | None = None,
     ) -> None:
         """
         Create modular evasion attack.
@@ -111,6 +113,9 @@ class ModularEvasionAttack(BaseEvasionAttack):
         self.optimizer_cls = optimizer_cls
         self.scheduler_cls = scheduler_cls
 
+        self.optim_kwargs = optimizer_kwargs if optimizer_kwargs is not None else {}
+        self.scheduler_kwargs = scheduler_kwargs if scheduler_kwargs is not None else {}
+
         self._manipulation_function = manipulation_function
         self.initializer = initializer
         self.gradient_processing = gradient_processing
@@ -142,22 +147,6 @@ class ModularEvasionAttack(BaseEvasionAttack):
         self._manipulation_function = manipulation_function
 
     @classmethod
-    def get_perturbation_models(cls) -> set[str]:
-        """
-        Check if a given perturbation model is implemented.
-
-        Returns
-        -------
-        set[str]
-            Set of perturbation models available for this attack.
-        """
-        return {
-            LpPerturbationModels.L1,
-            LpPerturbationModels.L2,
-            LpPerturbationModels.LINF,
-        }
-
-    @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
         return True
 
@@ -168,7 +157,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
 
-    def _create_scheduler(self, optimizer: Optimizer, **kwargs) -> LRScheduler:
+    def _create_scheduler(self, optimizer: Optimizer, **kwargs) -> _LRScheduler:
         return self.scheduler_cls(optimizer, **kwargs)
 
     def forward_loss(
@@ -202,10 +191,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
-        optim_kwargs: dict | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        if optim_kwargs is None:
-            optim_kwargs = {}
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
@@ -221,8 +207,8 @@ class ModularEvasionAttack(BaseEvasionAttack):
             delta = self.initializer(samples.data)
         delta.requires_grad = True
 
-        optimizer = self._create_optimizer(delta, **optim_kwargs)
-        scheduler = self._create_scheduler(optimizer, **optim_kwargs)
+        optimizer = self._create_optimizer(delta, **self.optim_kwargs)
+        scheduler = self._create_scheduler(optimizer, **self.scheduler_kwargs)
         return self._run_loop(
             model,
             delta,
@@ -231,7 +217,6 @@ class ModularEvasionAttack(BaseEvasionAttack):
             optimizer,
             scheduler,
             multiplier,
-            optim_kwargs=optim_kwargs,
         )
 
     @abstractmethod
@@ -242,9 +227,8 @@ class ModularEvasionAttack(BaseEvasionAttack):
         samples: torch.Tensor,
         target: torch.Tensor,
         optimizer: Optimizer,
-        scheduler: LRScheduler,
+        scheduler: _LRScheduler,
         multiplier: int,
-        optim_kwargs: dict | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Abstract run loop for the attack."""
         raise NotImplementedError

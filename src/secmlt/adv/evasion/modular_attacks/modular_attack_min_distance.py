@@ -1,4 +1,4 @@
-"""Implementation of fixed-epsilon iterative attacks with customizable components."""
+"""Implementation of min-distance iterative attacks with customizable components."""
 
 from __future__ import annotations  # noqa: I001
 
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
     from torch.optim import LRScheduler, Optimizer
 
 
-class ModularEvasionAttackFixedEps(ModularEvasionAttack):
-    """Modular evasion attack for fixed-epsilon attacks."""
+class ModularEvasionAttackMinDistance(ModularEvasionAttack):
+    """Modular evasion attack for min-distance attacks."""
 
     def __init__(
         self,
@@ -35,6 +35,8 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         initializer: Initializer,
         gradient_processing: GradientProcessing,
         trackers: list[Tracker] | Tracker | None = None,
+        gamma: float = 0.05,
+        min_step_size: float | None = None,
     ) -> None:
         """
         Create modular evasion attack.
@@ -62,6 +64,12 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         trackers : list[Tracker] | Tracker | None, optional
             Trackers for monitoring the attack, by default None.
         """
+        self.gamma = gamma
+        self.min_step_size = (
+            min_step_size if min_step_size is not None else step_size / 100
+        )
+        scheduler_kwargs = {"T_max": num_steps, "eta_min": self.min_step_size}
+        optimizer_kwargs = None
         super().__init__(
             y_target=y_target,
             num_steps=num_steps,
@@ -73,6 +81,8 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
             initializer=initializer,
             gradient_processing=gradient_processing,
             trackers=trackers,
+            optimizer_kwargs=optimizer_kwargs,
+            scheduler_kwargs=scheduler_kwargs,
         )
 
     def _run_loop(
@@ -86,8 +96,10 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         multiplier: int,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         x_adv, delta = self.manipulation_function(samples, delta)
-        best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
+        best_distances = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
+        epsilons = torch.full((x_adv.shape[0],), torch.inf, device=x_adv.device)
+        # TODO step size alpha for changing eps
 
         for i in range(self.num_steps):
             scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
@@ -99,6 +111,7 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
             scheduler.step(epoch=i)
+            # TODO epsilon constraint
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,
@@ -114,16 +127,37 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                         grad_before_processing.detach().cpu().data,
                     )
 
-            # keep perturbation with highest loss
+            distances = torch.norm(
+                delta.detach().cpu().flatten(start_dim=1),
+                p=self.perturbation_model,
+                dim=-1,
+            )
+
+            is_adv = (
+                scores.argmax(dim=1) == target
+                if multiplier == -1
+                else scores.argmax(dim=1) != target
+            )
+
+            # keep perturbation with smallest distance and adv
             best_delta.data = torch.where(
-                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
+                atleast_kd(
+                    torch.logical_and(
+                        is_adv,
+                        distances.detach() < best_distances,
+                    ),
+                    k=len(delta.shape),
+                ),
                 delta.data,
                 best_delta.data,
             )
-            best_losses.data = torch.where(
-                losses.detach().cpu() < best_losses,
-                losses.detach().cpu(),
-                best_losses.data,
+
+            # save best distances found for successful adv
+            best_distances.data = torch.norm(
+                best_delta.detach().cpu().flatten(start_dim=1),
+                p=self.perturbation_model,
+                dim=-1,
             )
+
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
         return x_adv, best_delta
