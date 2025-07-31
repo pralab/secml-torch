@@ -99,7 +99,8 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         best_distances = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
         epsilons = torch.full((x_adv.shape[0],), torch.inf, device=x_adv.device)
-        # TODO step size alpha for changing eps
+        # TODO step size gamma for changing eps
+        # TODO step size alpha for decaying gamma
 
         for i in range(self.num_steps):
             scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
@@ -135,7 +136,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
 
             is_adv = (
                 scores.argmax(dim=1) == target
-                if multiplier == -1
+                if multiplier == 1
                 else scores.argmax(dim=1) != target
             )
 
@@ -153,10 +154,17 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             )
 
             # save best distances found for successful adv
-            best_distances.data = torch.norm(
-                best_delta.detach().cpu().flatten(start_dim=1),
-                p=self.perturbation_model,
-                dim=-1,
+            best_distances.data = torch.where(
+                torch.logical_and(
+                    is_adv,
+                    distances.detach() < best_distances,
+                ),
+                torch.norm(
+                    best_delta.detach().cpu().flatten(start_dim=1),
+                    p=self.perturbation_model,
+                    dim=-1,
+                ),
+                best_distances,
             )
 
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
