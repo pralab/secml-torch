@@ -4,7 +4,6 @@ from __future__ import annotations  # noqa: I001
 from abc import ABC, abstractmethod
 from typing import Union, TYPE_CHECKING
 
-from secmlt.utils.tensor_utils import atleast_kd
 import torch
 
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
