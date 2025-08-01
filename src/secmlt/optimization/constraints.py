@@ -10,6 +10,7 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.models.data_processing.identity_data_processing import (
     IdentityDataProcessing,
 )
+from secmlt.utils.tensor_utils import atleast_kd
 
 if TYPE_CHECKING:
     from secmlt.models.data_processing.data_processing import DataProcessing
@@ -134,7 +135,7 @@ class LpConstraint(Constraint, ABC):
         self.p = LpPerturbationModels.get_p(p)
         if not isinstance(radius, torch.Tensor):
             radius = torch.tensor(radius, dtype=torch.float32)
-        self.radius = radius.unsqueeze(0) if radius.ndim == 0 else radius
+        self._radius = radius.unsqueeze(0) if radius.ndim == 0 else radius
 
     @abstractmethod
     def project(self, x: torch.Tensor) -> torch.Tensor:
@@ -173,6 +174,25 @@ class LpConstraint(Constraint, ABC):
             proj_delta = self.project(x).flatten(start_dim=1)
             delta = torch.where(to_normalize, proj_delta, x.flatten(start_dim=1))
         return delta.view(x.shape)
+
+    @property
+    def radius(self) -> torch.Tensor:
+        """Get radius of the constraint."""
+        return self._radius
+
+    @radius.setter
+    def radius(self, value: float | torch.Tensor = 0) -> None:
+        """
+        Set the radius of the constraint.
+
+        Parameters
+        ----------
+        value : float | torch.Tensor
+            Radius to set.
+        """
+        if not isinstance(value, torch.Tensor):
+            value = torch.tensor(value, dtype=torch.float32)
+        self._radius = value.unsqueeze(0) if value.ndim == 0 else value
 
 
 class L2Constraint(LpConstraint):
@@ -246,7 +266,8 @@ class LInfConstraint(LpConstraint):
         torch.Tensor
             Tensor projected onto the Linf constraint.
         """
-        return x.clamp(min=-self.radius, max=self.radius)
+        radius = atleast_kd(self.radius, k=len(x.shape))
+        return x.clamp(min=-radius, max=radius)
 
 
 class L1Constraint(LpConstraint):
@@ -320,13 +341,13 @@ class L0Constraint(LpConstraint):
             Radius of the constraint, by default 0.0.
             Optionally, can be a tensor with the same shape as the input.
         """
-        if int(radius) != radius:
+        if radius != float("inf") and int(radius) != radius:
             msg = (
                 f"Pass either an integer or a float with no decimals for "
                 f"the radius of an L0 constraint (current value: {radius})."
             )
             raise ValueError(msg)
-        super().__init__(radius=radius, center=center, p=LpPerturbationModels.L0)
+        super().__init__(radius=radius, p=LpPerturbationModels.L0)
 
     def project(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -345,12 +366,23 @@ class L0Constraint(LpConstraint):
         torch.Tensor
             Samples projected onto L0 constraint.
         """
-        flat_x = x.flatten(start_dim=1)
-        _, topk_indices = torch.topk(flat_x.abs(), k=int(self.radius), dim=1)
-        # zero out all values and scatter the top k values back
-        proj = torch.zeros_like(flat_x)
-        proj.scatter_(1, topk_indices, flat_x.gather(1, topk_indices))
-        return proj.view_as(x)
+        flat_x = x.flatten(start_dim=1)  # (batch_size, d)
+
+        d = flat_x.shape[1]
+        self.radius = torch.ones((flat_x.shape[0],)) * self.radius
+        radius = torch.where(
+            self.radius == float("inf"),
+            torch.full_like(torch.tensor(self.radius), d),
+            self.radius,
+        )
+        radius = radius.to(dtype=torch.long)  # ensure it's integer-valued
+        thresholds = (
+            flat_x.abs()
+            .topk(k=int(radius.max().item()), dim=1)
+            .values.gather(1, (radius.unsqueeze(1) - 1).clamp_(min=0))
+        )
+        flat_x[flat_x.abs() < thresholds] = 0
+        return (flat_x).view_as(x)
 
 
 class QuantizationConstraint(InputSpaceConstraint):
