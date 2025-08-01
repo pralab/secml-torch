@@ -317,14 +317,32 @@ class L1Constraint(LpConstraint):
         """
         original_shape = x.shape
         x = x.view(x.shape[0], -1)
-        mask = (torch.norm(x, p=1, dim=1) < self.radius).float().unsqueeze(1)
+
+        # ensure radius has shape (batch_size, 1)
+        radius = self.radius.view(-1, 1)
+
+        # check for no-projection case
+        mask = (torch.norm(x, p=1, dim=1, keepdim=True) < radius).float()
+
+        # sort absolute values
         mu, _ = torch.sort(torch.abs(x), dim=1, descending=True)
         cumsum = torch.cumsum(mu, dim=1)
-        arange = torch.arange(1, x.shape[1] + 1, device=x.device)
-        rho, _ = torch.max((mu * arange > (cumsum - self.radius)) * arange, dim=1)
-        theta = (cumsum[torch.arange(x.shape[0]), rho.cpu() - 1] - self.radius) / rho
+        arange = torch.arange(1, x.shape[1] + 1, device=x.device).view(1, -1)
+
+        # compute threshold index rho
+        condition = mu * arange > (cumsum - radius)
+        rho, _ = torch.max(condition * arange, dim=1)
+
+        # compute theta
+        idx = rho.clamp(min=1) - 1  # to index cumsum (avoid negative index)
+        theta = (cumsum[torch.arange(x.shape[0]), idx] - radius.squeeze(1)) / rho.clamp(
+            min=1
+        ).to(x.dtype)
+
+        # compute projection
         proj = (torch.abs(x) - theta.unsqueeze(1)).clamp(min=0)
         x = mask * x + (1 - mask) * proj * torch.sign(x)
+
         return x.view(original_shape)
 
 
