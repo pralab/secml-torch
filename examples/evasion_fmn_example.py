@@ -8,7 +8,6 @@ from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from secmlt.trackers.trackers import (
     LossTracker,
     PerturbationNormTracker,
-    PredictionTracker,
 )
 
 device = "cpu"
@@ -27,12 +26,11 @@ print(f"test accuracy: {accuracy.item():.2f}")
 # Create and run attack
 num_steps = 100
 step_size = 0.3
-perturbation_model = LpPerturbationModels.L2
+perturbation_model = LpPerturbationModels.L0
 y_target = None
 
 trackers = [
     LossTracker(),
-    PredictionTracker(),
     PerturbationNormTracker(perturbation_model),
 ]
 
@@ -46,10 +44,6 @@ native_attack = FMN(
 )
 
 native_adv_ds = native_attack(model, test_loader)
-
-for tracker in trackers:
-    print(tracker.name)
-    print(tracker.get())
 
 # Test accuracy on adversarial examples
 n_robust_accuracy = Accuracy()(model, native_adv_ds)
@@ -82,15 +76,15 @@ print("robust accuracy foolbox: ", f_robust_accuracy)
 al_robust_accuracy = Accuracy()(model, al_adv_ds)
 print("robust accuracy AdvLib: ", al_robust_accuracy)
 
-# native_data, native_labels = next(iter(native_adv_ds))
-# f_data, f_labels = next(iter(f_adv_ds))
-# real_data, real_labels = next(iter(test_loader))
+native_data, native_labels = next(iter(native_adv_ds))
+f_data, f_labels = next(iter(f_adv_ds))
+adv_lib_data, advlib_labels = next(iter(al_adv_ds))
+real_data, real_labels = next(iter(test_loader))
 
-
-# distance = torch.linalg.norm(
-#     native_data.detach().cpu().flatten(start_dim=1)
-#     - f_data.detach().cpu().flatten(start_dim=1),
-#     ord=LpPerturbationModels.pert_models[perturbation_model],
-#     dim=1,
-# )
-# print("Solutions are :", distance, f"{perturbation_model} distant")
+p = LpPerturbationModels.get_p(perturbation_model)
+distances_native = (real_data - native_data).flatten(start_dim=1).norm(p=p, dim=-1)
+distances_foolbox = (real_data - f_data).flatten(start_dim=1).norm(p=p, dim=-1)
+distances_advlib = (real_data - adv_lib_data).flatten(start_dim=1).norm(p=p, dim=-1)
+print("Native distances: ", distances_native)
+print("Foolbox distances: ", distances_foolbox)
+print("AdvLib distances: ", distances_advlib)
