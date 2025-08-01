@@ -384,21 +384,22 @@ class L0Constraint(LpConstraint):
         torch.Tensor
             Samples projected onto L0 constraint.
         """
+        if torch.all(self.radius == 0):
+            return torch.zeros_like(x)
         flat_x = x.flatten(start_dim=1)  # (batch_size, d)
 
         d = flat_x.shape[1]
-        self.radius = torch.ones((flat_x.shape[0],)) * self.radius
+        self.radius = torch.ones((flat_x.shape[0],)) * torch.minimum(
+            self.radius, torch.tensor(d)
+        )
         radius = torch.where(
             self.radius == float("inf"),
             torch.full_like(torch.tensor(self.radius), d),
             self.radius,
         )
         radius = radius.to(dtype=torch.long)  # ensure it's integer-valued
-        thresholds = (
-            flat_x.abs()
-            .topk(k=int(radius.max().item()), dim=1)
-            .values.gather(1, (radius.unsqueeze(1) - 1).clamp_(min=0))
-        )
+        top_k_max = flat_x.abs().topk(k=int(radius.max().item()), dim=1).values
+        thresholds = top_k_max.gather(1, (radius.unsqueeze(1) - 1).clamp_(min=0))
         flat_x[flat_x.abs() < thresholds] = 0
         return (flat_x).view_as(x)
 
