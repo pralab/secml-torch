@@ -130,3 +130,28 @@ class AdditiveManipulation(Manipulation):
         delta: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         return x + delta, delta
+
+    def __call__(
+        self,
+        x: torch.Tensor,
+        delta: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Apply the additive manipulation to the input data.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input data.
+        delta : torch.Tensor
+            Perturbation to apply.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Perturbed data and perturbation after the
+            application of constraints.
+        """
+        x_adv, delta = super().__call__(x, delta)
+        delta.data = x_adv.data - x.data
+        return x_adv, delta
