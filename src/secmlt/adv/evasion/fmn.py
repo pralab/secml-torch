@@ -177,7 +177,6 @@ class FMNNative(ModularEvasionAttackMinDistance):
             LpPerturbationModels.LINF: LInfConstraint,
         }
 
-        # TODO(Maura): create initializer with line search for the boundary
         initializer = Initializer()
         gradient_processing = LinearProjectionGradientProcessing(
             LpPerturbationModels.L2
