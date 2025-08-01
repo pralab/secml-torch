@@ -98,7 +98,7 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
             grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
-            scheduler.step(epoch=i)
+            scheduler.step()
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,
