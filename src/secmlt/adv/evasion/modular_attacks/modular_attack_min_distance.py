@@ -2,7 +2,10 @@
 
 from __future__ import annotations  # noqa: I001
 
+import math
 from typing import Union, TYPE_CHECKING
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.optimization.losses import LogitDifferenceLoss
 import torch.nn
 from secmlt.adv.evasion.modular_attacks.modular_attack import ModularEvasionAttack
 from secmlt.manipulations.manipulation import Manipulation
@@ -37,6 +40,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         trackers: list[Tracker] | Tracker | None = None,
         gamma: float = 0.05,
         min_step_size: float | None = None,
+        min_gamma: float = 0.001,
     ) -> None:
         """
         Create modular evasion attack.
@@ -65,6 +69,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             Trackers for monitoring the attack, by default None.
         """
         self.gamma = gamma
+        self.min_gamma = min_gamma
         self.min_step_size = (
             min_step_size if min_step_size is not None else step_size / 100
         )
@@ -99,10 +104,14 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         best_distances = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
         epsilons = torch.full((x_adv.shape[0],), torch.inf, device=x_adv.device)
-        # TODO step size gamma for changing eps
-        # TODO step size alpha for decaying gamma
+        gamma = self.gamma
+        adv_found = torch.zeros(samples.shape[0], dtype=torch.bool, device=x_adv.device)
 
         for i in range(self.num_steps):
+            x_adv.data, delta.data = self.manipulation_function(
+                samples.data,
+                delta.data,
+            )
             scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
             losses *= multiplier
             loss = losses.sum()
@@ -112,11 +121,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()
             scheduler.step(epoch=i)
-            # TODO epsilon constraint
-            x_adv.data, delta.data = self.manipulation_function(
-                samples.data,
-                delta.data,
-            )
+
             if self.trackers is not None:
                 for tracker in self.trackers:
                     tracker.track(
@@ -140,13 +145,51 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                 else scores.argmax(dim=1) != target
             )
 
+            adv_found = torch.logical_or(adv_found, is_adv)
+
+            # update epsilons
+            if self.perturbation_model == LpPerturbationModels.L0:
+                epsilons = torch.where(
+                    is_adv,
+                    torch.minimum(epsilons - 1, best_distances, epsilons * (1 - gamma)),
+                    torch.maximum(epsilons * (1 + gamma), epsilons + 1),
+                )
+            else:
+                logits_difference_loss = LogitDifferenceLoss()(scores, target)
+                distance_to_boundary = logits_difference_loss / delta.data.flatten(
+                    start_dim=1
+                ).norm(p=self.perturbation_model_dual, dim=-1)
+                epsilons = torch.where(
+                    is_adv,
+                    torch.minimum(best_distances, epsilons * (1 - gamma)),
+                    torch.where(
+                        adv_found,
+                        epsilons * (1 + gamma),
+                        best_distances + distance_to_boundary,
+                    ),
+                )
+
+            epsilons = torch.clamp(epsilons, 0)
+
+            # cosine annealing for gamma
+            gamma = (
+                self.min_gamma
+                + (self.gamma - self.min_gamma)
+                * (1 + math.cos(math.pi * i / self.num_steps))
+                / 2
+            )
+
+            self.manipulation_function.perturbation_constraints[0].radius = epsilons
+
+            condition = torch.logical_and(
+                is_adv,
+                distances.detach() < best_distances,
+            )
+
             # keep perturbation with smallest distance and adv
             best_delta.data = torch.where(
                 atleast_kd(
-                    torch.logical_and(
-                        is_adv,
-                        distances.detach() < best_distances,
-                    ),
+                    condition,
                     k=len(delta.shape),
                 ),
                 delta.data,
@@ -155,10 +198,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
 
             # save best distances found for successful adv
             best_distances.data = torch.where(
-                torch.logical_and(
-                    is_adv,
-                    distances.detach() < best_distances,
-                ),
+                condition,
                 torch.norm(
                     best_delta.detach().cpu().flatten(start_dim=1),
                     p=self.perturbation_model,
@@ -167,5 +207,8 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                 best_distances,
             )
 
+        # do not apply constraint on last operation
+        self.manipulation_function.perturbation_constraints = []
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
+
         return x_adv, best_delta

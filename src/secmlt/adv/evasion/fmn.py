@@ -180,7 +180,6 @@ class FMNNative(ModularEvasionAttackMinDistance):
         gradient_processing = LinearProjectionGradientProcessing(
             LpPerturbationModels.L2
         )
-        # TODO check if this is needed
         perturbation_constraints = [
             perturbation_models[perturbation_model](radius=float("inf")),
         ]
@@ -191,6 +190,7 @@ class FMNNative(ModularEvasionAttackMinDistance):
         )
 
         self.perturbation_model = LpPerturbationModels.get_p(perturbation_model)
+        self.perturbation_model_dual = LpPerturbationModels.get_dual(perturbation_model)
 
         super().__init__(
             y_target=y_target,
