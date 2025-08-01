@@ -4,6 +4,8 @@ from __future__ import annotations  # noqa: I001
 
 import importlib.util
 
+import torch
+
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttack,
@@ -175,13 +177,13 @@ class FMNNative(ModularEvasionAttackMinDistance):
             LpPerturbationModels.LINF: LInfConstraint,
         }
 
-        # TODO create initializer with line search for the boundary
+        # TODO(Maura): create initializer with line search for the boundary
         initializer = Initializer()
         gradient_processing = LinearProjectionGradientProcessing(
             LpPerturbationModels.L2
         )
         perturbation_constraints = [
-            perturbation_models[perturbation_model](radius=float("inf")),
+            perturbation_models[perturbation_model](radius=torch.inf)
         ]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation(

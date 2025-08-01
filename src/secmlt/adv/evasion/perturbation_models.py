@@ -11,7 +11,12 @@ class LpPerturbationModels:
     L2 = "l2"
     LINF = "linf"
     pert_models: ClassVar[dict[str, float]] = {L0: 0, L1: 1, L2: 2, LINF: float("inf")}
-    dual_norms: ClassVar[dict[str, float]] = {L0: None, L1: LINF, L2: 2, LINF: 1}
+    dual_norms: ClassVar[dict[str, float]] = {
+        L0: None,
+        L1: float("inf"),
+        L2: 2,
+        LINF: 1,
+    }
 
     @classmethod
     def is_perturbation_model_available(cls, perturbation_model: str) -> bool:

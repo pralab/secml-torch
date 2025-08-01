@@ -108,11 +108,42 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         adv_found = torch.zeros(samples.shape[0], dtype=torch.bool, device=x_adv.device)
 
         for i in range(self.num_steps):
+            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
+            is_adv = (
+                scores.argmax(dim=1) == target
+                if multiplier == 1
+                else scores.argmax(dim=1) != target
+            )
+            distances = torch.norm(
+                delta.detach().cpu().flatten(start_dim=1),
+                p=self.perturbation_model,
+                dim=-1,
+            )
+            condition = torch.logical_and(
+                is_adv,
+                distances.detach() < best_distances,
+            )
+
+            # keep perturbation with smallest distance and adv
+            best_delta.data = torch.where(
+                atleast_kd(
+                    condition,
+                    k=len(delta.shape),
+                ),
+                delta.data,
+                best_delta.data,
+            )
+
+            # save best distances found for successful adv
+            best_distances.data = torch.where(
+                condition,
+                distances,
+                best_distances,
+            )
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,
             )
-            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
             losses *= multiplier
             loss = losses.sum()
             optimizer.zero_grad()
@@ -133,26 +164,19 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                         grad_before_processing.detach().cpu().data,
                     )
 
-            distances = torch.norm(
-                delta.detach().cpu().flatten(start_dim=1),
-                p=self.perturbation_model,
-                dim=-1,
-            )
-
-            is_adv = (
-                scores.argmax(dim=1) == target
-                if multiplier == 1
-                else scores.argmax(dim=1) != target
-            )
-
             adv_found = torch.logical_or(adv_found, is_adv)
 
             # update epsilons
-            if self.perturbation_model == LpPerturbationModels.L0:
+            if self.perturbation_model == 0:
                 epsilons = torch.where(
                     is_adv,
-                    torch.minimum(epsilons - 1, best_distances, epsilons * (1 - gamma)),
-                    torch.maximum(epsilons * (1 + gamma), epsilons + 1),
+                    torch.minimum(
+                        epsilons - 1,
+                        torch.minimum(
+                            best_distances, torch.floor(epsilons * (1 - gamma))
+                        ),
+                    ),
+                    torch.maximum(torch.floor(epsilons * (1 + gamma)), epsilons + 1),
                 )
             else:
                 logits_difference_loss = LogitDifferenceLoss()(scores, target)
@@ -178,37 +202,9 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                 * (1 + math.cos(math.pi * i / self.num_steps))
                 / 2
             )
-
             self.manipulation_function.perturbation_constraints[0].radius = epsilons
 
-            condition = torch.logical_and(
-                is_adv,
-                distances.detach() < best_distances,
-            )
-
-            # keep perturbation with smallest distance and adv
-            best_delta.data = torch.where(
-                atleast_kd(
-                    condition,
-                    k=len(delta.shape),
-                ),
-                delta.data,
-                best_delta.data,
-            )
-
-            # save best distances found for successful adv
-            best_distances.data = torch.where(
-                condition,
-                torch.norm(
-                    best_delta.detach().cpu().flatten(start_dim=1),
-                    p=self.perturbation_model,
-                    dim=-1,
-                ),
-                best_distances,
-            )
-
         # do not apply constraint on last operation
-        self.manipulation_function.perturbation_constraints = []
+        self.manipulation_function.perturbation_constraints[0].radius = torch.inf
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
-
         return x_adv, best_delta
