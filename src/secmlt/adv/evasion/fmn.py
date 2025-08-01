@@ -49,7 +49,7 @@ class FMN(BaseEvasionAttackCreator):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        backend: str = Backends.FOOLBOX,
+        backend: str = Backends.NATIVE,
         trackers: list[Tracker] | None = None,
         **kwargs,
     ) -> BaseEvasionAttack:

@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, TensorDataset
 def dataset() -> TensorDataset:
     """Create fake dataset."""
     data = torch.randn(100, 3, 32, 32).clamp(0, 1)
-    labels = torch.randint(0, 10, (100,))
+    labels = torch.randint(0, 9, (100,))
     return TensorDataset(data, labels)
 
 
@@ -47,7 +47,7 @@ def adv_loaders() -> list[DataLoader[tuple[torch.Tensor, ...]]]:
     """
     # Create a list of dummy adversarial example loaders for testing
     loaders = []
-    adv_labels = torch.randint(0, 10, (100,))
+    adv_labels = torch.randint(0, 9, (100,))
     for _ in range(3):
         adv_data = torch.randn(100, 3, 32, 32)
         adv_dataset = TensorDataset(adv_data, adv_labels)

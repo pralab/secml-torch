@@ -4,7 +4,6 @@ from __future__ import annotations  # noqa: I001
 
 import math
 from typing import Union, TYPE_CHECKING
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.optimization.losses import LogitDifferenceLoss
 import torch.nn
 from secmlt.adv.evasion.modular_attacks.modular_attack import ModularEvasionAttack
