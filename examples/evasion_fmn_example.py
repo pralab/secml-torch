@@ -26,7 +26,7 @@ print(f"test accuracy: {accuracy.item():.2f}")
 # Create and run attack
 num_steps = 100
 step_size = 0.3
-perturbation_model = LpPerturbationModels.L0
+perturbation_model = LpPerturbationModels.LINF
 y_target = None
 
 trackers = [
