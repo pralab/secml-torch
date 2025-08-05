@@ -1,3 +1,7 @@
+  <p align="center">
+  <img src="docs/logo_sfondo_bianco.svg" alt=secml-torch style="width:500px;"/> &nbsp;&nbsp;
+</p>
+
  # SecML-Torch: A Library for Robustness Evaluation of Deep Learning Models
 
 [![pypi](https://img.shields.io/badge/pypi-latest-blue)](https://pypi.org/pypi/secml-torch/)
