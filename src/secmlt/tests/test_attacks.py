@@ -131,3 +131,23 @@ def test_fmn_attack(
                     y_target=y_target,
                     backend=backend,
                 )
+
+
+@pytest.mark.parametrize("attack_class", [PGD, FMN])
+def test_invalid_perturbation_models(attack_class):
+    """Test that an error is raised for invalid perturbation models."""
+
+    common_args = {
+        "perturbation_model": "invalid_perturbation_model",
+        "num_steps": 10,
+        "step_size": 0.1,
+        "backend": "native",  # Backends.NATIVE
+    }
+
+    if attack_class is PGD:
+        common_args["epsilon"] = 0.5
+
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented perturbation model."
+    ):
+        attack_class(**common_args)
