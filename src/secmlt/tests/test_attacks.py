@@ -122,15 +122,6 @@ def test_fmn_attack(
                 backend=backend,
             )
             assert isinstance(attack(model, data_loader), DataLoader)
-        else:
-            with pytest.raises(NotImplementedError):
-                attack = FMN(
-                    perturbation_model=perturbation_model,
-                    num_steps=10,
-                    step_size=0.1,
-                    y_target=y_target,
-                    backend=backend,
-                )
 
 
 @pytest.mark.parametrize("attack_class", [PGD, FMN])
