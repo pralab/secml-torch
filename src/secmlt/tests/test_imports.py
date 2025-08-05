@@ -33,18 +33,15 @@ from secmlt.adv.evasion.pgd import PGD
     ],
 )
 def test_imports(backend, attack, attack_args):
-    # Only test import failure simulation for FMN
-    if attack is FMN:
-        missing_module = "foolbox" if backend == Backends.FOOLBOX else "adv_lib"
+    missing_module = "foolbox" if backend == Backends.FOOLBOX else "adv_lib"
 
-        with mock.patch(
+    with (
+        mock.patch(
             "importlib.util.find_spec",
             side_effect=lambda name, _: None
             if name == missing_module
             else mock.DEFAULT,
-        ):
-            with pytest.raises(ImportError):
-                attack(backend=backend, **attack_args)
-    else:
-        # Non-FMN attacks should not raise ImportError
+        ),
+        pytest.raises(ImportError),
+    ):
         attack(backend=backend, **attack_args)
