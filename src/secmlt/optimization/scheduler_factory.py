@@ -8,10 +8,8 @@ from typing import ClassVar, TYPE_CHECKING
 from torch.optim.lr_scheduler import _LRScheduler, CosineAnnealingLR
 
 if TYPE_CHECKING:
-
     from torch.optim import Optimizer
 
-LR_SCHEDULER = "lr_scheduler"
 COSINE_ANNEALING = "cosine_annealing"
 NO_SCHEDULER = "no_scheduler"
 
@@ -61,6 +59,8 @@ class LRSchedulerFactory:
         """
         if scheduler_name == COSINE_ANNEALING:
             return LRSchedulerFactory.create_cosine_annealing()
+        if scheduler_name == NO_SCHEDULER:
+            return LRSchedulerFactory.create_no_scheduler()
         msg = f"Scheduler not found. Use one of: \
             {list(LRSchedulerFactory.SCHEDULERS.keys())}"
         raise ValueError(msg)
@@ -81,10 +81,6 @@ class LRSchedulerFactory:
     def create_cosine_annealing() -> functools.partial[_LRScheduler]:
         """
         Create the Cosine Annealing scheduler.
-
-        Parameters
-        ----------
-        TODO
 
         Returns
         -------
