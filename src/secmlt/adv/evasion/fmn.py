@@ -113,7 +113,7 @@ class FMN(BaseEvasionAttackCreator):
             from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 
             return FMNFoolbox
-        msg = "Foolbox extra not installed"
+        msg = "foolbox extra not installed"
         raise ImportError(msg)
 
     @staticmethod
@@ -122,7 +122,7 @@ class FMN(BaseEvasionAttackCreator):
             from secmlt.adv.evasion.advlib_attacks import FMNAdvLib
 
             return FMNAdvLib
-        msg = "Adversarial Library extra not installed"
+        msg = "adv_lib extra not installed"
         raise ImportError(msg)
 
     @staticmethod

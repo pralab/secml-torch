@@ -109,7 +109,7 @@ class PGD(BaseEvasionAttackCreator):
             from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 
             return PGDFoolbox
-        msg = "Foolbox extra not installed"
+        msg = "foolbox extra not installed"
         raise ImportError(msg)
 
     @staticmethod
@@ -118,7 +118,7 @@ class PGD(BaseEvasionAttackCreator):
             from secmlt.adv.evasion.advlib_attacks import PGDAdvLib
 
             return PGDAdvLib
-        msg = "Adversarial Library extra not installed"
+        msg = "adv_lib extra not installed"
         raise ImportError(msg)
 
     @staticmethod

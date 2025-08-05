@@ -1,39 +1,21 @@
 from unittest import mock
 
 import pytest
-from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.pgd import PGD
 
 
 @pytest.mark.parametrize(
-    "backend",
-    [Backends.FOOLBOX, Backends.ADVLIB],
-)
-@pytest.mark.parametrize(
-    ["attack", "attack_args"],
+    "missing_module, impl_getter",
     [
-        (
-            PGD,
-            {
-                "perturbation_model": "linf",
-                "num_steps": 10,
-                "step_size": 0.1,
-                "epsilon": 0.5,
-            },
-        ),
-        (
-            FMN,
-            {
-                "perturbation_model": "l2",
-                "num_steps": 10,
-                "step_size": 0.1,
-            },
-        ),
+        ("foolbox", FMN._get_foolbox_implementation),
+        ("adv_lib", FMN._get_advlib_implementation),
+        ("foolbox", PGD._get_foolbox_implementation),
+        ("adv_lib", PGD._get_advlib_implementation),
     ],
 )
-def test_imports(backend, attack, attack_args):
-    missing_module = "foolbox" if backend == Backends.FOOLBOX else "adv_lib"
+def test_attack_importerror_on_missing_dependency(missing_module, impl_getter):
+    expected_msg = f"{missing_module} extra not installed"
 
     with (
         mock.patch(
@@ -42,6 +24,6 @@ def test_imports(backend, attack, attack_args):
             if name == missing_module
             else mock.DEFAULT,
         ),
-        pytest.raises(ImportError),
+        pytest.raises(ImportError, match=expected_msg),
     ):
-        attack(backend=backend, **attack_args)
+        impl_getter()
