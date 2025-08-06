@@ -1,0 +1,18 @@
+
+article.bd-article > p[align="center"] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+
+article.bd-article > p[align="center"] > img {
+  background: none !important;
+}
+.bd-cover > p[align="center"] {
+  background: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}

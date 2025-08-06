@@ -1,3 +1,7 @@
+  <p align="center">
+  <img src="_static/assets/logos/logo.svg" alt=secml-torch style="width:250px;"/> &nbsp;&nbsp;
+</p>
+
  # SecML-Torch: A Library for Robustness Evaluation of Deep Learning Models
 
 [![pypi](https://img.shields.io/badge/pypi-latest-blue)](https://pypi.org/pypi/secml-torch/)
@@ -75,34 +79,6 @@ For more detailed usage instructions and examples, please refer to the [official
 We welcome contributions from the research community to expand the library's capabilities or add new features.
 If you would like to contribute to SecMLT, please follow our [contribution guidelines](https://github.com/pralab/secml-torch/blob/main/CONTRIBUTING.md).
 
-### Contributors
-
-<table>
-<tr>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/maurapintor>
-            <img src=https://avatars.githubusercontent.com/u/23276849?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=Maura Pintor/>
-            <br />
-            <sub style="font-size:14px;padding:10px"><b>maurapintor</b></sub>
-        </a>
-    </td>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/zangobot>
-            <img src=https://avatars.githubusercontent.com/u/6831380?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=zangobot/>
-            <br />
-            <sub style="font-size:14px;padding:10px"><b>zangobot</b></sub>
-        </a>
-    </td>
-    <td align="center" style="word-wrap: break-word; width: 150.0; height: 150.0">
-        <a href=https://github.com/lucascionis>
-            <img src=https://avatars.githubusercontent.com/u/46931538?v=4 width="50;"  style="border-radius:50%;align-items:center;justify-content:center;overflow:hidden;padding:10px" alt=lucascionis/>
-            <br />
-            <sub style="font-size:14px;padding:10px"><b>lucascionis</b></sub>
-        </a>
-    </td>
-</tr>
-</table>
 
 ## Acknowledgements
 SecML has been partially developed with the support of European Union’s [ELSA – European Lighthouse on Secure and Safe AI](https://elsa-ai.eu), Horizon Europe, grant agreement No. 101070617, [Sec4AI4Sec - Cybersecurity for AI-Augmented Systems](https://www.sec4ai4sec-project.eu), Horizon Europe, grant agreement No. 101120393, and [CoEvolution - A Comprehensive Trustworthy Framework for Connected Machine Learning and Secure Interconnected AI Solutions](https://coevolution-project.eu/), Horizon Europe, grant agreement No. 101168560.
