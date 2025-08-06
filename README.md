@@ -1,5 +1,5 @@
   <p align="center">
-  <img src="docs/logo.svg" alt=secml-torch style="width:250px;"/> &nbsp;&nbsp;
+  <img src="_static/assets/logos/logo.svg" alt=secml-torch style="width:250px;"/> &nbsp;&nbsp;
 </p>
 
  # SecML-Torch: A Library for Robustness Evaluation of Deep Learning Models

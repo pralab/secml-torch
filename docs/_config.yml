@@ -27,8 +27,19 @@ repository:
 
 # Add GitHub buttons to your book
 # See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+
 html:
   use_issues_button: true
+  use_repository_button: true
+  favicon: _static/assets/logos/logo_icon.ico
+  css:
+    - css/custom.css
+
+
+logo: _static/assets/logos/logo.svg
+
+html_theme_options:
+  logo_only: true
   use_repository_button: true
 
 sphinx:

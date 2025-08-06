@@ -1,0 +1,13 @@
+/* 1) Rimuove il rettangolo grigio dal paragrafo che centra l’immagine */
+article.bd-article > p[align="center"] {
+  background: transparent !important;
+  box-shadow: none      !important;
+  border: none          !important;
+  padding: 0            !important;
+  margin-bottom: 1rem   !important; /* se vuoi un po’ di spazio sotto il logo */
+}
+
+/* 2) Assicura che anche l’immagine non abbia alcun bg */
+article.bd-article > p[align="center"] > img {
+  background: transparent !important;
+}
