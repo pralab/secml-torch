@@ -36,7 +36,7 @@ html:
     - css/custom.css
 
 
-logo: _static/assets/logos/logo.svg
+logo: _static/assets/logos/logo.png
 
 html_theme_options:
   logo_only: true
