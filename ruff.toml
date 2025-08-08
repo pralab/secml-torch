@@ -25,7 +25,8 @@ ignore = [
     "ISC001",  # implicitly concatenated string literals on one line
     "UP007", # conflict non-pep8 annotations
     "S311",  # random generator not suitable for cryptographic purposes,
-    "PLC0415"  # import should be at the top-level of a file
+    "PLC0415",  # import should be at the top-level of a file
+    "A002"  # Function argument `input` is shadowing a Python builtin
     ]
 
 [lint.per-file-ignores]

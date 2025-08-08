@@ -84,7 +84,7 @@ To generate documentation RST files for new modules, follow these steps:
 
    ```bash
     cd ..  # skip if you are already in the main project folder
-    sphinx-build -M html ./docs/source ./docs/build
+    sphinx-build -M html ./docs/reference ./docs/build
     ```
 
 By following these steps, you can ensure that your new modules are properly documented and integrated into the SecMLT documentation. A preview will be generated when you create the pull request.

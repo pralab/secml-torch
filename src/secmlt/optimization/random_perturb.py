@@ -45,7 +45,6 @@ class RandomPerturbBase(ABC):
         perturbations = self.get_perturb(x)
         return self._constraint(
             radius=self.epsilon,
-            center=torch.zeros_like(perturbations),
         ).project(perturbations)
 
     @abstractmethod
