@@ -11,3 +11,4 @@ ipython
 jupyter-book>0.15
 matplotlib
 numpy
+docutils=0.17.1
