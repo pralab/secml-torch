@@ -43,6 +43,8 @@ html_theme_options:
   use_repository_button: true
 
 sphinx:
+  config:
+    bibtex_reference_style: author_year
   extra_extensions:
     - sphinx.ext.autodoc
     - sphinx.ext.autosummary
