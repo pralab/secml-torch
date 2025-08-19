@@ -104,8 +104,18 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                 delta.data,
             )
             if self.trackers is not None:
-                for tracker in self.trackers:
-                    tracker.track(
+                if isinstance(self.trackers, list):
+                    for tracker in self.trackers:
+                        tracker.track(
+                            i,
+                            losses.detach().cpu().data,
+                            scores.detach().cpu().data,
+                            x_adv.detach().cpu().data,
+                            delta.detach().cpu().data,
+                            grad_before_processing.detach().cpu().data,
+                        )
+                else:
+                    self.trackers.track(
                         i,
                         losses.detach().cpu().data,
                         scores.detach().cpu().data,
