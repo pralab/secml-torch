@@ -50,11 +50,16 @@ class TensorboardTracker(Tracker):
     def end_tracking(self) -> None:
         """End tracking for current batch and update global sample offset."""
         # Calculate batch size from first tracker
-        if self.trackers and hasattr(self.trackers[0], 'tracked') and isinstance(self.trackers[0].tracked, list) \
-                and len(self.trackers[0].tracked) > 0:
-            batch_size = self.trackers[0].tracked[0].shape[0]  # Get batch size from first iteration
+        if (
+            self.trackers
+            and hasattr(self.trackers[0], "tracked")
+            and isinstance(self.trackers[0].tracked, list)
+            and len(self.trackers[0].tracked) > 0
+        ):
+            # Get batch size from first iteration
+            batch_size = self.trackers[0].tracked[0].shape[0]
             self._global_sample_offset += batch_size
-        
+
         for tracker in self.trackers:
             tracker.end_tracking()
 

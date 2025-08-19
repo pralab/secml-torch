@@ -168,20 +168,20 @@ class BaseEvasionAttack:
         original_labels = []
         for samples, labels in data_loader:
             # Initialize tracking for new batch
-            if hasattr(self, 'trackers') and self.trackers is not None:
+            if hasattr(self, "trackers") and self.trackers is not None:
                 if isinstance(self.trackers, list):
                     for tracker in self.trackers:
                         tracker.init_tracking()
                 else:
                     self.trackers.init_tracking()
-            
+
             try:
                 x_adv, _ = self._run(model, samples, labels)
                 adversarials.append(x_adv)
                 original_labels.append(labels)
             finally:
                 # End tracking for current batch
-                if hasattr(self, 'trackers') and self.trackers is not None:
+                if hasattr(self, "trackers") and self.trackers is not None:
                     if isinstance(self.trackers, list):
                         for tracker in self.trackers:
                             tracker.end_tracking()

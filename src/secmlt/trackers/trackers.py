@@ -62,14 +62,18 @@ class Tracker(ABC):
 
     def init_tracking(self) -> None:
         """Initialize tracking for a new batch (clears the per-batch buffer)."""
-        if hasattr(self, 'tracked') and isinstance(self.tracked, list):
+        if hasattr(self, "tracked") and isinstance(self.tracked, list):
             self.tracked = []
-        elif hasattr(self, 'tracked'):
+        elif hasattr(self, "tracked"):
             self.tracked = None
 
     def end_tracking(self) -> None:
         """Finalize the current batch and append its history to `_batches`."""
-        if hasattr(self, 'tracked') and isinstance(self.tracked, list) and len(self.tracked) > 0:
+        if (
+            hasattr(self, "tracked")
+            and isinstance(self.tracked, list)
+            and len(self.tracked) > 0
+        ):
             if not hasattr(self, "_batches"):
                 self._batches = []
             self._batches.append(torch.stack(self.tracked, -1))
@@ -77,9 +81,9 @@ class Tracker(ABC):
 
     def reset(self) -> None:
         """Clear all tracking history across all batches."""
-        if hasattr(self, 'tracked') and isinstance(self.tracked, list):
+        if hasattr(self, "tracked") and isinstance(self.tracked, list):
             self.tracked = []
-        elif hasattr(self, 'tracked'):
+        elif hasattr(self, "tracked"):
             self.tracked = None
         self._batches = []
 
@@ -95,7 +99,11 @@ class Tracker(ABC):
             dimension (dim=0) and iterations are along the last dimension.
         """
         if not self._batches:
-            if hasattr(self, 'tracked') and isinstance(self.tracked, list) and len(self.tracked) > 0:
+            if (
+                hasattr(self, "tracked")
+                and isinstance(self.tracked, list)
+                and len(self.tracked) > 0
+            ):
                 return torch.stack(self.tracked, -1)
             return torch.empty(0)
         if len(self._batches) == 1:
@@ -112,7 +120,11 @@ class Tracker(ABC):
             Returns the last tracked element if anything was tracked.
         """
         # Prefer the most recent value from the ongoing batch
-        if hasattr(self, "tracked") and isinstance(self.tracked, list) and len(self.tracked) > 0:
+        if (
+            hasattr(self, "tracked")
+            and isinstance(self.tracked, list)
+            and len(self.tracked) > 0
+        ):
             return self.tracked[-1]
         # Otherwise take the last iteration from the last finalized batch
         if hasattr(self, "_batches") and len(self._batches) > 0:
