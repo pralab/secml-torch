@@ -2,14 +2,15 @@
 
 from __future__ import annotations  # noqa: I001
 
+from abc import abstractmethod
 from typing import Literal, Union, TYPE_CHECKING
 import torch.nn
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import Manipulation
-from secmlt.utils.tensor_utils import atleast_kd
 from torch.nn import CrossEntropyLoss
+from secmlt.optimization.losses import LogitDifferenceLoss
 from secmlt.optimization.optimizer_factory import OptimizerFactory
+from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 
 
 if TYPE_CHECKING:
@@ -21,19 +22,19 @@ if TYPE_CHECKING:
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
     from secmlt.trackers.trackers import Tracker
-    from torch.optim import Optimizer
-
+    from torch.optim import Optimizer, _LRScheduler
 
 CE_LOSS = "ce_loss"
 LOGIT_LOSS = "logit_loss"
 
 LOSS_FUNCTIONS = {
     CE_LOSS: CrossEntropyLoss,
+    LOGIT_LOSS: LogitDifferenceLoss,
 }
 
 
-class ModularEvasionAttackFixedEps(BaseEvasionAttack):
-    """Modular evasion attack for fixed-epsilon attacks."""
+class ModularEvasionAttack(BaseEvasionAttack):
+    """Modular evasion attack."""
 
     def __init__(
         self,
@@ -42,10 +43,13 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         step_size: float,
         loss_function: Union[str, torch.nn.Module],
         optimizer_cls: str | partial[Optimizer],
+        scheduler_cls: str | partial[_LRScheduler],
         manipulation_function: Manipulation,
         initializer: Initializer,
         gradient_processing: GradientProcessing,
         trackers: list[Tracker] | Tracker | None = None,
+        optimizer_kwargs: dict | None = None,
+        scheduler_kwargs: dict | None = None,
     ) -> None:
         """
         Create modular evasion attack.
@@ -62,6 +66,8 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             Loss function to minimize.
         optimizer_cls : str | partial[Optimizer]
             Algorithm for solving the attack optimization problem.
+        scheduler_cls : str | partial[LRScheduler]
+            Learning rate scheduler for the optimizer.
         manipulation_function : Manipulation
             Manipulation function to perturb the inputs.
         initializer : Initializer
@@ -98,7 +104,17 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                 lr=step_size,
             )
 
+        if isinstance(scheduler_cls, str):
+            scheduler_cls = LRSchedulerFactory.create_scheduler_from_name(
+                scheduler_cls,
+                optimizer_cls=optimizer_cls,
+            )
+
         self.optimizer_cls = optimizer_cls
+        self.scheduler_cls = scheduler_cls
+
+        self.optim_kwargs = optimizer_kwargs if optimizer_kwargs is not None else {}
+        self.scheduler_kwargs = scheduler_kwargs if scheduler_kwargs is not None else {}
 
         self._manipulation_function = manipulation_function
         self.initializer = initializer
@@ -141,22 +157,6 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         self._loss_function = loss_function
 
     @classmethod
-    def get_perturbation_models(cls) -> set[str]:
-        """
-        Check if a given perturbation model is implemented.
-
-        Returns
-        -------
-        set[str]
-            Set of perturbation models available for this attack.
-        """
-        return {
-            LpPerturbationModels.L1,
-            LpPerturbationModels.L2,
-            LpPerturbationModels.LINF,
-        }
-
-    @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
         return True
 
@@ -166,6 +166,9 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
 
     def _create_optimizer(self, delta: torch.Tensor, **kwargs) -> Optimizer:
         return self.optimizer_cls([delta], lr=self.step_size, **kwargs)
+
+    def _create_scheduler(self, optimizer: Optimizer, **kwargs) -> _LRScheduler:
+        return self.scheduler_cls(optimizer, **kwargs)
 
     def forward_loss(
         self, model: BaseModel, x: torch.Tensor, target: torch.Tensor
@@ -198,10 +201,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
-        optim_kwargs: dict | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        if optim_kwargs is None:
-            optim_kwargs = {}
         multiplier = 1 if self.y_target is not None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
@@ -217,46 +217,28 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             delta = self.initializer(samples.data)
         delta.requires_grad = True
 
-        optimizer = self._create_optimizer(delta, **optim_kwargs)
-        x_adv, delta = self.manipulation_function(samples, delta)
-        x_adv.data, delta.data = self.manipulation_function(samples.data, delta.data)
-        best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
-        best_delta = torch.zeros_like(samples)
+        optimizer = self._create_optimizer(delta, **self.optim_kwargs)
+        scheduler = self._create_scheduler(optimizer, **self.scheduler_kwargs)
+        return self._run_loop(
+            model,
+            delta,
+            samples,
+            target,
+            optimizer,
+            scheduler,
+            multiplier,
+        )
 
-        for i in range(self.num_steps):
-            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
-            losses *= multiplier
-            loss = losses.sum()
-            optimizer.zero_grad()
-            loss.backward()
-            grad_before_processing = delta.grad.data
-            delta.grad.data = self.gradient_processing(delta.grad.data)
-            optimizer.step()
-            x_adv.data, delta.data = self.manipulation_function(
-                samples.data,
-                delta.data,
-            )
-            if self.trackers is not None:
-                for tracker in self.trackers:
-                    tracker.track(
-                        i,
-                        losses.detach().cpu().data,
-                        scores.detach().cpu().data,
-                        x_adv.detach().cpu().data,
-                        delta.detach().cpu().data,
-                        grad_before_processing.detach().cpu().data,
-                    )
-
-            # keep perturbation with highest loss
-            best_delta.data = torch.where(
-                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
-                delta.data,
-                best_delta.data,
-            )
-            best_losses.data = torch.where(
-                losses.detach().cpu() < best_losses,
-                losses.detach().cpu(),
-                best_losses.data,
-            )
-        x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
-        return x_adv, best_delta
+    @abstractmethod
+    def _run_loop(
+        self,
+        model: BaseModel,
+        delta: torch.Tensor,
+        samples: torch.Tensor,
+        target: torch.Tensor,
+        optimizer: Optimizer,
+        scheduler: _LRScheduler,
+        multiplier: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Abstract run loop for the attack."""
+        raise NotImplementedError

@@ -23,10 +23,10 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         advlib_attack: Callable[..., torch.Tensor],
         epsilon: float = torch.inf,
         y_target: int | None = None,
-        loss_function: str = "ce",
         lb: float = 0.0,
         ub: float = 1.0,
         trackers: type[TRACKER_TYPE] | None = None,
+        **kwargs,
     ) -> None:
         """
         Wrap Adversarial Library attacks.
@@ -42,8 +42,6 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         y_target : int | None, optional
             The target label for the attack. If None, the attack is
             untargeted. The default value is None.
-        loss_function : str, optional
-            The loss function to be used for the attack. The default value is "ce".
         lb : float, optional
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
@@ -57,7 +55,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         self.epsilon = epsilon
         self.y_target = y_target
         self.trackers = trackers
-        self.loss_function = loss_function
+        self.kwargs = kwargs
         super().__init__()
 
     @classmethod
@@ -80,13 +78,14 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         else:
             labels = labels.to(device)
             targets = labels
+        if self.epsilon < float(torch.inf):
+            self.kwargs.update({"ε": self.epsilon})
         advx = self.advlib_attack(
             model=model,
             inputs=samples,
             labels=targets,
-            ε=self.epsilon,
             targeted=(self.y_target is not None),
-            loss_function=self.loss_function,
+            **self.kwargs,
         )
 
         delta = advx - samples

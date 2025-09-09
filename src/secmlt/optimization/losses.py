@@ -11,7 +11,7 @@ class LogitDifferenceLoss(_WeightedLoss):
         """Create a LogitDifferenceLoss instance."""
         super().__init__(weight=weight, reduction=reduction)
 
-    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:  # noqa: A002
+    def forward(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         r"""
         Compute the difference between input and target logits.
 

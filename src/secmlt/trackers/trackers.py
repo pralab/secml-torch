@@ -29,6 +29,7 @@ class Tracker(ABC):
         self.name = name
         self.tracked = None
         self.tracked_type = tracker_type
+        self._batches = []
 
     @abstractmethod
     def track(
@@ -59,6 +60,33 @@ class Tracker(ABC):
             The gradient of delta at the given iteration.
         """
 
+    def init_tracking(self) -> None:
+        """Initialize tracking for a new batch (clears the per-batch buffer)."""
+        if hasattr(self, "tracked") and isinstance(self.tracked, list):
+            self.tracked = []
+        elif hasattr(self, "tracked"):
+            self.tracked = None
+
+    def end_tracking(self) -> None:
+        """Finalize the current batch and append its history to `_batches`."""
+        if (
+            hasattr(self, "tracked")
+            and isinstance(self.tracked, list)
+            and len(self.tracked) > 0
+        ):
+            if not hasattr(self, "_batches"):
+                self._batches = []
+            self._batches.append(torch.stack(self.tracked, -1))
+            self.tracked = []
+
+    def reset(self) -> None:
+        """Clear all tracking history across all batches."""
+        if hasattr(self, "tracked") and isinstance(self.tracked, list):
+            self.tracked = []
+        elif hasattr(self, "tracked"):
+            self.tracked = None
+        self._batches = []
+
     def get(self) -> torch.Tensor:
         """
         Get the current tracking history.
@@ -66,9 +94,21 @@ class Tracker(ABC):
         Returns
         -------
         torch.Tensor
-            History of tracked parameters.
+            History of tracked parameters. When multiple batches were tracked,
+            returns a tensor where batches are concatenated along the sample
+            dimension (dim=0) and iterations are along the last dimension.
         """
-        return torch.stack(self.tracked, -1)
+        if not self._batches:
+            if (
+                hasattr(self, "tracked")
+                and isinstance(self.tracked, list)
+                and len(self.tracked) > 0
+            ):
+                return torch.stack(self.tracked, -1)
+            return torch.empty(0)
+        if len(self._batches) == 1:
+            return self._batches[0]
+        return torch.cat(self._batches, dim=0)
 
     def get_last_tracked(self) -> Union[None, torch.Tensor]:
         """
@@ -79,8 +119,16 @@ class Tracker(ABC):
         None | torch.Tensor
             Returns the last tracked element if anything was tracked.
         """
-        if self.tracked is not None:
-            return self.get()[..., -1]  # return last tracked value
+        # Prefer the most recent value from the ongoing batch
+        if (
+            hasattr(self, "tracked")
+            and isinstance(self.tracked, list)
+            and len(self.tracked) > 0
+        ):
+            return self.tracked[-1]
+        # Otherwise take the last iteration from the last finalized batch
+        if hasattr(self, "_batches") and len(self._batches) > 0:
+            return self._batches[-1][..., -1]
         return None
 
 

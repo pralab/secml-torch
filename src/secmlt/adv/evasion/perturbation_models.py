@@ -11,6 +11,12 @@ class LpPerturbationModels:
     L2 = "l2"
     LINF = "linf"
     pert_models: ClassVar[dict[str, float]] = {L0: 0, L1: 1, L2: 2, LINF: float("inf")}
+    dual_norms: ClassVar[dict[str, float]] = {
+        L0: None,
+        L1: float("inf"),
+        L2: 2,
+        LINF: 1,
+    }
 
     @classmethod
     def is_perturbation_model_available(cls, perturbation_model: str) -> bool:
@@ -51,5 +57,30 @@ class LpPerturbationModels:
         """
         if cls.is_perturbation_model_available(perturbation_model):
             return cls.pert_models[perturbation_model]
+        msg = "Perturbation model not implemented"
+        raise ValueError(msg)
+
+    @classmethod
+    def get_dual(cls, perturbation_model: str) -> float:
+        """
+        Get the float representation of p from the given string.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            One of the strings defined in PerturbationModels.pert_models.
+
+        Returns
+        -------
+        float
+            The float representation of p, to use. e.g., in torch.norm(p=...).
+
+        Raises
+        ------
+        ValueError
+            Raises ValueError if the norm given is not in PerturbationModels.pert_models
+        """
+        if cls.is_perturbation_model_available(perturbation_model):
+            return cls.dual_norms[perturbation_model]
         msg = "Perturbation model not implemented"
         raise ValueError(msg)
