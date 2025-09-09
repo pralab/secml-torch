@@ -131,11 +131,13 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
         self._manipulation_function = manipulation_function
 
     @property
-    def loss_function(self):
+    def loss_function(self) -> torch.nn.Module:
+        """Get the loss function of the attack."""
         return self._loss_function
 
     @loss_function.setter
-    def loss_function(self, loss_function):
+    def loss_function(self, loss_function: torch.nn.Module) -> None:
+        """Set the loss function of the attack."""
         self._loss_function = loss_function
 
     @classmethod

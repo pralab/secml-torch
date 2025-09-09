@@ -1,10 +1,26 @@
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import torch
+import torchvision
+from robustbench.utils import download_gdrive
+from secmlt.adv.backends import Backends
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion.pgd import PGD, PGDNative
+from secmlt.metrics.classification import Accuracy
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.optimization.losses import LogitDifferenceLoss
+from secmlt.trackers import (
+    GradientNormTracker,
+    LossTracker,
+)
 from torch import nn
+from torch.utils.data import DataLoader, Subset
 
 
 class MNISTModel(nn.Module):
     def __init__(self):
-        super(MNISTModel, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=(3, 3))
         self.conv2 = nn.Conv2d(32, 32, kernel_size=(3, 3))
         self.pool1 = nn.MaxPool2d(kernel_size=(2, 2))
@@ -33,21 +49,14 @@ class MNISTModel(nn.Module):
         x = self.dropout(x)
 
         x = torch.relu(self.linear2(x))
-        x = self.linear3(x)
+        return self.linear3(x)
 
-        return x
-
-
-import os
-
-import torch
-from robustbench.utils import download_gdrive
 
 MODEL_ID = "1s7Kfa2Bs5nY2zLd6dVAxUqNbCNQhPYxs"
 
 model = MNISTModel()
-path = os.path.join("models", "mnist_distilled.pt")
-if not os.path.exists(path):
+path = Path("models/mnist_distilled.pt")
+if not path.exists():
     download_gdrive(MODEL_ID, path)
 state_dict = torch.load(
     path, map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -55,8 +64,6 @@ state_dict = torch.load(
 model.load_state_dict(state_dict)
 model.eval()
 
-import torchvision
-from torch.utils.data import DataLoader, Subset
 
 test_dataset = torchvision.datasets.MNIST(
     transform=torchvision.transforms.ToTensor(),
@@ -67,15 +74,6 @@ test_dataset = torchvision.datasets.MNIST(
 test_dataset = Subset(test_dataset, list(range(3)))
 test_loader = DataLoader(test_dataset, batch_size=10, shuffle=False)
 
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.adv.evasion.pgd import PGD, PGDNative
-from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from secmlt.trackers import (
-    GradientNormTracker,
-    LossTracker,
-)
 
 device = "cpu"
 
@@ -113,7 +111,6 @@ native_adv_ds = native_attack(secmlt_model, test_loader)
 robust_accuracy = accuracy = Accuracy()(secmlt_model, native_adv_ds)
 print(f"robust accuracy: {robust_accuracy.item():.2f}")
 
-import matplotlib.pyplot as plt
 
 fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(10, 5))
 
@@ -130,8 +127,6 @@ axes[1].set_ylabel("Gradient Norm")
 axes[1].set_title("Gradient Norm during PGD attack")
 
 plt.show()
-
-from secmlt.optimization.losses import LogitDifferenceLoss
 
 
 class PGDWithDifferenceOfLogits(PGDNative):
