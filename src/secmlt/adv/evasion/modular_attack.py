@@ -90,7 +90,7 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
                 )
                 raise ValueError(msg)
         else:
-            self.loss_function = loss_function
+            self._loss_function = loss_function
 
         if isinstance(optimizer_cls, str):
             optimizer_cls = OptimizerFactory.create_from_name(
@@ -129,6 +129,14 @@ class ModularEvasionAttackFixedEps(BaseEvasionAttack):
             The manipulation function to be used in the attack.
         """
         self._manipulation_function = manipulation_function
+
+    @property
+    def loss_function(self):
+        return self._loss_function
+
+    @loss_function.setter
+    def loss_function(self, loss_function):
+        self._loss_function = loss_function
 
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
