@@ -8,6 +8,7 @@ logo: logo.svg
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
 execute:
+  timeout: 1000
   execute_notebooks: force
 
 # Define the name of the latex output file for PDF builds
@@ -43,6 +44,8 @@ html_theme_options:
   use_repository_button: true
 
 sphinx:
+  config:
+    bibtex_reference_style: author_year
   extra_extensions:
     - sphinx.ext.autodoc
     - sphinx.ext.autosummary
