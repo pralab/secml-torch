@@ -9,6 +9,9 @@ parts:
         sections:
           - file: tutorials/01-introduction.ipynb
           - file: tutorials/02-introduction.ipynb
+      - file: tutorials/evasion-attacks
+        sections:
+          - file: tutorials/03-evasion-attacks-introduction.ipynb
 
   - caption: Contributing
     chapters:
