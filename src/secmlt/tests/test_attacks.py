@@ -139,6 +139,6 @@ def test_invalid_perturbation_models(attack_class):
         common_args["epsilon"] = 0.5
 
     with pytest.raises(
-        NotImplementedError, match="Unsupported or not-implemented perturbation model."
+        NotImplementedError, match=r"Unsupported or not-implemented perturbation model."
     ):
         attack_class(**common_args)
