@@ -12,6 +12,7 @@ parts:
       - file: tutorials/evasion-attacks
         sections:
           - file: tutorials/03-evasion-attacks-introduction.ipynb
+          - file: tutorials/07-random-inits.ipynb
 
   - caption: Contributing
     chapters:
