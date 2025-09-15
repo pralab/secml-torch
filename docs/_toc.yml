@@ -13,6 +13,8 @@ parts:
         sections:
           - file: tutorials/03-evasion-attacks-introduction.ipynb
           - file: tutorials/04-pgd-tensorboard-tracking.ipynb
+          - file: tutorials/05-multiple-random-inits.ipynb
+
   - caption: Contributing
     chapters:
       - file: contributing_link
