@@ -10,6 +10,7 @@ logo: logo.svg
 execute:
   timeout: 1000
   execute_notebooks: force
+  stderr_output: remove
 
 # Define the name of the latex output file for PDF builds
 latex:
@@ -57,3 +58,6 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
+  config:
+    autosectionlabel_prefix_document: true
+    nb_execution_timeout: 1000
