@@ -11,8 +11,8 @@ parts:
           - file: tutorials/02-introduction.ipynb
       - file: tutorials/evasion-attacks
         sections:
+          - file: tutorials/03-evasion-attacks-introduction.ipynb
           - file: tutorials/04-pgd-tensorboard-tracking.ipynb
-
   - caption: Contributing
     chapters:
       - file: contributing_link
