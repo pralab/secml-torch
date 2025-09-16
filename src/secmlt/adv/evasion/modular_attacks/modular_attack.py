@@ -195,6 +195,34 @@ class ModularEvasionAttack(BaseEvasionAttack):
         losses = self.loss_function(scores, target)
         return scores, losses
 
+    def _loss_and_grad(
+        self,
+        model: BaseModel,
+        x: torch.Tensor,
+        target: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Compute loss and gradient.
+
+        Parameters
+        ----------
+        model : BaseModel
+            Model used by the attack run.
+        x : torch.Tensor
+            Input sample.
+        target : torch.Tensor
+            Target for computing the loss.
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor]
+            Loss and gradient.
+        """
+        scores, losses = self.forward_loss(model=model, x=x, target=target)
+        loss = torch.mean(losses)
+        loss.backward()
+        return scores, losses
+
     def _run(
         self,
         model: BaseModel,
