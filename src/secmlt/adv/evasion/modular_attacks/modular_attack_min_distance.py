@@ -117,7 +117,13 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             )
             delta_before_processing = delta.detach().clone()
             optimizer.zero_grad()
-            scores, losses = self._loss_and_grad(model=model, x=x_adv, target=target)
+            scores, losses = self._loss_and_grad(
+                model=model,
+                samples=samples,
+                delta=delta,
+                target=target,
+                multiplier=multiplier,
+            )
             is_adv = (
                 scores.argmax(dim=1) == target
                 if multiplier == 1
