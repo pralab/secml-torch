@@ -97,8 +97,13 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
             # capture gradient before processing and before any optimizer changes
             delta_before_processing = delta.detach().clone()
             optimizer.zero_grad()
-            scores, losses = self._loss_and_grad(model=model, x=x_adv, target=target)
-            losses *= multiplier
+            scores, losses = self._loss_and_grad(
+                model=model,
+                samples=samples,
+                delta=delta,
+                target=target,
+                multiplier=multiplier,
+            )
             # keep perturbation with best loss
             best_delta.data = torch.where(
                 atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
@@ -110,6 +115,7 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                 losses.detach().cpu(),
                 best_losses.data,
             )
+
             grad_before_processing = delta.grad.data
             delta.grad.data = self.gradient_processing(delta.grad.data)
             optimizer.step()

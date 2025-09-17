@@ -198,30 +198,44 @@ class ModularEvasionAttack(BaseEvasionAttack):
     def _loss_and_grad(
         self,
         model: BaseModel,
-        x: torch.Tensor,
+        samples: torch.Tensor,
+        delta: torch.Tensor,
         target: torch.Tensor,
+        multiplier: int,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Compute loss and gradient.
+        Compute scores and losses, then backward to get delta.grad.
 
-        Parameters
-        ----------
-        model : BaseModel
-            Model used by the attack run.
-        x : torch.Tensor
-            Input sample.
-        target : torch.Tensor
-            Target for computing the loss.
-
-        Returns
-        -------
-        tuple[torch.Tensor, torch.Tensor]
-            Loss and gradient.
+        Compute scores and per-sample losses for x_adv,
+        then backward the summed loss to populate delta.grad (gradient w.r.t. delta).
+        Returns (scores, losses) where losses is per-sample (detached).
+        Assumes optimizer.zero_grad() has been called outside.
         """
-        scores, losses = self.forward_loss(model=model, x=x, target=target)
-        loss = torch.mean(losses)
-        loss.backward()
-        return scores, losses
+        # Ensure delta requires grad and is leaf so autograd will populate delta.grad
+        # (If delta is not a leaf, set requires_grad on a clone and operate on that.)
+        if not delta.requires_grad:
+            delta.requires_grad_()
+
+        # Ensure we start with zeroed grads
+        if delta.grad is not None:
+            delta.grad.detach_()
+            delta.grad.zero_()
+
+        # Build the adversarial example from samples and delta
+        x_adv, _ = self.manipulation_function(
+            samples, delta
+        )  # must be a function of delta
+
+        # Forward: get scores and per-sample losses
+        scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
+        losses = losses * multiplier  # keep same convention as before
+
+        # Backward on summed loss -> populates delta.grad
+        loss_sum = losses.sum()
+        loss_sum.backward()
+
+        # At this point delta.grad is the gradient of loss_sum w.r.t. delta
+        return scores, losses.detach()
 
     def _run(
         self,
