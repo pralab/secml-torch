@@ -14,6 +14,8 @@ parts:
           - file: tutorials/03-evasion-attacks-introduction.ipynb
           - file: tutorials/04-pgd-tensorboard-tracking.ipynb
           - file: tutorials/05-multiple-random-inits.ipynb
+          - file: tutorials/06-pgd_with_custom_loss.ipynb
+          - file: tutorials/07-adaptive_attacks.ipynb
 
   - caption: Contributing
     chapters:
