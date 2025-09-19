@@ -16,7 +16,6 @@ execute:
 latex:
   latex_documents:
     targetname: book.tex
-  latex_engine: pdflatex   # or xelatex/lualatex if you need unicode fonts
 
 
 # Add a bibtex file so that we can create citations
@@ -64,3 +63,7 @@ sphinx:
   config:
     autosectionlabel_prefix_document: true
     nb_execution_timeout: 1000
+    # Fix LaTeX issues
+    latex_elements:
+      # Avoid missing .ind index file
+      printindex: ''
