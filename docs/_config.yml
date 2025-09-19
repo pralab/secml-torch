@@ -1,9 +1,9 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: SecML-Torch Documentation
+title: SecML-Torch
 author: Maura Pintor, Luca Demetrio
-logo: logo.svg
+logo: _static/assets/logos/logo.png
 
 # Force re-execution of notebooks on each build.
 # See https://jupyterbook.org/content/execute.html
@@ -16,6 +16,8 @@ execute:
 latex:
   latex_documents:
     targetname: book.tex
+  latex_engine: pdflatex   # or xelatex/lualatex if you need unicode fonts
+
 
 # Add a bibtex file so that we can create citations
 bibtex_bibfiles:
@@ -46,6 +48,7 @@ html_theme_options:
 
 sphinx:
   config:
+    project: "SecML-Torch"
     bibtex_reference_style: author_year
   extra_extensions:
     - sphinx.ext.autodoc
