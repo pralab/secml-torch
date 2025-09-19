@@ -96,7 +96,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
                 )
                 raise ValueError(msg)
         else:
-            self.loss_function = loss_function
+            self._loss_function = loss_function
 
         if isinstance(optimizer_cls, str):
             optimizer_cls = OptimizerFactory.create_from_name(
@@ -146,6 +146,16 @@ class ModularEvasionAttack(BaseEvasionAttack):
         """
         self._manipulation_function = manipulation_function
 
+    @property
+    def loss_function(self) -> torch.nn.Module:
+        """Get the loss function of the attack."""
+        return self._loss_function
+
+    @loss_function.setter
+    def loss_function(self, loss_function: torch.nn.Module) -> None:
+        """Set the loss function of the attack."""
+        self._loss_function = loss_function
+
     @classmethod
     def _trackers_allowed(cls) -> Literal[True]:
         return True
@@ -184,6 +194,48 @@ class ModularEvasionAttack(BaseEvasionAttack):
         target = target.to(scores.device)
         losses = self.loss_function(scores, target)
         return scores, losses
+
+    def _loss_and_grad(
+        self,
+        model: BaseModel,
+        samples: torch.Tensor,
+        delta: torch.Tensor,
+        target: torch.Tensor,
+        multiplier: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """
+        Compute scores and losses, then backward to get delta.grad.
+
+        Compute scores and per-sample losses for x_adv,
+        then backward the summed loss to populate delta.grad (gradient w.r.t. delta).
+        Returns (scores, losses) where losses is per-sample (detached).
+        Assumes optimizer.zero_grad() has been called outside.
+        """
+        # Ensure delta requires grad and is leaf so autograd will populate delta.grad
+        # (If delta is not a leaf, set requires_grad on a clone and operate on that.)
+        if not delta.requires_grad:
+            delta.requires_grad_()
+
+        # Ensure we start with zeroed grads
+        if delta.grad is not None:
+            delta.grad.detach_()
+            delta.grad.zero_()
+
+        # Build the adversarial example from samples and delta
+        x_adv, _ = self.manipulation_function(
+            samples, delta
+        )  # must be a function of delta
+
+        # Forward: get scores and per-sample losses
+        scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
+        losses = losses * multiplier  # keep same convention as before
+
+        # Backward on summed loss -> populates delta.grad
+        loss_sum = losses.sum()
+        loss_sum.backward()
+
+        # At this point delta.grad is the gradient of loss_sum w.r.t. delta
+        return scores, losses.detach()
 
     def _run(
         self,

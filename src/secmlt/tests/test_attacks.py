@@ -9,6 +9,9 @@ from torch.utils.data import DataLoader
 
 from src.secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from src.secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
+from src.secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
+
+PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
 
 
 @pytest.mark.parametrize(
@@ -70,6 +73,38 @@ def test_pgd_attack(
                     y_target=y_target,
                     backend=backend,
                 )
+
+
+def test_eot_mixin(model, data_loader):
+    """Test that the EoT mixin can be added to PGD and works as expected."""
+    k = 3
+    radius = 0.02
+
+    # take a tiny subset for speed
+
+    attack = PGDEoT(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.3,
+        num_steps=3,  # keep it cheap
+        step_size=0.1,
+        random_start=True,
+        y_target=None,
+        backend="native",
+        eot_samples=k,
+        eot_radius=radius,
+    )
+
+    # check inheritance
+    assert isinstance(attack, PGDNative)
+    assert isinstance(attack, EoTGradientMixin)
+
+    # check parameters
+    assert attack.eot_samples == k
+    assert attack.eot_radius == radius
+
+    # run attack
+    adv_loader = attack(model, data_loader)
+    assert isinstance(adv_loader, DataLoader)
 
 
 @pytest.mark.parametrize(

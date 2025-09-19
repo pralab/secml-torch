@@ -90,19 +90,37 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         best_delta = torch.zeros_like(samples)
 
         for i in range(self.num_steps):
-            scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
-            losses *= multiplier
-            loss = losses.sum()
-            optimizer.zero_grad()
-            loss.backward()
-            grad_before_processing = delta.grad.data
-            delta.grad.data = self.gradient_processing(delta.grad.data)
-            optimizer.step()
-            scheduler.step()
             x_adv.data, delta.data = self.manipulation_function(
                 samples.data,
                 delta.data,
             )
+            # capture gradient before processing and before any optimizer changes
+            delta_before_processing = delta.detach().clone()
+            optimizer.zero_grad()
+            scores, losses = self._loss_and_grad(
+                model=model,
+                samples=samples,
+                delta=delta,
+                target=target,
+                multiplier=multiplier,
+            )
+            # keep perturbation with best loss
+            best_delta.data = torch.where(
+                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
+                delta_before_processing.data,
+                best_delta.data,
+            )
+            best_losses.data = torch.where(
+                losses.detach().cpu() < best_losses,
+                losses.detach().cpu(),
+                best_losses.data,
+            )
+
+            grad_before_processing = delta.grad.data
+            delta.grad.data = self.gradient_processing(delta.grad.data)
+            optimizer.step()
+            scheduler.step()
+
             if self.trackers is not None:
                 if isinstance(self.trackers, list):
                     for tracker in self.trackers:
@@ -124,16 +142,5 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                         grad_before_processing.detach().cpu().data,
                     )
 
-            # keep perturbation with highest loss
-            best_delta.data = torch.where(
-                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
-                delta.data,
-                best_delta.data,
-            )
-            best_losses.data = torch.where(
-                losses.detach().cpu() < best_losses,
-                losses.detach().cpu(),
-                best_losses.data,
-            )
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
         return x_adv, best_delta
