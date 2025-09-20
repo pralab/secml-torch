@@ -46,7 +46,7 @@ SecML-Torch (SecMLT) is a PyTorch-native toolkit for evaluating and improving ad
 - **Robustness evaluation tools** including metrics, logging, and trackers to ensure reproducibility and easy reporting.
 - **Attacl debugging support** such as built-in hooks and TensorBoard integration to monitor and inspect attack behavior.
 
-:point_right: Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch in action.
+Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch in action.
 
 | Category | Attack / Attack Type | Native Implementation in SecML-Torch | Wrapped / Imported / Backend Alternatives |
 | - | - | - | - |
