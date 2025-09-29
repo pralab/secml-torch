@@ -37,10 +37,27 @@ pip install secml-torch[foolbox,tensorboard,adv_lib]
 
 ## Key Features
 
-- **Built for Deep Learning:** SecMLT is compatible with the popular machine learning framework PyTorch.
-- **Various types of adversarial attacks:** SecMLT includes support for a wide range of attack methods (evasion, poisoning, ...) such as different implementations imported from popular AML libraries (Foolbox, Adversarial Library).
-- **Customizable attacks:** SecMLT offers several levels of analysis for the models, including modular implementations of existing attacks to extend with different loss functions, optimizers, and more.
-- **Attack debugging:** Built-in debugging of evaluations by logging events and metrics along the attack runs (even on Tensorboard).
+SecML-Torch (SecMLT) is a PyTorch-native toolkit for evaluating and improving adversarial robustness. It provides:
+- Built-in support for evaluating PyTorch models.
+- **Efficient native implementations** of common evasion attacks (e.g. PGD, FMN), built directly for PyTorch, and poisoning/backdoor attacks.
+- **Wrappers for external libraries** (Foolbox, Adversarial Library) so you can run and compare attacks from a single interface.
+- **Modular design to build adaptive/custom attacks** to swap losses, optimizers, perturbation models, and add EoT easily with a few lines of code.
+- **Attack ensembling modules** to obtain worst-case per-sample robustness evaluations.
+- **Robustness evaluation tools** including metrics, logging, and trackers to ensure reproducibility and easy reporting.
+- **Attacl debugging support** such as built-in hooks and TensorBoard integration to monitor and inspect attack behavior.
+
+Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch in action.
+
+| Category | Attack / Attack Type | Native Implementation in SecML-Torch | Wrapped / Imported / Backend Alternatives |
+| - | - | - | - |
+|  |  | <sub>Advantages: GPU-native, efficient, modular/customizable, debugging tools</sub> | <sub>Advantages: expands the attack catalogue, easy cross-checks</sub> |
+| Test time | **PGD (fixed-epsilon, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **FMN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **Other Evasion Attacks** | Work in progress | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
+| Training time | **Backdoor** | ✔ Native implementation | - |
+| Training time | **Label Flip Poisoning** | ✔ Native implementation | - |
+
+
 
 ## Usage
 
