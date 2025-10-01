@@ -37,6 +37,8 @@ html:
   favicon: _static/assets/logos/logo_icon.ico
   css:
     - css/custom.css
+  analytics:
+    google_analytics_id: G-JTGZVQFCJ3
 
 
 logo: _static/assets/logos/logo.png
