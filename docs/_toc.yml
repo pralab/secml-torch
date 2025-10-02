@@ -16,6 +16,7 @@ parts:
           - file: tutorials/05-multiple-random-inits.ipynb
           - file: tutorials/06-pgd-with-custom-loss.ipynb
           - file: tutorials/07-adaptive-attacks.ipynb
+          - file: tutorials/08-patch-attacks-introduction.ipynb
 
   - caption: Contributing
     chapters:
