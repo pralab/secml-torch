@@ -1,26 +1,19 @@
-"""Wrapper of the FMN attack implemented in Foolbox."""
+"""Wrapper of the DDN attack implemented in Foolbox."""
 
 from __future__ import annotations
 
-from foolbox.attacks.fast_minimum_norm import (
-    L0FMNAttack,
-    L1FMNAttack,
-    L2FMNAttack,
-    LInfFMNAttack,
-)
+from foolbox.attacks.ddn import DDNAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
-class FMNFoolbox(BaseFoolboxEvasionAttack):
-    """Wrapper of the Foolbox implementation of the FMN attack."""
+class DDNFoolbox(BaseFoolboxEvasionAttack):
+    """Wrapper of the Foolbox implementation of the DDN attack."""
 
     def __init__(
         self,
-        perturbation_model: str,
         num_steps: int,
-        max_step_size: float,
-        min_step_size: float | None = None,
+        eps_init: float = 1.0,
         gamma: float = 0.05,
         y_target: int | None = None,
         lb: float = 0.0,
@@ -28,18 +21,14 @@ class FMNFoolbox(BaseFoolboxEvasionAttack):
         **kwargs,
     ) -> None:
         """
-        Create FMN attack with Foolbox backend.
+        Create DDN attack with Foolbox backend.
 
         Parameters
         ----------
-        perturbation_model : str
-            The perturbation model to be used for the attack.
         num_steps : int
             The number of iterations for the attack.
-        max_step_size : float
-            The attack maximum step size.
-        min_step_size : float, optional
-            The attack minimum step size. If None, it is set to max_step_size/100.
+        eps_init : float
+            The initial L2 norm of the perturbation. Default is 8/255.
             The default value is None.
         gamma: float, optional
             Step size for modifying the eps-ball. Will decay with cosine annealing.
@@ -51,17 +40,10 @@ class FMNFoolbox(BaseFoolboxEvasionAttack):
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
         """
-        perturbation_models = {
-            LpPerturbationModels.L0: L0FMNAttack,
-            LpPerturbationModels.L1: L1FMNAttack,
-            LpPerturbationModels.L2: L2FMNAttack,
-            LpPerturbationModels.LINF: LInfFMNAttack,
-        }
-        foolbox_attack_cls = perturbation_models.get(perturbation_model)
+        foolbox_attack_cls = DDNAttack
 
         foolbox_attack = foolbox_attack_cls(
-            max_stepsize=max_step_size,
-            min_stepsize=min_step_size,
+            init_epsilon=eps_init,
             gamma=gamma,
             steps=num_steps,
         )
@@ -86,8 +68,5 @@ class FMNFoolbox(BaseFoolboxEvasionAttack):
             The list of perturbation models implemented for this attack.
         """
         return {
-            LpPerturbationModels.L0,
-            LpPerturbationModels.L1,
             LpPerturbationModels.L2,
-            LpPerturbationModels.LINF,
         }
