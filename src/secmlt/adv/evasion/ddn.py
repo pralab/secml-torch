@@ -89,7 +89,15 @@ class DDN(BaseEvasionAttackCreator):
 
 
 class DDNNative(ModularEvasionAttackMinDistance):
-    """Native implementation of the Decoupled Direction and Norm attack."""
+    """Native implementation of the Decoupled Direction and Norm attack.
+
+    References
+    ----------
+    .. [#Rony18] Jérôme Rony, Luiz G. Hafemann, Luiz S. Oliveira,
+        Ismail Ben Ayed, Robert Sabourin, Eric Granger, "Decoupling
+        Direction and Norm for Efficient Gradient-Based L2 Adversarial
+        Attacks and Defenses", https://arxiv.org/abs/1811.09600
+    """
 
     def __init__(
         self,
