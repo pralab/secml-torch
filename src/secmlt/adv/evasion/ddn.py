@@ -145,7 +145,7 @@ class DDNNative(ModularEvasionAttackMinDistance):
         )
 
         self.perturbation_model = LpPerturbationModels.get_p(LpPerturbationModels.L2)
-        
+
     @staticmethod
     def get_perturbation_models() -> set[str]:
         """Return available perturbation models for the attack."""
