@@ -214,25 +214,6 @@ class FMNNative(ModularEvasionAttackMinDistance):
             min_step_size=min_step_size,
         )
 
-    def _init_epsilons(
-        self,
-        samples: torch.Tensor,
-        delta: torch.Tensor,
-    ) -> torch.Tensor:
-        if self.perturbation_model != 0:
-            return super()._init_epsilons(samples, delta)
-        batch_size = samples.shape[0]
-        device, dtype = samples.device, samples.dtype
-        return torch.ones(batch_size, device=device, dtype=dtype)
-
-    def _gamma_for_step(self, step: int, state: dict) -> float:
-        return (
-            self.min_gamma
-            + (self.gamma - self.min_gamma)
-            * (1 + math.cos(math.pi * step / self.num_steps))
-            / 2
-        )
-
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
         """
