@@ -3,6 +3,7 @@
 from __future__ import annotations  # noqa: I001
 
 import importlib.util
+import math
 
 import torch
 
@@ -30,6 +31,7 @@ from secmlt.optimization.gradient_processing import LinearProjectionGradientProc
 from secmlt.optimization.initializer import Initializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
+from secmlt.optimization.losses import LogitDifferenceLoss
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -142,7 +144,8 @@ class FMNNative(ModularEvasionAttackMinDistance):
         lb: float = 0.0,
         ub: float = 1.0,
         trackers: list[Tracker] | None = None,
-        **kwargs,
+        gamma: float = 0.05,
+        min_step_size: float | None = None,
     ) -> None:
         """
         Create Native FMN attack.
@@ -204,7 +207,51 @@ class FMNNative(ModularEvasionAttackMinDistance):
             gradient_processing=gradient_processing,
             initializer=initializer,
             trackers=trackers,
+            gamma=gamma,
+            min_step_size=min_step_size,
+            initial_epsilon=float("inf"),
         )
+
+    def _init_epsilons(
+        self,
+        samples: torch.Tensor,
+        delta: torch.Tensor,
+    ) -> torch.Tensor:
+        if self.perturbation_model != 0:
+            return super()._init_epsilons(samples, delta)
+        batch_size = samples.shape[0]
+        device, dtype = samples.device, samples.dtype
+        return torch.ones(batch_size, device=device, dtype=dtype)
+
+    def _gamma_for_step(self, step: int, state: dict) -> float:
+        return (
+            self.min_gamma
+            + (self.gamma - self.min_gamma)
+            * (1 + math.cos(math.pi * step / self.num_steps))
+            / 2
+        )
+
+    def _distance_to_boundary(
+        self,
+        delta: torch.Tensor,
+        scores: torch.Tensor,
+        target: torch.Tensor,
+        state: dict,
+    ) -> torch.Tensor | None:
+        if self.perturbation_model == 0:
+            return None
+
+        logits_difference_loss = LogitDifferenceLoss()(scores, target)
+        denom = (
+            delta.detach()
+            .flatten(start_dim=1)
+            .norm(
+                p=self.perturbation_model_dual,
+                dim=-1,
+            )
+        )
+        denom = torch.clamp(denom, min=1e-12)
+        return logits_difference_loss / denom
 
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
