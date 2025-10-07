@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.pgd import PGD
 
@@ -12,6 +13,8 @@ from secmlt.adv.evasion.pgd import PGD
         ("adv_lib", FMN._get_advlib_implementation),
         ("foolbox", PGD._get_foolbox_implementation),
         ("adv_lib", PGD._get_advlib_implementation),
+        ("foolbox", DDN._get_foolbox_implementation),
+        ("adv_lib", DDN._get_advlib_implementation),
     ],
 )
 def test_attack_importerror_on_missing_dependency(missing_module, impl_getter):

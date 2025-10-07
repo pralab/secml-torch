@@ -8,23 +8,10 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DDNFoolbox(BaseFoolboxEvasionAttack):
-    """Wrapper of the Foolbox implementation of the DDN attack."""
+    """Wrapper of the Foolbox implementation of the DDN attack.
 
-    def __init__(
-        self,
-        num_steps: int,
-        eps_init: float = 1.0,
-        gamma: float = 0.05,
-        y_target: int | None = None,
-        lb: float = 0.0,
-        ub: float = 1.0,
-        **kwargs,
-    ) -> None:
-        """
-        Create DDN attack with Foolbox backend.
-
-        Parameters
-        ----------
+    Parameters
+    ----------
         num_steps : int
             The number of iterations for the attack.
         eps_init : float
@@ -39,13 +26,23 @@ class DDNFoolbox(BaseFoolboxEvasionAttack):
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
-        """
-        foolbox_attack_cls = DDNAttack
+    """
 
-        foolbox_attack = foolbox_attack_cls(
-            init_epsilon=eps_init,
-            gamma=gamma,
+    def __init__(
+        self,
+        num_steps: int,
+        eps_init: float,
+        gamma: float,
+        y_target: int | None = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        **kwargs,
+    ) -> None:
+        """Create DDN attack with Foolbox backend."""
+        foolbox_attack = DDNAttack(
+            eps_init=eps_init,
             steps=num_steps,
+            gamma=gamma,
         )
 
         super().__init__(
@@ -59,14 +56,5 @@ class DDNFoolbox(BaseFoolboxEvasionAttack):
 
     @staticmethod
     def get_perturbation_models() -> set[str]:
-        """
-        Check the perturbation models implemented for this attack.
-
-        Returns
-        -------
-        set[str]
-            The list of perturbation models implemented for this attack.
-        """
-        return {
-            LpPerturbationModels.L2,
-        }
+        """Check the perturbation models implemented for this attack."""
+        return {LpPerturbationModels.L2}

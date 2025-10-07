@@ -1,31 +1,20 @@
 """Wrapper of the DDN attack implemented in Adversarial Library."""
 
 from __future__ import annotations  # noqa: I001
+
 from functools import partial
 
-from adv_lib.attacks import ddn
+from adv_lib.attacks.decoupled_direction_norm import ddn
+
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DDNAdvLib(BaseAdvLibEvasionAttack):
-    """Wrapper of the Adversarial Library implementation of the DDN attack."""
+    """Wrapper of the Adversarial Library implementation of the DDN attack.
 
-    def __init__(
-        self,
-        num_steps: int,
-        eps_init: float | None = None,
-        gamma: float | None = 0.05,
-        y_target: int | None = None,
-        lb: float = 0.0,
-        ub: float = 1.0,
-        **kwargs,
-    ) -> None:
-        """
-        Initialize a DDN attack with the Adversarial Library backend.
-
-        Parameters
-        ----------
+    Parameters
+    ----------
         num_steps : int
             The number of iterations for the attack.
         eps_init: float, optional
@@ -39,7 +28,19 @@ class DDNAdvLib(BaseAdvLibEvasionAttack):
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
-        """
+    """
+
+    def __init__(
+        self,
+        num_steps: int,
+        eps_init: float,
+        gamma: float,
+        y_target: int | None = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        **kwargs,
+    ) -> None:
+        """Initialize the Adversarial Library backend for the DDN attack."""
         advlib_attack_func = ddn
         advlib_attack = partial(
             advlib_attack_func,
@@ -49,19 +50,14 @@ class DDNAdvLib(BaseAdvLibEvasionAttack):
         )
 
         super().__init__(
-            advlib_attack=advlib_attack, y_target=y_target, lb=lb, ub=ub, **kwargs
+            advlib_attack=advlib_attack,
+            y_target=y_target,
+            lb=lb,
+            ub=ub,
+            **kwargs,
         )
 
     @staticmethod
     def get_perturbation_models() -> set[str]:
-        """
-        Check the perturbation models implemented for this attack.
-
-        Returns
-        -------
-        set[str]
-            The list of perturbation models implemented for this attack.
-        """
-        return {
-            LpPerturbationModels.L2,
-        }
+        """Return the perturbation models available for this attack."""
+        return {LpPerturbationModels.L2}
