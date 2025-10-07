@@ -28,7 +28,6 @@ y_target = None
 
 # Native backend
 native_attack = DDN(
-    perturbation_model=perturbation_model,
     num_steps=num_steps,
     init_epsilon=init_epsilon,
     gamma=gamma,
@@ -39,7 +38,6 @@ native_adv_ds = native_attack(model, test_loader)
 
 # Foolbox backend
 foolbox_attack = DDN(
-    perturbation_model=perturbation_model,
     num_steps=num_steps,
     init_epsilon=init_epsilon,
     gamma=gamma,
@@ -50,7 +48,6 @@ f_adv_ds = foolbox_attack(model, test_loader)
 
 # Adversarial Library backend
 advlib_attack = DDN(
-    perturbation_model=perturbation_model,
     num_steps=num_steps,
     init_epsilon=init_epsilon,
     gamma=gamma,

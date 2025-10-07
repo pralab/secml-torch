@@ -8,11 +8,28 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DDNFoolbox(BaseFoolboxEvasionAttack):
-    """Wrapper of the Foolbox implementation of the DDN attack."""
+    """Wrapper of the Foolbox implementation of the DDN attack.
+
+    Parameters
+    ----------
+        num_steps : int
+            The number of iterations for the attack.
+        eps_init : float
+            The initial L2 norm of the perturbation. Default is 8/255.
+            The default value is None.
+        gamma: float, optional
+            Step size for modifying the eps-ball. Will decay with cosine annealing.
+        y_target : int | None, optional
+            The target label for the attack. If None, the attack is
+            untargeted. The default value is None.
+        lb : float, optional
+            The lower bound for the perturbation. The default value is 0.0.
+        ub : float, optional
+            The upper bound for the perturbation. The default value is 1.0.
+    """
 
     def __init__(
         self,
-        perturbation_model: str,
         num_steps: int,
         init_epsilon: float,
         gamma: float,
@@ -22,8 +39,6 @@ class DDNFoolbox(BaseFoolboxEvasionAttack):
         **kwargs,
     ) -> None:
         """Create DDN attack with Foolbox backend."""
-        type(self).check_perturbation_model_available(perturbation_model)
-
         foolbox_attack = DDNAttack(
             init_epsilon=init_epsilon,
             steps=num_steps,

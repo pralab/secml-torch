@@ -33,7 +33,6 @@ class DDN(BaseEvasionAttackCreator):
 
     def __new__(
         cls,
-        perturbation_model: str = LpPerturbationModels.L2,
         num_steps: int = 100,
         init_epsilon: float = 1.0,
         gamma: float = 0.05,
@@ -47,9 +46,7 @@ class DDN(BaseEvasionAttackCreator):
         """Create the DDN attack."""
         cls.check_backend_available(backend)
         implementation = cls.get_implementation(backend)
-        implementation.check_perturbation_model_available(perturbation_model)
         return implementation(
-            perturbation_model=perturbation_model,
             num_steps=num_steps,
             init_epsilon=init_epsilon,
             gamma=gamma,
@@ -101,7 +98,6 @@ class DDNNative(ModularEvasionAttackMinDistance):
 
     def __init__(
         self,
-        perturbation_model: str,
         num_steps: int,
         init_epsilon: float,
         gamma: float,
@@ -148,8 +144,8 @@ class DDNNative(ModularEvasionAttackMinDistance):
             initial_epsilon=init_epsilon,
         )
 
-        self.perturbation_model = LpPerturbationModels.get_p(perturbation_model)
-
+        self.perturbation_model = LpPerturbationModels.get_p(LpPerturbationModels.L2)
+        
     @staticmethod
     def get_perturbation_models() -> set[str]:
         """Return available perturbation models for the attack."""

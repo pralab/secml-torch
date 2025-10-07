@@ -11,11 +11,27 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DDNAdvLib(BaseAdvLibEvasionAttack):
-    """Wrapper of the Adversarial Library implementation of the DDN attack."""
+    """Wrapper of the Adversarial Library implementation of the DDN attack.
+
+    Parameters
+    ----------
+        num_steps : int
+            The number of iterations for the attack.
+        eps_init: float, optional
+            Initial L2 norm of the perturbation. The default value is 8/255.
+        gamma: float, optional
+            Step size for modifying the eps-ball. Will decay with cosine annealing.
+        y_target : int | None, optional
+            The target label for the attack. If None, the attack is
+            untargeted. The default value is None.
+        lb : float, optional
+            The lower bound for the perturbation. The default value is 0.0.
+        ub : float, optional
+            The upper bound for the perturbation. The default value is 1.0.
+    """
 
     def __init__(
         self,
-        perturbation_model: str,
         num_steps: int,
         init_epsilon: float,
         gamma: float,
@@ -25,13 +41,7 @@ class DDNAdvLib(BaseAdvLibEvasionAttack):
         **kwargs,
     ) -> None:
         """Initialize the Adversarial Library backend for the DDN attack."""
-        type(self).check_perturbation_model_available(perturbation_model)
-
-        perturbation_models = {
-            LpPerturbationModels.L2: ddn,
-        }
-
-        advlib_attack_func = perturbation_models.get(perturbation_model)
+        advlib_attack_func = ddn
         advlib_attack = partial(
             advlib_attack_func,
             steps=num_steps,
