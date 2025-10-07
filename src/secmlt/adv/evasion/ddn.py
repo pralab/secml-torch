@@ -12,7 +12,7 @@ from secmlt.adv.evasion.base_evasion_attack import (
     BaseEvasionAttackCreator,
 )
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
-    LOGIT_LOSS,
+    CE_LOSS,
 )
 from secmlt.adv.evasion.modular_attacks.modular_attack_min_distance import (
     ModularEvasionAttackMinDistance,
@@ -50,6 +50,13 @@ class DDN(BaseEvasionAttackCreator):
     ) -> BaseEvasionAttack:
         """
         Create the DDN attack.
+
+        References
+        ----------
+        .. [#Rony18] Jérôme Rony, Luiz G. Hafemann, Luiz S. Oliveira,
+            Ismail Ben Ayed, Robert Sabourin, Eric Granger, "Decoupling
+            Direction and Norm for Efficient Gradient-Based L2 Adversarial
+            Attacks and Defenses", https://arxiv.org/abs/1811.09600
 
         Parameters
         ----------
@@ -137,8 +144,6 @@ class DDNNative(ModularEvasionAttackMinDistance):
 
         Parameters
         ----------
-        eps_init : float
-            Initial L2 norm of the perturbation.
         num_steps : int
             The number of iterations for the attack.
         eps_init: float, optional
@@ -160,7 +165,7 @@ class DDNNative(ModularEvasionAttackMinDistance):
         gradient_processing = LinearProjectionGradientProcessing(
             LpPerturbationModels.L2
         )
-        perturbation_constraints = [L2Constraint(radius=torch.inf)]
+        perturbation_constraints = [L2Constraint(radius=eps_init)]
         domain_constraints = [ClipConstraint(lb=lb, ub=ub)]
         manipulation_function = AdditiveManipulation(
             domain_constraints=domain_constraints,
@@ -169,14 +174,14 @@ class DDNNative(ModularEvasionAttackMinDistance):
 
         self.perturbation_model = LpPerturbationModels.get_p(LpPerturbationModels.L2)
 
-        self.eps = eps_init
+        self.eps_init = eps_init
         self.gamma = gamma
 
         super().__init__(
-            step_size=eps_init,
+            step_size=1.0,
             y_target=y_target,
             num_steps=num_steps,
-            loss_function=LOGIT_LOSS,
+            loss_function=CE_LOSS,
             optimizer_cls=OptimizerFactory.create_sgd(lr=1.0),
             scheduler_cls=LRSchedulerFactory.create_cosine_annealing(),
             manipulation_function=manipulation_function,
@@ -198,6 +203,9 @@ class DDNNative(ModularEvasionAttackMinDistance):
         return {
             LpPerturbationModels.L2,
         }
+
+    def _init_epsilons(self, samples: torch.Tensor) -> torch.Tensor:
+        return torch.ones(samples.shape[0]).fill_(self.eps_init)
 
     def _update_epsilons(
         self,

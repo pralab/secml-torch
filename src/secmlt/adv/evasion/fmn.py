@@ -228,6 +228,13 @@ class FMNNative(ModularEvasionAttackMinDistance):
             LpPerturbationModels.LINF,
         }
 
+    def _init_epsilons(self, samples: torch.Tensor) -> torch.Tensor:
+        return (
+            torch.zeros(samples.shape[0]).fill_(torch.inf)
+            if self.perturbation_model != 0
+            else torch.ones(samples.shape[0])
+        )
+
     def _update_epsilons(
         self,
         is_adv: torch.Tensor,
