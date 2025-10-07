@@ -233,28 +233,6 @@ class FMNNative(ModularEvasionAttackMinDistance):
             / 2
         )
 
-    def _distance_to_boundary(
-        self,
-        delta: torch.Tensor,
-        scores: torch.Tensor,
-        target: torch.Tensor,
-        state: dict,
-    ) -> torch.Tensor | None:
-        if self.perturbation_model == 0:
-            return None
-
-        logits_difference_loss = LogitDifferenceLoss()(scores, target)
-        denom = (
-            delta.detach()
-            .flatten(start_dim=1)
-            .norm(
-                p=self.perturbation_model_dual,
-                dim=-1,
-            )
-        )
-        denom = torch.clamp(denom, min=1e-12)
-        return logits_difference_loss / denom
-
     @classmethod
     def get_perturbation_models(cls) -> set[str]:
         """
