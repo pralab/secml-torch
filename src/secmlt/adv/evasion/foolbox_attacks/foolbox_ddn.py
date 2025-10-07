@@ -40,7 +40,7 @@ class DDNFoolbox(BaseFoolboxEvasionAttack):
     ) -> None:
         """Create DDN attack with Foolbox backend."""
         foolbox_attack = DDNAttack(
-            eps_init=eps_init,
+            init_epsilon=eps_init,
             steps=num_steps,
             gamma=gamma,
         )
