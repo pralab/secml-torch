@@ -57,7 +57,7 @@ Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch
 | Training time | **Backdoor** | ✔ Native implementation | - |
 | Training time | **Label Flip Poisoning** | ✔ Native implementation | - |
 
-
+Check out what's cooking! Have a look at our [roadmap](https://github.com/orgs/pralab/projects/2)!
 
 ## Usage
 
