@@ -2,9 +2,7 @@
 
 from __future__ import annotations  # noqa: I001
 
-import math
 from typing import Union, TYPE_CHECKING
-from secmlt.optimization.losses import LogitDifferenceLoss
 import torch.nn
 from secmlt.adv.evasion.modular_attacks.modular_attack import ModularEvasionAttack
 from secmlt.manipulations.manipulation import Manipulation
@@ -102,11 +100,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         x_adv, delta = self.manipulation_function(samples, delta)
         best_distances = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
-        epsilons = (
-            best_distances.clone().detach()
-            if self.perturbation_model != 0
-            else torch.ones_like(best_distances)
-        )
+        epsilons = self._init_epsilons(samples)
         gamma = self.gamma
         adv_found = torch.zeros(samples.shape[0], dtype=torch.bool, device=x_adv.device)
 
@@ -162,18 +156,8 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             scheduler.step()
 
             if self.trackers is not None:
-                if isinstance(self.trackers, list):
-                    for tracker in self.trackers:
-                        tracker.track(
-                            i,
-                            losses.detach().cpu().data,
-                            scores.detach().cpu().data,
-                            x_adv.detach().cpu().data,
-                            delta.detach().cpu().data,
-                            grad_before_processing.detach().cpu().data,
-                        )
-                else:
-                    self.trackers.track(
+                for tracker in self.trackers:
+                    tracker.track(
                         i,
                         losses.detach().cpu().data,
                         scores.detach().cpu().data,
@@ -184,41 +168,20 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
 
             adv_found = torch.logical_or(adv_found, is_adv)
 
-            # update epsilons
-            if self.perturbation_model == 0:
-                epsilons = torch.where(
-                    is_adv,
-                    torch.minimum(
-                        epsilons - 1,
-                        torch.minimum(
-                            best_distances, torch.floor(epsilons * (1 - gamma))
-                        ),
-                    ),
-                    torch.maximum(torch.floor(epsilons * (1 + gamma)), epsilons + 1),
-                )
-            else:
-                logits_difference_loss = LogitDifferenceLoss()(scores, target)
-                distance_to_boundary = logits_difference_loss / delta.data.flatten(
-                    start_dim=1
-                ).norm(p=self.perturbation_model_dual, dim=-1)
-                epsilons = torch.where(
-                    is_adv,
-                    torch.minimum(best_distances, epsilons * (1 - gamma)),
-                    torch.where(
-                        adv_found,
-                        epsilons * (1 + gamma),
-                        best_distances + distance_to_boundary,
-                    ),
-                )
+            epsilons = self._update_epsilons(
+                is_adv,
+                epsilons,
+                best_distances,
+                gamma,
+                scores,
+                target,
+                delta,
+                adv_found,
+            )
 
             epsilons = torch.clamp(epsilons, 0)
             # cosine annealing for gamma
-            gamma = (
-                self.min_gamma
-                + (self.gamma - self.min_gamma)
-                * (1 + math.cos(math.pi * i / self.num_steps))
-                / 2
-            )
+            gamma = self._update_gamma(i)
 
             self.manipulation_function.perturbation_constraints[0].radius = epsilons
 

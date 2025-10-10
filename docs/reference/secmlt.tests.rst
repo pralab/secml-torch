@@ -68,6 +68,14 @@ secmlt.tests.test\_data module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.test\_imports module
+---------------------------------
+
+.. automodule:: secmlt.tests.test_imports
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_manipulations module
 ---------------------------------------
 
@@ -80,6 +88,22 @@ secmlt.tests.test\_metrics module
 ---------------------------------
 
 .. automodule:: secmlt.tests.test_metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.tests.test\_perturbation\_models module
+----------------------------------------------
+
+.. automodule:: secmlt.tests.test_perturbation_models
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.tests.test\_schedulers module
+------------------------------------
+
+.. automodule:: secmlt.tests.test_schedulers
    :members:
    :undoc-members:
    :show-inheritance:
