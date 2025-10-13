@@ -53,6 +53,7 @@ Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch
 |  |  | <sub>Advantages: GPU-native, efficient, modular/customizable, debugging tools</sub> | <sub>Advantages: expands the attack catalogue, easy cross-checks</sub> |
 | Test time | **PGD (fixed-epsilon, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **FMN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **DDN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **Other Evasion Attacks** | Work in progress | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
 | Training time | **Backdoor** | ✔ Native implementation | - |
 | Training time | **Label Flip Poisoning** | ✔ Native implementation | - |
