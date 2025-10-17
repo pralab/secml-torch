@@ -103,6 +103,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
         epsilons = self._init_epsilons(samples)
         gamma = self.gamma
         adv_found = torch.zeros(samples.shape[0], dtype=torch.bool, device=x_adv.device)
+        grad_before_processing = torch.zeros_like(delta)
 
         for i in range(self.num_steps):
             x_adv.data, delta.data = self.manipulation_function(
@@ -150,11 +151,6 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                 best_distances,
             )
 
-            grad_before_processing = delta.grad.data
-            delta.grad.data = self.gradient_processing(delta.grad.data)
-            optimizer.step()
-            scheduler.step()
-
             if self.trackers is not None:
                 for tracker in self.trackers:
                     tracker.track(
@@ -162,9 +158,15 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
                         losses.detach().cpu().data,
                         scores.detach().cpu().data,
                         x_adv.detach().cpu().data,
-                        delta.detach().cpu().data,
+                        delta_before_processing.detach().cpu().data,
                         grad_before_processing.detach().cpu().data,
                     )
+
+            grad_before_processing = delta.grad.data
+            delta.grad.data = self.gradient_processing(delta.grad.data)
+
+            optimizer.step()
+            scheduler.step()
 
             adv_found = torch.logical_or(adv_found, is_adv)
 
