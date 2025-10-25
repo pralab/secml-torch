@@ -1,13 +1,16 @@
+"""Basic wrapper for generic language model."""
+
 from abc import ABC, abstractmethod
+from typing import Union
+
 import torch
 
 
 class BaseLanguageModel(ABC):
     """Abstract base class defining the common interface for language models."""
 
-
     @abstractmethod
-    def encode(self, text: str | list[str], **kwargs) -> torch.LongTensor:
+    def encode(self, text: Union[str, list[str]], **kwargs) -> torch.LongTensor:
         """
         Convert input text into token IDs.
 
@@ -24,7 +27,7 @@ class BaseLanguageModel(ABC):
         ...
 
     @abstractmethod
-    def decode(self, ids: torch.LongTensor, **kwargs) -> str | list[str]:
+    def decode(self, ids: torch.LongTensor, **kwargs) -> Union[str, list[str]]:
         """
         Convert token IDs back into text.
 
@@ -39,7 +42,6 @@ class BaseLanguageModel(ABC):
             Decoded text(s).
         """
         ...
-
 
     @abstractmethod
     def predict(self, input_ids: torch.LongTensor, **kwargs) -> torch.Tensor:
@@ -98,7 +100,9 @@ class BaseLanguageModel(ABC):
         ...
 
     @abstractmethod
-    def hidden_states(self, input_ids: torch.LongTensor, **kwargs) -> list[torch.Tensor]:
+    def hidden_states(
+        self, input_ids: torch.LongTensor, **kwargs
+    ) -> list[torch.Tensor]:
         """
         Return hidden states of the model for given input.
 
