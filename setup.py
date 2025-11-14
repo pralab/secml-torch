@@ -62,6 +62,7 @@ setup(
         "foolbox": ["foolbox>=3.3.0"],
         "tensorboard": ["tensorboard"],
         "adv_lib": ["adv_lib"],
+        "llm": ["transformers", "accelerate"],
     },
     python_requires=">=3.7",
 )
