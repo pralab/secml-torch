@@ -8,6 +8,6 @@ sphinx-copybutton
 nbsphinx
 nbsphinx_link
 ipython
-jupyter-book>0.15
+jupyter-book<2.0
 matplotlib
 numpy
