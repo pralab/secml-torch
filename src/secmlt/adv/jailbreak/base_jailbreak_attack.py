@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from typing import Any
     from secmlt.models.base_language_model import BaseLanguageModel
 
 
@@ -85,7 +85,7 @@ class BaseJailbreakAttack:
         objective: Objective,
     ) -> bool:
         """
-        Check whether the generated adversarial prompt constitutes a successful jailbreak.
+        Check whether the generated adversarial prompt is a successful jailbreak.
 
         Parameters
         ----------
