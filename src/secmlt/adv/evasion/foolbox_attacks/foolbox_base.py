@@ -8,7 +8,7 @@ import torch
 from foolbox.criteria import Misclassification, TargetedMisclassification
 from foolbox.models.pytorch import PyTorchModel
 from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import Attack
@@ -63,7 +63,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
     ) -> torch.Tensor:
-        if not isinstance(model, BasePytorchClassifier):
+        if not isinstance(model, BasePyTorchClassifier):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
         device = model._get_device()

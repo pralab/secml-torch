@@ -4,7 +4,7 @@ from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from torch.utils.data import DataLoader, Subset
 
 net = load_model(model_name="Rony2019Decoupling", dataset="cifar10", threat_model="L2")
@@ -20,7 +20,7 @@ test_dataset = Subset(test_dataset, list(range(5)))
 test_data_loader = DataLoader(test_dataset, batch_size=5, shuffle=False)
 
 # Wrap model
-model = BasePytorchClassifier(net)
+model = BasePyTorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_data_loader)
