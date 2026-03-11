@@ -58,8 +58,8 @@ def test_additive_manipulation(additive_manipulation, input_tensor, delta_tensor
     # test the additive manipulation
     x_adv, delta = additive_manipulation(input_tensor, delta_tensor)
     expected_x_adv = torch.tensor([[0.0, 0.0], [0.7, 0.8]])
+    # expected delta is equal to expected_x_adv - input_tensor because of the inversion of the manipulation
     expected_delta = torch.tensor([[-0.2, -0.3], [0.7, 1.1]])
-
     assert torch.equal(x_adv, expected_x_adv), f"Expected {expected_x_adv}, got {x_adv}"
     assert torch.equal(delta, expected_delta), f"Expected {expected_delta}, got {delta}"
 

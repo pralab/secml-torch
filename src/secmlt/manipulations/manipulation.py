@@ -94,6 +94,33 @@ class Manipulation(ABC):
         """
         ...
 
+    @abstractmethod
+    def _invert_manipulation(
+        self,
+        x: torch.Tensor,
+        x_adv: torch.Tensor,
+    ) -> torch.Tensor | None:
+        """
+        Invert the manipulation to re-obtain the perturbation.
+
+        Does not need to be implemented if the manipulation does
+        not allow inversion (defaults to None).
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Original input samples.
+        x_adv : torch.Tensor
+            Perturbed samples.
+
+        Returns
+        -------
+        torch.Tensor or None
+            Perturbation obtained by inverting the manipulation.
+            If the manipulation does not allow inversion, returns None.
+        """
+        return None
+
     def __call__(
         self,
         x: torch.Tensor,
@@ -117,7 +144,12 @@ class Manipulation(ABC):
         """
         delta.data = self._apply_perturbation_constraints(delta.data)
         x_adv, delta = self._apply_manipulation(x, delta)
+        # apply the domain constraints to the perturbed sample
         x_adv.data = self._apply_domain_constraints(x_adv.data)
+        # obtain delta after applying the domain constraint
+        in_domain_delta = self._invert_manipulation(x, x_adv)
+        if in_domain_delta is not None:
+            delta.data = in_domain_delta.data
         return x_adv, delta
 
 
@@ -131,27 +163,10 @@ class AdditiveManipulation(Manipulation):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         return x + delta, delta
 
-    def __call__(
+    def _invert_manipulation(
         self,
         x: torch.Tensor,
-        delta: torch.Tensor,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        """
-        Apply the additive manipulation to the input data.
+        x_adv: torch.Tensor
+        ) -> torch.Tensor:
+        return x_adv - x
 
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input data.
-        delta : torch.Tensor
-            Perturbation to apply.
-
-        Returns
-        -------
-        tuple[torch.Tensor, torch.Tensor]
-            Perturbed data and perturbation after the
-            application of constraints.
-        """
-        x_adv, delta = super().__call__(x, delta)
-        delta.data = x_adv.data - x.data
-        return x_adv, delta
