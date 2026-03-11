@@ -158,7 +158,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
     def loss_function(self, loss_function: torch.nn.Module) -> None:
         """Set the loss function of the attack."""
         if isinstance(loss_function, type):
-                self._loss_function = loss_function(reduction="mean")
+                self._loss_function = loss_function(reduction="none")
         else:
             self._loss_function = loss_function
 
