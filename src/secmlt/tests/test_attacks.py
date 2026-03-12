@@ -269,3 +269,23 @@ def test_modular_attack_sets_loss_from_string_name():
 
     assert isinstance(attack.loss_function, torch.nn.CrossEntropyLoss)
     assert attack.loss_function.reduction == "none"
+
+
+def test_modular_attack_accepts_custom_loss_instance():
+    attack = DummyModularAttack(
+        y_target=None,
+        num_steps=1,
+        step_size=0.1,
+        loss_function=torch.nn.CrossEntropyLoss(),
+        optimizer_cls=torch.optim.SGD,
+        scheduler_cls=no_scheduler,
+        manipulation_function=AdditiveManipulation([], []),
+        initializer=Initializer(),
+        gradient_processing=IdentityGradientProcessingMock(),
+    )
+
+    custom_loss = torch.nn.CrossEntropyLoss(reduction="mean")
+    attack.loss_function = custom_loss
+
+    assert attack.loss_function is custom_loss
+    assert attack.loss_function.reduction == "mean"
