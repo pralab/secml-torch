@@ -12,14 +12,14 @@ def _ensure_visdom_stub() -> None:
     if "visdom" in sys.modules:  # pragma: no cover
         return
 
-    visdom_stub = types.ModuleType("visdom")
+    visdom_stub = types.ModuleType("visdom")  # pragma: no cover
 
-    class Visdom:
-        def __init__(self, *args, **kwargs) -> None:
-            pass
+    class Visdom:  # pragma: no cover
+        def __init__(self, *args, **kwargs) -> None:  # pragma: no cover
+            pass  # pragma: no cover
 
-    visdom_stub.Visdom = Visdom
-    sys.modules["visdom"] = visdom_stub
+    visdom_stub.Visdom = Visdom  # pragma: no cover
+    sys.modules["visdom"] = visdom_stub  # pragma: no cover
 
 if importlib.util.find_spec("foolbox", None) is not None:  # pragma: no cover
     from .foolbox_attacks import *  # noqa: F403
