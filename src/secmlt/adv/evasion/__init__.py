@@ -14,8 +14,8 @@ def _ensure_visdom_stub() -> None:
 
     visdom_stub = types.ModuleType("visdom")
 
-    class Visdom:  # noqa: D101
-        def __init__(self, *args, **kwargs) -> None:  # noqa: ANN002, ANN003, ARG002
+    class Visdom:
+        def __init__(self, *args, **kwargs) -> None:
             return
 
     visdom_stub.Visdom = Visdom
