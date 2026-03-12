@@ -14,7 +14,9 @@ jobs:
           python-version: '3.10'
       - name: Upgrade packaging tools
         run: python -m pip install --upgrade pip setuptools wheel
-      - name: Install adv lib with no visdom first
+      - name: Install visdom first
+        run: python -m pip install visdom==0.2.4
+      - name: Install adv lib with no visdom
         run: python -m pip install --no-deps adv-lib
       - name: Install dependencies
         run: python -m pip install -r requirements.txt
