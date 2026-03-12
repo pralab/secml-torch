@@ -92,7 +92,7 @@ class Manipulation(ABC):
         torch.Tensor
             Perturbed samples.
         """
-        ...
+        ...  # pragma: no cover
 
     @abstractmethod
     def _invert_manipulation(
@@ -117,9 +117,9 @@ class Manipulation(ABC):
         -------
         torch.Tensor or None
             Perturbation obtained by inverting the manipulation.
-            If the manipulation does not allow inversion, returns None.
+            If the manipulation does not allow inversion, should return None.
         """
-        return None
+        ... # pragma: no cover
 
     def __call__(
         self,
