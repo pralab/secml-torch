@@ -11,6 +11,10 @@ build:
   tools:
     python: "3.10"
   jobs:
+    pre_install:
+      - "mkdir -p visdom"
+      - "echo 'class Visdom: pass' > visdom/__init__.py"
+      - "python -m pip install --no-deps adv-lib"
     pre_build:
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
       - "jupyter-book config sphinx docs/"
@@ -21,12 +25,12 @@ sphinx:
 
 # Optionally build your docs in additional formats such as PDF and ePub
 formats:
-   - pdf
+  - pdf
   #  - epub
 
 # Optional but recommended, declare the Python requirements required
 # to build your documentation
 # See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
 python:
-   install:
-   - requirements: docs/requirements.txt
+  install:
+    - requirements: docs/requirements.txt
