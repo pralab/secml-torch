@@ -1,7 +1,9 @@
-from secmlt.trackers import Tracker, PredictionTracker
-import torch
-from secmlt.trackers.trackers import MULTI_SCALAR
+"""Ensemble trackers for adversarial attacks."""
 from typing import Union
+
+import torch
+from secmlt.trackers import PredictionTracker, Tracker
+from secmlt.trackers.trackers import MULTI_SCALAR
 
 
 class EnsemblePredictionTracker(Tracker):

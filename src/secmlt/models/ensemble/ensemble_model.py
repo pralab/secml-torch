@@ -1,8 +1,12 @@
-from secmlt.models.base_model import BaseModel
+"""Model for ensembling multiple models."""
 import torch
+from secmlt.models.base_model import BaseModel
+from secmlt.models.ensemble.ensemble_function import (
+    BaseEnsembleFunction,
+    RawEnsembleFunction,
+)
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
 from torch.utils.data import DataLoader
-from secmlt.models.ensemble.ensemble_function import BaseEnsembleFunction, RawEnsembleFunction
 
 
 class EnsembleModel(BaseModel):
@@ -11,13 +15,13 @@ class EnsembleModel(BaseModel):
     def __init__(
             self,
             models: dict[str, BasePytorchClassifier],
-            ensemble_function: BaseEnsembleFunction = RawEnsembleFunction(),
+            ensemble_function: BaseEnsembleFunction = None,
     ) -> None:
         """
-        Creates the ensemble model.
+        Create the ensemble model.
 
         Parameters
-        ----------  
+        ----------
         models : dict[str, BasePytorchClassifier]
             A dict containing as values the ensemble models, wrapped into a
             BasePytorchClassifier, and an identifier name as key.
@@ -31,19 +35,22 @@ class EnsembleModel(BaseModel):
         """
         self.models = models
         self.ensemble_function = ensemble_function
+        if not ensemble_function:
+            self.ensemble_function = RawEnsembleFunction()
         super().__init__()
 
     def _get_device(self) -> torch.device:
         """
-        Get the default device, which is the device of the first model in the
-        ensemble.
+        Get the default device for the ensemble model.
+
+        Use the device of the first model in the ensemble.
 
         Returns
         -------
         torch.device
             The device of the first model in the ensemble.
         """
-        return list(self.models.values())[0]._get_device()
+        return next(iter(self.models.values()))._get_device()
 
     def _decision_function(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
@@ -64,6 +71,8 @@ class EnsembleModel(BaseModel):
 
     def predict(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """
+        Prediction function for the ensemble model.
+
         Return the predicted class for the given samples. If the ensembling
         strategy is RawEnsembleFunction, use majority voting among models
         predictions.
@@ -108,4 +117,12 @@ class EnsembleModel(BaseModel):
         return x.grad
 
     def train(self, dataloader: DataLoader) -> "BaseModel":
+        """
+        Train the model with the given dataloader.
+
+        Parameters
+        ----------
+        dataloader : DataLoader
+            Train data loader.
+        """
         raise NotImplementedError

@@ -1,7 +1,9 @@
+"""Base output ensemble function."""
 from abc import ABC, abstractmethod
+
 import torch
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 class BaseEnsembleFunction(ABC, torch.nn.Module):
@@ -9,10 +11,10 @@ class BaseEnsembleFunction(ABC, torch.nn.Module):
 
     def __init__(
             self,
-            logits_scalers : dict[str, StandardScaler | MinMaxScaler] = None,
+            logits_scalers: dict[str, StandardScaler | MinMaxScaler] | None = None,
     ) -> None:
         """
-        Creates the Ensemble function.
+        Create the Ensemble function.
 
         Parameters
         ----------
@@ -32,8 +34,7 @@ class BaseEnsembleFunction(ABC, torch.nn.Module):
             models: dict[str, BasePytorchClassifier],
     ) -> torch.Tensor:
         """
-        Forwards the input through ensemble and returns the output based on the
-        implemented strategy.
+        Forward the input through ensemble based on the implemented strategy.
 
         Parameters
         ----------
@@ -41,6 +42,7 @@ class BaseEnsembleFunction(ABC, torch.nn.Module):
             The input tensor
         models : dict[str, BasePytorchClassifier]
             The ensemble models
+
         Returns
         -------
         torch.Tensor
@@ -62,6 +64,7 @@ class BaseEnsembleFunction(ABC, torch.nn.Module):
             The logits tensor
         model_name :
             The identifier name of the model
+
         Returns
         -------
         torch.Tensor
@@ -73,5 +76,4 @@ class BaseEnsembleFunction(ABC, torch.nn.Module):
             std = torch.tensor(
                 self._logits_scalers[model_name].scale_, device=logits.device)
             return (logits - mean) / std
-        else:
-            return logits
+        return logits

@@ -1,3 +1,5 @@
+"""Ensemble loss functions for adversarial attacks."""
+
 import torch
 from torch.nn import CrossEntropyLoss
 
@@ -7,10 +9,10 @@ class AvgEnsembleLoss(torch.nn.Module):
 
     def __init__(
             self,
-            loss: torch.nn.Module = CrossEntropyLoss(reduction="none"),
-    ):
+            loss: torch.nn.Module = None
+    ) -> None:
         """
-        Creates the average ensemble loss.
+        Create the average ensemble loss.
 
         Parameters
         ----------
@@ -21,6 +23,7 @@ class AvgEnsembleLoss(torch.nn.Module):
             Default: CrossEntropyLoss(reduction="none")
         """
         super().__init__()
+        loss = CrossEntropyLoss(reduction="none")
         self._loss = torch.vmap(loss, in_dims=(0, None))
 
     def forward(
@@ -29,8 +32,7 @@ class AvgEnsembleLoss(torch.nn.Module):
             target: torch.Tensor
     ) -> torch.Tensor:
         """
-        Given the ensemble models outputs, computes the loss for each model
-        and averages them.
+        Given the ensemble models outputs, computes average of model losses.
 
         Parameters
         ----------
@@ -39,6 +41,7 @@ class AvgEnsembleLoss(torch.nn.Module):
             (n_models, batch_size, *model_output).
         target : torch.Tensor
             The target to be used in the loss
+
         Returns
         -------
         torch.Tensor

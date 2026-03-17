@@ -1,5 +1,9 @@
+"""Ensemble PGD attack module for adversarial robustness."""
 import torch
-from secmlt.adv.evasion.modular_attacks.modular_attack_fixed_eps import ModularEvasionAttackFixedEps
+from secmlt.adv.evasion.ensemble.loss.avg_loss import AvgEnsembleLoss
+from secmlt.adv.evasion.modular_attacks.modular_attack_fixed_eps import (
+    ModularEvasionAttackFixedEps,
+)
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.constraints import (
@@ -13,7 +17,6 @@ from secmlt.optimization.initializer import Initializer, RandomLpInitializer
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 from secmlt.trackers.trackers import Tracker
-from secmlt.adv.evasion.ensemble.loss.avg_loss import AvgEnsembleLoss
 
 
 class EnsemblePGD(ModularEvasionAttackFixedEps):
@@ -26,7 +29,7 @@ class EnsemblePGD(ModularEvasionAttackFixedEps):
             num_steps: int,
             step_size: float,
             random_start: bool,
-            loss_function: torch.nn.Module = AvgEnsembleLoss(),
+            loss_function: torch.nn.Module = None,
             y_target: int | None = None,
             lb: float = 0.0,
             ub: float = 1.0,
@@ -77,6 +80,8 @@ class EnsemblePGD(ModularEvasionAttackFixedEps):
             )
         else:
             initializer = Initializer()
+        if loss_function is None:
+            loss_function = AvgEnsembleLoss()
         self.epsilon = epsilon
         gradient_processing = LinearProjectionGradientProcessing(perturbation_model)
         perturbation_constraints = [

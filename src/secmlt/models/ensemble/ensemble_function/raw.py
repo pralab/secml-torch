@@ -1,10 +1,14 @@
-from .base import BaseEnsembleFunction
+"""Ensemble function that returns raw model outputs."""
 import torch
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+
+from .base import BaseEnsembleFunction
 
 
 class RawEnsembleFunction(BaseEnsembleFunction):
     """
+    Raw ensemble function.
+
     Performs forward and backward pass on each ensemble model separately, and
     returns the unaggregated results in a single tensor.
     """
@@ -15,7 +19,9 @@ class RawEnsembleFunction(BaseEnsembleFunction):
             models: dict[str, BasePytorchClassifier],
     ) -> torch.Tensor:
         """
-        Forwards the input through all the models in the ensemble, and returns
+        Raw ensemble forward function.
+
+        Forward the input through all the models in the ensemble, and returns
         the averaged output.
 
         Parameters
@@ -24,15 +30,15 @@ class RawEnsembleFunction(BaseEnsembleFunction):
             The input tensor
         models : dict[str, BasePytorchClassifier]
             The ensemble models
+
         Returns
         -------
         torch.Tensor
             The ensemble output
         """
-        outputs = torch.stack([
+        return torch.stack([
             self._apply_scaling(
                 model(input.to(model._get_device())).to(
-                    list(models.values())[0]._get_device()),
+                    next(iter(models.values()))._get_device()),
                 model_name) for model_name, model in models.items()]
         )
-        return outputs

@@ -1,10 +1,14 @@
-from .raw import RawEnsembleFunction
+"""Ensemble function that averages model outputs."""
 import torch
 from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+
+from .raw import RawEnsembleFunction
 
 
 class AvgEnsembleFunction(RawEnsembleFunction):
     """
+    Average ensemble function.
+
     Implements a simple ensemble function that averages the outputs of the
     ensemble models. The gradient is computed accordingly.
     """
@@ -15,7 +19,9 @@ class AvgEnsembleFunction(RawEnsembleFunction):
             models: dict[str, BasePytorchClassifier]
     ) -> torch.Tensor:
         """
-        Forwards the input through all the models in the ensemble, and returns
+        Average ensemble forward function.
+
+        Forward the input through all the models in the ensemble, and returns
         the averaged output.
 
         Parameters
@@ -24,6 +30,7 @@ class AvgEnsembleFunction(RawEnsembleFunction):
             The input tensor
         models : dict[str, BasePytorchClassifier]
             The ensemble model
+
         Returns
         -------
         torch.Tensor

@@ -1,21 +1,15 @@
 import torchvision.datasets
 from robustbench.utils import load_model
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
-from torch.utils.data import DataLoader, Subset
-
 from secmlt.adv.evasion.ensemble.ensemble_pgd import EnsemblePGD
 from secmlt.adv.evasion.ensemble.loss.avg_loss import AvgEnsembleLoss
-from secmlt.adv.evasion.modular_attacks.modular_attack import CE_LOSS
-from secmlt.models.ensemble.ensemble_model import EnsembleModel
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.metrics.classification import Accuracy
 from secmlt.models.ensemble.ensemble_function import (
-    AvgEnsembleFunction, # forward averages the outputs of the ensemble models.
-    RandomEnsembleFunction, # forward considers one randomly picked model.
-    RawEnsembleFunction # forward returns the raw outputs of the models.
+    RawEnsembleFunction,  # forward returns the raw outputs of the models.
 )
-
+from secmlt.models.ensemble.ensemble_model import EnsembleModel
+from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from torch.utils.data import DataLoader, Subset
 
 # We load models to be included in the ensemble
 nets = [
@@ -79,6 +73,7 @@ n_robust_accuracy = Accuracy()(model, native_adv_ds)
 print("Robust Accuracy (Ensemble Model): ", n_robust_accuracy.item())
 
 # Test accuracy on adversarial examples for each model
-for i, (model_name, model) in enumerate(model.models.items()):
-    n_robust_accuracy = Accuracy()(model, native_adv_ds)
-    print(f"Robust Accuracy (Ensemble Model - {model_name}): ", n_robust_accuracy.item())
+for _, (model_name, m) in enumerate(model.models.items()):
+    n_robust_accuracy = Accuracy()(m, native_adv_ds)
+    print(f"Robust Accuracy (Ensemble Model - {model_name}): ",
+        n_robust_accuracy.item())
