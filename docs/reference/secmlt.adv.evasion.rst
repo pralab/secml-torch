@@ -10,6 +10,7 @@ Subpackages
    secmlt.adv.evasion.advlib_attacks
    secmlt.adv.evasion.aggregators
    secmlt.adv.evasion.foolbox_attacks
+   secmlt.adv.evasion.modular_attacks
 
 Submodules
 ----------
@@ -22,10 +23,18 @@ secmlt.adv.evasion.base\_evasion\_attack module
    :undoc-members:
    :show-inheritance:
 
-secmlt.adv.evasion.modular\_attack module
------------------------------------------
+secmlt.adv.evasion.ddn module
+-----------------------------
 
-.. automodule:: secmlt.adv.evasion.modular_attack
+.. automodule:: secmlt.adv.evasion.ddn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.adv.evasion.fmn module
+-----------------------------
+
+.. automodule:: secmlt.adv.evasion.fmn
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,4 +1,4 @@
-"""Wrapper of the PGD attack implemented in Adversarial Library."""
+"""Wrapper of the FMN attack implemented in Adversarial Library."""
 
 from __future__ import annotations  # noqa: I001
 from functools import partial
@@ -33,9 +33,10 @@ class FMNAdvLib(BaseAdvLibEvasionAttack):
         num_steps : int
             The number of iterations for the attack.
         max_step_size : float
-            The attack step size.
+            The attack maximum step size.
         min_step_size : float, optional
-            The number of attack restarts. The default value is 1.
+            The attack minimum step size. If None, it is set to max_step_size/100.
+            The default value is None.
         gamma: float, optional
             Step size for modifying the eps-ball. Will decay with cosine annealing.
         y_target : int | None, optional

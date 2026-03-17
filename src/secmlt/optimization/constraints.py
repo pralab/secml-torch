@@ -398,7 +398,7 @@ class L0Constraint(LpConstraint):
             radius,
         )
         radius = radius.to(dtype=torch.long)  # ensure it's integer-valued
-        top_k_max = flat_x.abs().topk(k=int(radius.max().item()), dim=1).values
+        top_k_max, _ = flat_x.abs().topk(k=int(radius.max().item()), dim=1)
         thresholds = top_k_max.gather(1, (radius.unsqueeze(1) - 1).clamp_(min=0))
         flat_x = torch.where(
             flat_x.abs() >= thresholds, flat_x, torch.zeros_like(flat_x)
@@ -444,7 +444,7 @@ class QuantizationConstraint(InputSpaceConstraint):
             msg = "Levels must be an integer, list, or torch.Tensor."
             raise TypeError(msg)
         # sort levels to ensure they are in ascending order
-        self.levels = self.levels.sort().values
+        self.levels, _ = torch.sort(self.levels)
         super().__init__(preprocessing)
 
     def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:

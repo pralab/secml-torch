@@ -69,16 +69,16 @@ def test_getters_and_setters(
 ):
     # test getter for domain_constraints
     domain_constraints = additive_manipulation.domain_constraints
-    assert domain_constraints == [domain_constraint], (
-        f"Expected domain constraints {domain_constraint}, got {domain_constraints}"
-    )
+    assert domain_constraints == [
+        domain_constraint
+    ], f"Expected domain constraints {domain_constraint}, got {domain_constraints}"
 
     # test setter for domain_constraints
     new_domain_constraint = MockConstraint(torch.tensor([[0.0, 0.1], [0.2, 0.3]]))
     additive_manipulation.domain_constraints = [new_domain_constraint]
-    assert additive_manipulation.domain_constraints == [new_domain_constraint], (
-        "Domain constraints setter did not update correctly"
-    )
+    assert additive_manipulation.domain_constraints == [
+        new_domain_constraint
+    ], "Domain constraints setter did not update correctly"
 
     # test getter for perturbation_constraints
     perturbation_constraints = additive_manipulation.perturbation_constraints
