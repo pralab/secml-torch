@@ -11,6 +11,7 @@ from torch.nn import CrossEntropyLoss
 from secmlt.optimization.losses import LogitDifferenceLoss
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
+from secmlt.trackers.trackers import Tracker
 
 
 if TYPE_CHECKING:
@@ -21,7 +22,6 @@ if TYPE_CHECKING:
     from secmlt.optimization.constraints import Constraint
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
-    from secmlt.trackers.trackers import Tracker
     from torch.optim import Optimizer, _LRScheduler
 
 CE_LOSS = "ce_loss"
@@ -86,7 +86,10 @@ class ModularEvasionAttack(BaseEvasionAttack):
         self.y_target = y_target
         self.num_steps = num_steps
         self.step_size = step_size
-        self.trackers = trackers
+        if isinstance(trackers, Tracker):
+            self.trackers = [trackers]
+        else:
+            self.trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
                 self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")

@@ -76,4 +76,9 @@ native_adv_ds = native_attack(model, test_data_loader)
 
 # Test accuracy on adversarial examples
 n_robust_accuracy = Accuracy()(model, native_adv_ds)
-print("Robust Accuracy (PGD Native): ", n_robust_accuracy.item())
+print("Robust Accuracy (Ensemble Model): ", n_robust_accuracy.item())
+
+# Test accuracy on adversarial examples for each model
+for i, (model_name, model) in enumerate(model.models.items()):
+    n_robust_accuracy = Accuracy()(model, native_adv_ds)
+    print(f"Robust Accuracy (Ensemble Model - {model_name}): ", n_robust_accuracy.item())
