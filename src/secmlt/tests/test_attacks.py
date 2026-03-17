@@ -1,6 +1,7 @@
 import pytest
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fmn import FMN, FMNNative
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
@@ -157,6 +158,34 @@ def test_fmn_attack(
                 backend=backend,
             )
             assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
+@pytest.mark.parametrize(
+    ("backend",),
+    [
+        ("foolbox",),
+        ("advlib",),
+        ("native",),
+    ],
+)
+def test_ddn_attack(
+    backend,
+    y_target,
+    model,
+    data_loader,
+) -> BaseEvasionAttack:
+    attack = DDN(
+        num_steps=5,
+        eps_init=1.0,
+        gamma=0.05,
+        y_target=y_target,
+        backend=backend,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
 
 
 @pytest.mark.parametrize("attack_class", [PGD, FMN])

@@ -28,6 +28,14 @@ secmlt.optimization.initializer module
    :undoc-members:
    :show-inheritance:
 
+secmlt.optimization.losses module
+---------------------------------
+
+.. automodule:: secmlt.optimization.losses
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.optimization.optimizer\_factory module
 ---------------------------------------------
 
@@ -40,6 +48,14 @@ secmlt.optimization.random\_perturb module
 ------------------------------------------
 
 .. automodule:: secmlt.optimization.random_perturb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.optimization.scheduler\_factory module
+---------------------------------------------
+
+.. automodule:: secmlt.optimization.scheduler_factory
    :members:
    :undoc-members:
    :show-inheritance:

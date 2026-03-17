@@ -133,7 +133,7 @@ class MinDistanceEnsemble(Ensemble):
             The minimum-distance adversarial examples found so far.
         """
         preds = model(x_adv).argmax(dim=1)
-        is_adv = preds.type(labels.dtype) == labels
+        is_adv = preds.type(labels.dtype) != labels
         norms = (
             (samples - x_adv)
             .flatten(start_dim=1)

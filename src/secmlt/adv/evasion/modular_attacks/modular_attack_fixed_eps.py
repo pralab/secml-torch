@@ -88,6 +88,7 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         x_adv, delta = self.manipulation_function(samples, delta)
         best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
         best_delta = torch.zeros_like(samples)
+        grad_before_processing = torch.zeros_like(delta)
 
         for i in range(self.num_steps):
             x_adv.data, delta.data = self.manipulation_function(
@@ -116,24 +117,9 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                 best_losses.data,
             )
 
-            grad_before_processing = delta.grad.data
-            delta.grad.data = self.gradient_processing(delta.grad.data)
-            optimizer.step()
-            scheduler.step()
-
             if self.trackers is not None:
-                if isinstance(self.trackers, list):
-                    for tracker in self.trackers:
-                        tracker.track(
-                            i,
-                            losses.detach().cpu().data,
-                            scores.detach().cpu().data,
-                            x_adv.detach().cpu().data,
-                            delta.detach().cpu().data,
-                            grad_before_processing.detach().cpu().data,
-                        )
-                else:
-                    self.trackers.track(
+                for tracker in self.trackers:
+                    tracker.track(
                         i,
                         losses.detach().cpu().data,
                         scores.detach().cpu().data,
@@ -141,6 +127,12 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                         delta.detach().cpu().data,
                         grad_before_processing.detach().cpu().data,
                     )
+
+            grad_before_processing = delta.grad.data
+            delta.grad.data = self.gradient_processing(delta.grad.data)
+            optimizer.step()
+            scheduler.step()
+
 
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
         return x_adv, best_delta

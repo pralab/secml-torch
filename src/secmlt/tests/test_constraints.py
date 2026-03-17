@@ -14,9 +14,9 @@ from secmlt.optimization.constraints import (
 
 
 def assert_tensor_equal(actual, expected, msg="") -> None:
-    assert torch.allclose(actual, expected), (
-        f"Expected {expected}, but got {actual}. {msg}"
-    )
+    assert torch.allclose(
+        actual, expected
+    ), f"Expected {expected}, but got {actual}. {msg}"
 
 
 @pytest.mark.parametrize(
@@ -62,9 +62,9 @@ def test_lp_constraints(constraint_class, radius, x, expected_norm, norm_type):
 
     # calculate the norm for the projection and ensure it does not exceed the radius
     norms = torch.norm(projected.flatten(start_dim=1), p=norm_type, dim=1)
-    assert torch.all(norms <= expected_norm), (
-        f"{constraint_class.__name__} failed with norms {norms}"
-    )
+    assert torch.all(
+        norms <= expected_norm
+    ), f"{constraint_class.__name__} failed with norms {norms}"
 
 
 @pytest.mark.parametrize(

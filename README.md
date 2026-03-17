@@ -53,11 +53,12 @@ Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch
 |  |  | <sub>Advantages: GPU-native, efficient, modular/customizable, debugging tools</sub> | <sub>Advantages: expands the attack catalogue, easy cross-checks</sub> |
 | Test time | **PGD (fixed-epsilon, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **FMN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **DDN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **Other Evasion Attacks** | Work in progress | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
 | Training time | **Backdoor** | ✔ Native implementation | - |
 | Training time | **Label Flip Poisoning** | ✔ Native implementation | - |
 
-
+Check out what's cooking! Have a look at our [roadmap](https://github.com/orgs/pralab/projects/2)!
 
 ## Usage
 
@@ -100,8 +101,9 @@ If you would like to contribute to SecMLT, please follow our [contribution guide
 ## Acknowledgements
 SecML has been partially developed with the support of European Union’s [ELSA – European Lighthouse on Secure and Safe AI](https://elsa-ai.eu), Horizon Europe, grant agreement No. 101070617, [Sec4AI4Sec - Cybersecurity for AI-Augmented Systems](https://www.sec4ai4sec-project.eu), Horizon Europe, grant agreement No. 101120393, and [CoEvolution - A Comprehensive Trustworthy Framework for Connected Machine Learning and Secure Interconnected AI Solutions](https://coevolution-project.eu/), Horizon Europe, grant agreement No. 101168560, and by the project SERICS (PE00000014) under the MUR National Recovery and Resilience Plan funded by the European Union - NextGenerationEU.
 
-<img src="_static/assets/logos/sec4AI4sec.png" alt="sec4ai4sec" style="height:60px;"/> &nbsp;&nbsp; 
-<img src="_static/assets/logos/elsa.jpg" alt="elsa" style="height:60px;"/> &nbsp;&nbsp; 
-<img src="_static/assets/logos/coevolution.svg" alt="coevolution" style="height:60px;"/> &nbsp;&nbsp; 
-<img src="_static/assets/logos/serics.png" alt="serics" style="height:60px;"/> &nbsp;&nbsp; 
-<img src="_static/assets/logos/FundedbytheEU.png" alt="europe" style="height:60px;"/>
+<img src="_static/assets/logos/sec4AI4sec.png" alt="sec4ai4sec" style="height:50px;"/> &nbsp;&nbsp; 
+<img src="_static/assets/logos/elsa.jpg" alt="elsa" style="height:50px;"/> &nbsp;&nbsp; 
+<img src="_static/assets/logos/coevolution.svg" alt="coevolution" style="height:50px;"/> &nbsp;&nbsp; 
+<img src="_static/assets/logos/serics.png" alt="serics" style="height:50px;"/> &nbsp;&nbsp; 
+<img src="_static/assets/logos/safer.png" alt="safer" style="height:50px;"/>
+<img src="_static/assets/logos/FundedbytheEU.png" alt="europe" style="height:50px;"/>
