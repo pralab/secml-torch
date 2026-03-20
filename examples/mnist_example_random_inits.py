@@ -11,7 +11,7 @@ from secmlt.metrics.classification import (
     AttackSuccessRate,
     EnsembleSuccessRate,
 )
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 device = "cpu"
 model_path = "example_data/models/mnist"
@@ -20,7 +20,7 @@ net = get_mnist_model(model_path).to(device)
 test_loader = get_mnist_loader(dataset_path)
 
 # Wrap model
-model = BasePytorchClassifier(net)
+model = BasePyTorchClassifier(net)
 
 # Test accuracy on original data
 accuracy = Accuracy()(model, test_loader)

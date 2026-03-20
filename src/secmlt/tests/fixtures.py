@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 import torch
 from secmlt.models.hugging_face.base_hf_lm import HFCausalLM
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
 from secmlt.tests.mocks_lm import MockHFModel, MockHFTokenizer
 from torch.utils.data import DataLoader, TensorDataset
@@ -69,7 +69,7 @@ def model() -> torch.nn.Module:
     torch.nn.Module
         Fake model.
     """
-    return BasePytorchClassifier(model=MockModel())
+    return BasePyTorchClassifier(model=MockModel())
 
 
 @pytest.fixture

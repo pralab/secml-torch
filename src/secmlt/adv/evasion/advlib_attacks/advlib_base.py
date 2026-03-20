@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Literal
 import torch
 from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
 
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -68,7 +68,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         samples: torch.Tensor,
         labels: torch.Tensor,
     ) -> torch.Tensor:
-        if not isinstance(model, BasePytorchClassifier):
+        if not isinstance(model, BasePyTorchClassifier):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
         device = model._get_device()

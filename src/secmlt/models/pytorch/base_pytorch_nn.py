@@ -7,7 +7,7 @@ from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.utils.data import DataLoader
 
 
-class BasePytorchClassifier(BaseModel):
+class BasePyTorchClassifier(BaseModel):
     """Wrapper for PyTorch classifier."""
 
     def __init__(

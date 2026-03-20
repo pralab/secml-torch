@@ -1,6 +1,6 @@
 import pytest
 import torch
-from secmlt.manipulations.manipulation import AdditiveManipulation
+from secmlt.manipulations.manipulation import AdditiveManipulation, Manipulation
 from secmlt.optimization.constraints import Constraint
 
 
@@ -10,6 +10,22 @@ class MockConstraint(Constraint):
 
     def _apply_constraint(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         return self.mock_return
+
+
+class MockNonInvertibleManipulation(Manipulation):
+    def _apply_manipulation(
+        self,
+        x: torch.Tensor,
+        delta: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        return x + delta, delta
+
+    def _invert_manipulation(
+        self,
+        x: torch.Tensor,
+        x_adv: torch.Tensor,
+    ) -> torch.Tensor | None:
+        return None
 
 
 @pytest.fixture
@@ -40,6 +56,14 @@ def additive_manipulation(domain_constraint, perturbation_constraint):
     )
 
 
+@pytest.fixture
+def non_invertible_manipulation(domain_constraint, perturbation_constraint):
+    return MockNonInvertibleManipulation(
+        domain_constraints=[domain_constraint],
+        perturbation_constraints=[perturbation_constraint],
+    )
+
+
 def test_apply_domain_constraints(additive_manipulation, input_tensor):
     # apply the domain constraint and check if it modifies the input correctly
     result = additive_manipulation._apply_domain_constraints(input_tensor)
@@ -58,8 +82,9 @@ def test_additive_manipulation(additive_manipulation, input_tensor, delta_tensor
     # test the additive manipulation
     x_adv, delta = additive_manipulation(input_tensor, delta_tensor)
     expected_x_adv = torch.tensor([[0.0, 0.0], [0.7, 0.8]])
+    # expected delta is equal to expected_x_adv - input_tensor because of
+    # the inversion of the manipulation
     expected_delta = torch.tensor([[-0.2, -0.3], [0.7, 1.1]])
-
     assert torch.equal(x_adv, expected_x_adv), f"Expected {expected_x_adv}, got {x_adv}"
     assert torch.equal(delta, expected_delta), f"Expected {expected_delta}, got {delta}"
 
@@ -95,3 +120,69 @@ def test_getters_and_setters(
     assert additive_manipulation.perturbation_constraints == [
         new_perturbation_constraint
     ], "Perturbation constraints setter did not update correctly"
+
+
+def test_non_invertible_manipulation_keeps_constrained_delta(
+    non_invertible_manipulation,
+    input_tensor,
+    delta_tensor,
+):
+    x_adv, delta = non_invertible_manipulation(input_tensor, delta_tensor)
+    expected_x_adv = torch.tensor([[0.0, 0.0], [0.7, 0.8]])
+    # Without inversion, delta remains the output of perturbation constraints.
+    expected_delta = torch.tensor([[0.1, 0.2], [0.3, 0.2]])
+
+    assert torch.equal(x_adv, expected_x_adv), f"Expected {expected_x_adv}, got {x_adv}"
+    assert torch.equal(delta, expected_delta), f"Expected {expected_delta}, got {delta}"
+
+
+def test_raises_if_apply_manipulation_not_implemented(
+    domain_constraint,
+    perturbation_constraint,
+):
+    class MissingApplyManipulation(Manipulation):
+        def _invert_manipulation(
+            self,
+            x: torch.Tensor,
+            x_adv: torch.Tensor,
+        ) -> torch.Tensor | None:
+            return None
+
+    with pytest.raises(TypeError):
+        MissingApplyManipulation(
+            domain_constraints=[domain_constraint],
+            perturbation_constraints=[perturbation_constraint],
+        )
+
+
+def test_raises_if_invert_manipulation_not_implemented(
+    domain_constraint,
+    perturbation_constraint,
+):
+    class MissingInvertManipulation(Manipulation):
+        def _apply_manipulation(
+            self,
+            x: torch.Tensor,
+            delta: torch.Tensor,
+        ) -> tuple[torch.Tensor, torch.Tensor]:
+            return x + delta, delta
+
+    with pytest.raises(TypeError):
+        MissingInvertManipulation(
+            domain_constraints=[domain_constraint],
+            perturbation_constraints=[perturbation_constraint],
+        )
+
+
+def test_raises_if_both_abstract_methods_not_implemented(
+    domain_constraint,
+    perturbation_constraint,
+):
+    class MissingBothManipulationMethods(Manipulation):
+        pass
+
+    with pytest.raises(TypeError):
+        MissingBothManipulationMethods(
+            domain_constraints=[domain_constraint],
+            perturbation_constraints=[perturbation_constraint],
+        )
