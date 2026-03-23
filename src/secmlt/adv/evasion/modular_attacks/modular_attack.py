@@ -92,7 +92,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
             self.trackers = trackers
         if isinstance(loss_function, str):
             if loss_function in LOSS_FUNCTIONS:
-                self.loss_function = LOSS_FUNCTIONS[loss_function](reduction="none")
+                self.loss_function = LOSS_FUNCTIONS[loss_function]
             else:
                 msg = (
                     f"Loss function not found. Use one among {LOSS_FUNCTIONS.values()}"
@@ -157,7 +157,10 @@ class ModularEvasionAttack(BaseEvasionAttack):
     @loss_function.setter
     def loss_function(self, loss_function: torch.nn.Module) -> None:
         """Set the loss function of the attack."""
-        self._loss_function = loss_function
+        if isinstance(loss_function, type):
+                self._loss_function = loss_function(reduction="none")
+        else:
+            self._loss_function = loss_function
 
     @classmethod
     def _trackers_allowed(cls) -> Literal[True]:

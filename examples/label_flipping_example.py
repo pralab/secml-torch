@@ -2,7 +2,7 @@ import torchvision.datasets
 from models.mnist_net import MNISTNet
 from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
 from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePytorchClassifier
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -46,7 +46,7 @@ for k, data_loader in {
     "poisoned": poisoned_data_loader,
 }.items():
     trainer = BasePyTorchTrainer(optimizer, epochs=3)
-    model = BasePytorchClassifier(net, trainer=trainer)
+    model = BasePyTorchClassifier(net, trainer=trainer)
     model.train(data_loader)
     # test accuracy without backdoor
     accuracy = Accuracy()(model, test_data_loader)
