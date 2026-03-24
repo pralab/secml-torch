@@ -35,6 +35,32 @@ class BasePyTorchTrainer(BaseTrainer):
         self._loss = loss if loss is not None else torch.nn.CrossEntropyLoss()
         self._scheduler = scheduler
 
+    def train_epoch(self, model: torch.nn.Module, dataloader:DataLoader)-> torch.nn.Module:
+        """
+        Train model for one epoch with given loader.
+
+        Parameters
+        ----------
+        model : torch.nn.Module
+            Pytorch model to be trained.
+        dataloader : DataLoader
+            Train data loader.
+
+        Returns
+        -------
+        torch.nn.Module
+            Trained model.
+        """
+        device = next(model.parameters()).device
+        for _, (x, y) in enumerate(dataloader):
+            x, y = x.to(device), y.to(device)
+            self._optimizer.zero_grad()
+            outputs = model(x)
+            loss = self._loss(outputs, y)
+            loss.backward()
+            self._optimizer.step()
+        return model
+
     def train(self, model: torch.nn.Module, dataloader: DataLoader) -> torch.nn.Module:
         """
         Train model with given loader.
@@ -51,16 +77,9 @@ class BasePyTorchTrainer(BaseTrainer):
         torch.nn.Module
             Trained model.
         """
-        device = next(model.parameters()).device
         model = model.train()
         for _ in range(self._epochs):
-            for _, (x, y) in enumerate(dataloader):
-                x, y = x.to(device), y.to(device)
-                self._optimizer.zero_grad()
-                outputs = model(x)
-                loss = self._loss(outputs, y)
-                loss.backward()
-                self._optimizer.step()
+            model = self.train_epoch(model, dataloader)
             if self._scheduler is not None:
                 self._scheduler.step()
         return model
