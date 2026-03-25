@@ -5,6 +5,7 @@ optimization problem, where the inner maximization is solved by generating adver
 examples with a given attack, and the outer minimization is solved by training the model
 (only) on adversarial examples.
 """
+
 from typing import Literal
 
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
@@ -15,13 +16,17 @@ from torch.utils.data import DataLoader
 
 COMBINING_MODE = Literal["adv", "mix"]
 
+
 class AdversarialTrainer(BasePyTorchTrainer):
     """Adversarial trainer for PyTorch models."""
 
-    def train(self, model: Module,
-              dataloader: DataLoader,
-              attack: BaseEvasionAttack,
-              combining_mode: COMBINING_MODE = "adv") -> Module:
+    def train(
+        self,
+        model: Module,
+        dataloader: DataLoader,
+        attack: BaseEvasionAttack,
+        combining_mode: COMBINING_MODE = "adv",
+    ) -> Module:
         r"""Train a model with the given dataloader and attack.
 
         Parameters
@@ -44,8 +49,12 @@ class AdversarialTrainer(BasePyTorchTrainer):
         """
         for _ in range(self._epochs):
             # Generate adversarial examples using the attack and the dataloader
-            model.eval()
-            adv_data = attack(BasePyTorchClassifier(model), dataloader)
+            classifier = (
+                model
+                if isinstance(model, BasePyTorchClassifier)
+                else BasePyTorchClassifier(model)
+            )
+            adv_data = attack(classifier, dataloader)
 
             # Combine the original and adversarial dataloaders
             combined_data = self.collect_data(dataloader, adv_data, combining_mode)
@@ -57,8 +66,12 @@ class AdversarialTrainer(BasePyTorchTrainer):
                 self._scheduler.step()
         return model
 
-    def collect_data(self, clean_data: DataLoader, adv_data: DataLoader,
-                     combining_strategy: COMBINING_MODE) -> DataLoader:
+    def collect_data(
+        self,
+        clean_data: DataLoader,
+        adv_data: DataLoader,
+        combining_strategy: COMBINING_MODE,
+    ) -> DataLoader:
         r"""Combine two dataloaders into one.
 
         Parameters

@@ -35,7 +35,9 @@ class BasePyTorchTrainer(BaseTrainer):
         self._loss = loss if loss is not None else torch.nn.CrossEntropyLoss()
         self._scheduler = scheduler
 
-    def train_epoch(self, model: torch.nn.Module, dataloader:DataLoader)-> torch.nn.Module:
+    def train_epoch(
+        self, model: torch.nn.Module, dataloader: DataLoader
+    ) -> torch.nn.Module:
         """
         Train model for one epoch with given loader.
 
