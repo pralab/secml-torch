@@ -1,6 +1,5 @@
 import torch
 from loaders.get_loaders import get_mnist_loader
-from models.mnist_net import get_mnist_model
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
@@ -13,9 +12,9 @@ from secmlt.trackers.trackers import (
 )
 
 device = "cpu"
-model_path = "example_data/models/mnist"
 dataset_path = "example_data/datasets/"
-net = get_mnist_model(model_path).to(device)
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="student")
+net.eval()
 test_loader = get_mnist_loader(dataset_path)
 
 # Wrap model
@@ -91,15 +90,3 @@ print("robust accuracy foolbox: ", f_robust_accuracy)
 al_robust_accuracy = Accuracy()(model, al_adv_ds)
 print("robust accuracy AdvLib: ", al_robust_accuracy)
 
-native_data, native_labels = next(iter(native_adv_ds))
-f_data, f_labels = next(iter(f_adv_ds))
-real_data, real_labels = next(iter(test_loader))
-
-
-distance = torch.linalg.norm(
-    native_data.detach().cpu().flatten(start_dim=1)
-    - f_data.detach().cpu().flatten(start_dim=1),
-    ord=LpPerturbationModels.pert_models[perturbation_model],
-    dim=1,
-)
-print("Solutions are :", distance, f"{perturbation_model} distant")

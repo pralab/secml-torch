@@ -2,7 +2,6 @@ from pathlib import Path
 
 import torch
 import torchvision.datasets
-from models.mnist_net import MNISTNet
 from secmlt.metrics.classification import Accuracy
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
@@ -11,7 +10,7 @@ from torch.utils.data import DataLoader
 
 dataset_path = "example_data/datasets/"
 device = "cpu"
-net = MNISTNet()
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model")
 net.to(device)
 optimizer = Adam(lr=1e-3, params=net.parameters())
 training_dataset = torchvision.datasets.MNIST(

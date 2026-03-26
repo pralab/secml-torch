@@ -1,5 +1,6 @@
+import torch
+
 from loaders.get_loaders import get_mnist_loader
-from models.mnist_net import get_mnist_model
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
@@ -11,9 +12,9 @@ from secmlt.trackers.trackers import (
 )
 
 device = "cpu"
-model_path = "example_data/models/mnist"
 dataset_path = "example_data/datasets/"
-net = get_mnist_model(model_path).to(device)
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="student")
+net.eval()
 test_loader = get_mnist_loader(dataset_path)
 
 # Wrap model
