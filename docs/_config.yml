@@ -1,7 +1,7 @@
 # Book settings
 # Learn more at https://jupyterbook.org/customize/config.html
 
-title: SecML-Torch
+title: "SecML-Torch"
 author: Maura Pintor, Luca Demetrio
 logo: _static/assets/logos/logo.png
 
