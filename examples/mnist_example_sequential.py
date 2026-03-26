@@ -1,5 +1,4 @@
 import torch
-
 from loaders.get_loaders import get_mnist_loader
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
