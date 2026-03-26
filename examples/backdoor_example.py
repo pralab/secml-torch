@@ -1,6 +1,5 @@
 import torch
 import torchvision.datasets
-from models.mnist_net import MNISTNet
 from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
 from secmlt.metrics.classification import Accuracy, AttackSuccessRate
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
@@ -16,7 +15,7 @@ def apply_patch(x: torch.Tensor) -> torch.Tensor:
 
 dataset_path = "example_data/datasets/"
 device = "cpu"
-net = MNISTNet()
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model")
 net.to(device)
 optimizer = Adam(lr=1e-3, params=net.parameters())
 training_dataset = torchvision.datasets.MNIST(
