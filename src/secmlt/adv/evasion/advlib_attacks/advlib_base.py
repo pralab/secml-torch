@@ -5,7 +5,7 @@ from __future__ import annotations  # noqa: I001
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from secmlt.models.base_model import BaseModel
+    from secmlt.trackers.trackers import Tracker
 
 
 class BaseAdvLibEvasionAttack(BaseEvasionAttack):
@@ -25,7 +26,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: type[TRACKER_TYPE] | None = None,
+        trackers: Tracker | list[Tracker] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -46,7 +47,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
-        trackers : type[TRACKER_TYPE] | None, optional
+        trackers : Tracker | list[Tracker] | None, optional
             Trackers for the attack (unallowed in Adversarial Library), by default None.
         """
         self.advlib_attack = advlib_attack

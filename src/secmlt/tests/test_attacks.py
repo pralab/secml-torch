@@ -14,6 +14,7 @@ from secmlt.adv.evasion.pgd import PGD, PGDNative
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
+from secmlt.trackers.trackers import LossTracker
 from torch.utils.data import DataLoader
 
 from src.secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
@@ -217,6 +218,49 @@ def test_ddn_attack(
         backend=backend,
     )
     assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_attack_can_return_generator(model, data_loader):
+    attack = PGD(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.5,
+        num_steps=3,
+        step_size=0.1,
+        random_start=False,
+        y_target=None,
+        backend="native",
+    )
+
+    batch_iterator = attack(model, data_loader, stream=True)
+    assert not isinstance(batch_iterator, DataLoader)
+
+    attacked_batches = list(batch_iterator)
+    assert len(attacked_batches) == len(data_loader)
+
+    total_attacked_samples = sum(batch_adv.shape[0]
+                                for batch_adv, _ in attacked_batches)
+    total_labels = sum(batch_labels.shape[0] for _, batch_labels in attacked_batches)
+    assert total_attacked_samples == len(data_loader.dataset)
+    assert total_labels == len(data_loader.dataset)
+
+
+def test_attack_warns_when_streaming_with_trackers(model, data_loader):
+    attack = PGD(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.5,
+        num_steps=3,
+        step_size=0.1,
+        random_start=False,
+        y_target=None,
+        backend="native",
+        trackers=[LossTracker()],
+    )
+
+    with pytest.warns(UserWarning, match="Trackers are enabled while streaming"):
+        batch_iterator = attack(model, data_loader, stream=True)
+
+    first_batch_adv, first_batch_labels = next(batch_iterator)
+    assert first_batch_adv.shape[0] == first_batch_labels.shape[0]
 
 
 @pytest.mark.parametrize("attack_class", [PGD, FMN])
