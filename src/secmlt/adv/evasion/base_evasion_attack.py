@@ -167,7 +167,6 @@ class BaseEvasionAttack:
 
             try:
                 x_adv, _ = self._run(model, samples, labels)
-                yield x_adv, labels
             finally:
                 # End tracking for current batch
                 if hasattr(self, "trackers") and self.trackers is not None:
@@ -176,6 +175,8 @@ class BaseEvasionAttack:
                             tracker.end_tracking()
                     else:
                         self.trackers.end_tracking()
+
+            yield x_adv, labels
 
     def __call__(
         self,
@@ -208,8 +209,7 @@ class BaseEvasionAttack:
             if hasattr(self, "trackers") and self.trackers is not None:
                 warnings.warn(
                     "Trackers are enabled while streaming attack batches. "
-                    "If the iterator is not fully consumed, tracker cleanup "
-                    "may be delayed.",
+                    "Only consumed batches will be tracked.",
                     UserWarning,
                     stacklevel=2,
                 )
