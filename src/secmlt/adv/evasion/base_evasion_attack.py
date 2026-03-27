@@ -157,24 +157,25 @@ class BaseEvasionAttack:
     ) -> Iterator[tuple[torch.Tensor, torch.Tensor]]:
         """Run the attack on each batch and yield adversarials with labels."""
         for samples, labels in data_loader:
+            trackers = getattr(self, "_trackers", None)
             # Initialize tracking for new batch
-            if hasattr(self, "trackers") and self.trackers is not None:
-                if isinstance(self.trackers, list):
-                    for tracker in self.trackers:
+            if trackers is not None:
+                if isinstance(trackers, list):
+                    for tracker in trackers:
                         tracker.init_tracking()
                 else:
-                    self.trackers.init_tracking()
+                    trackers.init_tracking()
 
             try:
                 x_adv, _ = self._run(model, samples, labels)
             finally:
                 # End tracking for current batch
-                if hasattr(self, "trackers") and self.trackers is not None:
-                    if isinstance(self.trackers, list):
-                        for tracker in self.trackers:
+                if trackers is not None:
+                    if isinstance(trackers, list):
+                        for tracker in trackers:
                             tracker.end_tracking()
                     else:
-                        self.trackers.end_tracking()
+                        trackers.end_tracking()
 
             yield x_adv, labels
 
@@ -206,7 +207,8 @@ class BaseEvasionAttack:
         """
         attacked_batches = self._run_batches(model, data_loader)
         if stream:
-            if hasattr(self, "trackers") and self.trackers is not None:
+            trackers = getattr(self, "_trackers", None)
+            if trackers is not None:
                 warnings.warn(
                     "Trackers are enabled while streaming attack batches. "
                     "Only consumed batches will be tracked.",
@@ -238,7 +240,7 @@ class BaseEvasionAttack:
         list[Tracker] | None
             Trackers set for the attack, if any.
         """
-        return self._trackers
+        return getattr(self, "_trackers", None)
 
     @trackers.setter
     def trackers(self, trackers: list[Tracker] | Tracker | None = None) -> None:
