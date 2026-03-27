@@ -237,9 +237,12 @@ def test_attack_can_return_generator(model, data_loader):
     attacked_batches = list(batch_iterator)
     assert len(attacked_batches) == len(data_loader)
 
-    total_attacked_samples = sum(batch_adv.shape[0]
-                                for batch_adv, _ in attacked_batches)
-    total_labels = sum(batch_labels.shape[0] for _, batch_labels in attacked_batches)
+    total_attacked_samples = sum(
+        batch_adv.shape[0] for batch_adv, _ in attacked_batches
+    )
+    total_labels = sum(
+        batch_labels.shape[0] for _, batch_labels in attacked_batches
+    )
     assert total_attacked_samples == len(data_loader.dataset)
     assert total_labels == len(data_loader.dataset)
 
