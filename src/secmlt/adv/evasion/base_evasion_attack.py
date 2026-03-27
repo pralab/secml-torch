@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import warnings
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal
 
@@ -11,10 +12,11 @@ from secmlt.adv.backends import Backends
 from torch.utils.data import DataLoader, TensorDataset
 
 if TYPE_CHECKING:
-    from secmlt.models.base_model import BaseModel
+    from collections.abc import Iterator
 
-# lazy evaluation to avoid circular imports
-TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"
+    from secmlt.models.base_model import BaseModel
+    from secmlt.trackers.trackers import Tracker
+
 
 
 class BaseEvasionAttackCreator:
@@ -148,7 +150,41 @@ class BaseEvasionAttackCreator:
 class BaseEvasionAttack:
     """Base class for evasion attacks."""
 
-    def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
+    def _run_batches(
+        self,
+        model: BaseModel,
+        data_loader: DataLoader,
+    ) -> Iterator[tuple[torch.Tensor, torch.Tensor]]:
+        """Run the attack on each batch and yield adversarials with labels."""
+        for samples, labels in data_loader:
+            trackers = getattr(self, "_trackers", None)
+            # Initialize tracking for new batch
+            if trackers is not None:
+                if isinstance(trackers, list):
+                    for tracker in trackers:
+                        tracker.init_tracking()
+                else:
+                    trackers.init_tracking()
+
+            try:
+                x_adv, _ = self._run(model, samples, labels)
+            finally:
+                # End tracking for current batch
+                if trackers is not None:
+                    if isinstance(trackers, list):
+                        for tracker in trackers:
+                            tracker.end_tracking()
+                    else:
+                        trackers.end_tracking()
+
+            yield x_adv, labels
+
+    def __call__(
+        self,
+        model: BaseModel,
+        data_loader: DataLoader,
+        stream: bool = False,
+    ) -> DataLoader | Iterator[tuple[torch.Tensor, torch.Tensor]]:
         """
         Compute the attack against the model, using the input data.
 
@@ -158,35 +194,34 @@ class BaseEvasionAttack:
             Model to test.
         data_loader : DataLoader
             Test dataloader.
+        stream : bool, default=False
+            If False, materialize all adversarial batches and return a
+            DataLoader.
+            If True, return an iterator yielding attacked batches lazily.
 
         Returns
         -------
-        DataLoader
-            Dataloader with adversarial examples and original labels.
+        DataLoader | Iterator[tuple[torch.Tensor, torch.Tensor]]
+            Materialized dataloader with adversarial examples and original
+            labels, or a lazy iterator over attacked batches.
         """
+        attacked_batches = self._run_batches(model, data_loader)
+        if stream:
+            trackers = getattr(self, "_trackers", None)
+            if trackers is not None:
+                warnings.warn(
+                    "Trackers are enabled while streaming attack batches. "
+                    "Only consumed batches will be tracked.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+            return attacked_batches
+
         adversarials = []
         original_labels = []
-        for samples, labels in data_loader:
-            # Initialize tracking for new batch
-            if hasattr(self, "trackers") and self.trackers is not None:
-                if isinstance(self.trackers, list):
-                    for tracker in self.trackers:
-                        tracker.init_tracking()
-                else:
-                    self.trackers.init_tracking()
-
-            try:
-                x_adv, _ = self._run(model, samples, labels)
-                adversarials.append(x_adv)
-                original_labels.append(labels)
-            finally:
-                # End tracking for current batch
-                if hasattr(self, "trackers") and self.trackers is not None:
-                    if isinstance(self.trackers, list):
-                        for tracker in self.trackers:
-                            tracker.end_tracking()
-                    else:
-                        self.trackers.end_tracking()
+        for x_adv, labels in attacked_batches:
+            adversarials.append(x_adv)
+            original_labels.append(labels)
         adversarials = torch.vstack(adversarials)
         original_labels = torch.hstack(original_labels)
         adversarial_dataset = TensorDataset(adversarials, original_labels)
@@ -196,19 +231,19 @@ class BaseEvasionAttack:
         )
 
     @property
-    def trackers(self) -> list[TRACKER_TYPE] | None:
+    def trackers(self) -> list[Tracker] | None:
         """
         Get the trackers set for this attack.
 
         Returns
         -------
-        list[TRACKER_TYPE] | None
+        list[Tracker] | None
             Trackers set for the attack, if any.
         """
-        return self._trackers
+        return getattr(self, "_trackers", None)
 
     @trackers.setter
-    def trackers(self, trackers: list[TRACKER_TYPE] | None = None) -> None:
+    def trackers(self, trackers: list[Tracker] | Tracker | None = None) -> None:
         if self._trackers_allowed():
             if trackers is not None and not isinstance(trackers, list):
                 trackers = [trackers]

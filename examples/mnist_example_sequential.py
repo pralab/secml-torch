@@ -8,7 +8,7 @@ from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 device = "cpu"
 dataset_path = "example_data/datasets/"
-net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="student")
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="teacher")
 net.eval()
 test_loader = get_mnist_loader(dataset_path)
 
