@@ -4,9 +4,12 @@ import pytest
 import torch
 from secmlt.trackers.trackers import IMAGE, MULTI_SCALAR, SCALAR
 
-
 tb_module = pytest.importorskip("secmlt.trackers.tensorboard_tracker")
 TensorboardTracker = tb_module.TensorboardTracker
+
+EXPECTED_SAMPLES = 2
+ITERATION = 7
+OFFSET_BATCH_SIZE = 3
 
 
 class _FakeWriter:
@@ -62,7 +65,7 @@ def fake_writer(monkeypatch):
     return captured
 
 
-def test_tensorboard_tracker_routes_scalar_multi_and_image(fake_writer):
+def test_tensorboard_tracker_routes_scalar_multi_and_image(fake_writer, tmp_path):
     scalar_tracker = _DummyTracker(
         name="ScalarT",
         tracked_type=SCALAR,
@@ -80,12 +83,12 @@ def test_tensorboard_tracker_routes_scalar_multi_and_image(fake_writer):
     )
 
     tracker = TensorboardTracker(
-        logdir="/tmp/tb-tests",
+        logdir=str(tmp_path / "tb-tests"),
         trackers=[scalar_tracker, multi_tracker, image_tracker],
     )
 
     tracker.track(
-        iteration=7,
+        iteration=ITERATION,
         loss=torch.zeros(2),
         scores=torch.zeros(2, 2),
         x_adv=torch.zeros(2, 2),
@@ -94,24 +97,24 @@ def test_tensorboard_tracker_routes_scalar_multi_and_image(fake_writer):
     )
 
     writer = fake_writer["writer"]
-    assert len(writer.scalar_calls) == 2
-    assert len(writer.scalars_calls) == 2
-    assert len(writer.image_calls) == 2
+    assert len(writer.scalar_calls) == EXPECTED_SAMPLES
+    assert len(writer.scalars_calls) == EXPECTED_SAMPLES
+    assert len(writer.image_calls) == EXPECTED_SAMPLES
 
     assert writer.scalar_calls[0][0] == "Sample #0/ScalarT"
     assert writer.scalar_calls[1][0] == "Sample #1/ScalarT"
-    assert writer.scalar_calls[0][2] == 7
+    assert writer.scalar_calls[0][2] == ITERATION
 
     assert writer.scalars_calls[0][0] == "Sample #0/MultiT"
     assert writer.scalars_calls[1][0] == "Sample #1/MultiT"
-    assert writer.scalars_calls[0][2] == 7
+    assert writer.scalars_calls[0][2] == ITERATION
 
     assert writer.image_calls[0][0] == "Sample #0/ImageT"
     assert writer.image_calls[1][0] == "Sample #1/ImageT"
-    assert writer.image_calls[0][2] == 7
+    assert writer.image_calls[0][2] == ITERATION
 
 
-def test_tensorboard_tracker_init_and_end_tracking(fake_writer):
+def test_tensorboard_tracker_init_and_end_tracking(fake_writer, tmp_path):
     first = _DummyTracker(
         name="First",
         tracked_type=SCALAR,
@@ -124,9 +127,12 @@ def test_tensorboard_tracker_init_and_end_tracking(fake_writer):
     )
 
     # end_tracking computes offset from first tracker tracked history
-    first.tracked = [torch.zeros(3)]
+    first.tracked = [torch.zeros(OFFSET_BATCH_SIZE)]
 
-    tracker = TensorboardTracker(logdir="/tmp/tb-tests", trackers=[first, second])
+    tracker = TensorboardTracker(
+        logdir=str(tmp_path / "tb-tests"),
+        trackers=[first, second],
+    )
     assert tracker._global_sample_offset == 0
 
     tracker.init_tracking()
@@ -136,10 +142,13 @@ def test_tensorboard_tracker_init_and_end_tracking(fake_writer):
     assert second.init_calls == 1
     assert first.end_calls == 1
     assert second.end_calls == 1
-    assert tracker._global_sample_offset == 3
+    assert tracker._global_sample_offset == OFFSET_BATCH_SIZE
 
 
-def test_tensorboard_tracker_get_last_tracked_returns_not_implemented(fake_writer):
-    tracker = TensorboardTracker(logdir="/tmp/tb-tests", trackers=[])
+def test_tensorboard_tracker_get_last_tracked_returns_not_implemented(
+    fake_writer,
+    tmp_path,
+):
+    tracker = TensorboardTracker(logdir=str(tmp_path / "tb-tests"), trackers=[])
     result = tracker.get_last_tracked()
     assert isinstance(result, NotImplementedError)
