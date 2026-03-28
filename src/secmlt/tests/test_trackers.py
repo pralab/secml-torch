@@ -1,12 +1,14 @@
 import pytest
 import torch
 from secmlt.trackers.image_trackers import (
-    GradientsTracker,
+    ImageGradientsTracker,
     ImageSampleTracker,
 )
 from secmlt.trackers.trackers import (
     IMAGE,
+    MULTI_SCALAR,
     SCALAR,
+    GradientsTracker,
     GradientNormTracker,
     LossTracker,
     PerturbationNormTracker,
@@ -31,7 +33,7 @@ def dummy_data():
 @pytest.mark.parametrize(
     "tracker",
     [
-        GradientsTracker(),
+        ImageGradientsTracker(),
         ImageSampleTracker(),
         GradientNormTracker(),
         LossTracker(),
@@ -141,7 +143,40 @@ def test_generic_and_image_sample_tracker_types(dummy_data):
     generic_tracker.track(0, loss_values, scores, data, data, data)
     image_tracker.track(0, loss_values, scores, data, data, data)
 
-    assert generic_tracker.tracked_type == SCALAR
+    assert generic_tracker.tracked_type == MULTI_SCALAR
     assert image_tracker.tracked_type == IMAGE
     assert torch.allclose(generic_tracker.get_last_tracked(), data)
     assert torch.allclose(image_tracker.get_last_tracked(), data)
+
+
+def test_generic_and_image_gradients_tracker_types(dummy_data):
+    data, loss_values, scores = dummy_data
+    generic_tracker = GradientsTracker()
+    image_tracker = ImageGradientsTracker()
+
+    generic_tracker.track(0, loss_values, scores, data, data, data)
+    image_tracker.track(0, loss_values, scores, data, data, data)
+
+    assert generic_tracker.tracked_type == MULTI_SCALAR
+    assert image_tracker.tracked_type == IMAGE
+    assert torch.allclose(generic_tracker.get_last_tracked(), data)
+    assert torch.allclose(image_tracker.get_last_tracked(), data)
+
+
+def test_sample_tracker_scalar_type_rejects_non_scalar_samples(dummy_data):
+    data, loss_values, scores = dummy_data
+    tracker = SampleTracker(tracker_type=SCALAR)
+
+    with pytest.raises(ValueError, match="SampleTracker with tracker_type='scalar'"):
+        tracker.track(0, loss_values, scores, data, data, data)
+
+
+def test_gradients_tracker_scalar_type_rejects_non_scalar_samples(dummy_data):
+    data, loss_values, scores = dummy_data
+    tracker = GradientsTracker(tracker_type=SCALAR)
+
+    with pytest.raises(
+        ValueError,
+        match="GradientsTracker with tracker_type='scalar'",
+    ):
+        tracker.track(0, loss_values, scores, data, data, data)
