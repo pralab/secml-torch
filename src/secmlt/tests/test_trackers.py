@@ -138,10 +138,12 @@ def test_generic_and_image_sample_tracker_types(dummy_data):
     generic_tracker = SampleTracker()
     image_tracker = ImageSampleTracker()
 
-    generic_tracker.track(0, loss_values, scores, data, data, data)
+    # For the generic SampleTracker with SCALAR type, track per-sample scalars
+    generic_tracker.track(0, loss_values, scores, loss_values, loss_values, loss_values)
+    # The ImageSampleTracker should continue to track image-like multi-dimensional data
     image_tracker.track(0, loss_values, scores, data, data, data)
 
     assert generic_tracker.tracked_type == SCALAR
     assert image_tracker.tracked_type == IMAGE
-    assert torch.allclose(generic_tracker.get_last_tracked(), data)
+    assert torch.allclose(generic_tracker.get_last_tracked(), loss_values)
     assert torch.allclose(image_tracker.get_last_tracked(), data)
