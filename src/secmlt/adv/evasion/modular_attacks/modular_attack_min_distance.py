@@ -99,7 +99,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         x_adv, delta = self.manipulation_function(samples, delta)
         best_distances = torch.zeros(samples.shape[0]).fill_(torch.inf)
-        best_delta = torch.zeros_like(samples)
+        best_delta = torch.zeros_like(delta)
         epsilons = self._init_epsilons(samples)
         gamma = self.gamma
         adv_found = torch.zeros(samples.shape[0], dtype=torch.bool, device=x_adv.device)
