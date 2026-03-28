@@ -1,14 +1,19 @@
 import pytest
 import torch
 from secmlt.trackers.image_trackers import (
-    GradientsTracker,
-    SampleTracker,
+    ImageGradientsTracker,
+    ImageSampleTracker,
 )
 from secmlt.trackers.trackers import (
+    IMAGE,
+    MULTI_SCALAR,
+    SCALAR,
     GradientNormTracker,
+    GradientsTracker,
     LossTracker,
     PerturbationNormTracker,
     PredictionTracker,
+    SampleTracker,
     ScoresTracker,
 )
 
@@ -28,8 +33,8 @@ def dummy_data():
 @pytest.mark.parametrize(
     "tracker",
     [
-        GradientsTracker(),
-        SampleTracker(),
+        ImageGradientsTracker(),
+        ImageSampleTracker(),
         GradientNormTracker(),
         LossTracker(),
         PerturbationNormTracker(),
@@ -128,3 +133,52 @@ def test_norm_trackers(dummy_data):
     t2.track(0, loss_values, scores, data, delta, grad)
     expected = grad.flatten(start_dim=1).norm(p=2, dim=-1)  # default L2
     assert torch.allclose(t2.get_last_tracked(), expected)
+
+
+def test_generic_and_image_sample_tracker_types(dummy_data):
+    data, loss_values, scores = dummy_data
+    generic_tracker = SampleTracker()
+    image_tracker = ImageSampleTracker()
+
+    # For the generic SampleTracker with SCALAR type, track per-sample scalars
+    generic_tracker.track(0, loss_values, scores, loss_values, loss_values, loss_values)
+    # The ImageSampleTracker should continue to track image-like multi-dimensional data
+    image_tracker.track(0, loss_values, scores, data, data, data)
+
+    assert generic_tracker.tracked_type == MULTI_SCALAR
+    assert image_tracker.tracked_type == IMAGE
+    assert torch.allclose(generic_tracker.get_last_tracked(), loss_values)
+    assert torch.allclose(image_tracker.get_last_tracked(), data)
+
+
+def test_generic_and_image_gradients_tracker_types(dummy_data):
+    data, loss_values, scores = dummy_data
+    generic_tracker = GradientsTracker()
+    image_tracker = ImageGradientsTracker()
+
+    generic_tracker.track(0, loss_values, scores, data, data, data)
+    image_tracker.track(0, loss_values, scores, data, data, data)
+
+    assert generic_tracker.tracked_type == MULTI_SCALAR
+    assert image_tracker.tracked_type == IMAGE
+    assert torch.allclose(generic_tracker.get_last_tracked(), data)
+    assert torch.allclose(image_tracker.get_last_tracked(), data)
+
+
+def test_sample_tracker_scalar_type_rejects_non_scalar_samples(dummy_data):
+    data, loss_values, scores = dummy_data
+    tracker = SampleTracker(tracker_type=SCALAR)
+
+    with pytest.raises(ValueError, match="SampleTracker with tracker_type='scalar'"):
+        tracker.track(0, loss_values, scores, data, data, data)
+
+
+def test_gradients_tracker_scalar_type_rejects_non_scalar_samples(dummy_data):
+    data, loss_values, scores = dummy_data
+    tracker = GradientsTracker(tracker_type=SCALAR)
+
+    with pytest.raises(
+        ValueError,
+        match="GradientsTracker with tracker_type='scalar'",
+    ):
+        tracker.track(0, loss_values, scores, data, data, data)
