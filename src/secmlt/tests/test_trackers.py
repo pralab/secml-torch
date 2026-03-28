@@ -2,13 +2,16 @@ import pytest
 import torch
 from secmlt.trackers.image_trackers import (
     GradientsTracker,
-    SampleTracker,
+    ImageSampleTracker,
 )
 from secmlt.trackers.trackers import (
+    IMAGE,
+    SCALAR,
     GradientNormTracker,
     LossTracker,
     PerturbationNormTracker,
     PredictionTracker,
+    SampleTracker,
     ScoresTracker,
 )
 
@@ -29,7 +32,7 @@ def dummy_data():
     "tracker",
     [
         GradientsTracker(),
-        SampleTracker(),
+        ImageSampleTracker(),
         GradientNormTracker(),
         LossTracker(),
         PerturbationNormTracker(),
@@ -128,3 +131,17 @@ def test_norm_trackers(dummy_data):
     t2.track(0, loss_values, scores, data, delta, grad)
     expected = grad.flatten(start_dim=1).norm(p=2, dim=-1)  # default L2
     assert torch.allclose(t2.get_last_tracked(), expected)
+
+
+def test_generic_and_image_sample_tracker_types(dummy_data):
+    data, loss_values, scores = dummy_data
+    generic_tracker = SampleTracker()
+    image_tracker = ImageSampleTracker()
+
+    generic_tracker.track(0, loss_values, scores, data, data, data)
+    image_tracker.track(0, loss_values, scores, data, data, data)
+
+    assert generic_tracker.tracked_type == SCALAR
+    assert image_tracker.tracked_type == IMAGE
+    assert torch.allclose(generic_tracker.get_last_tracked(), data)
+    assert torch.allclose(image_tracker.get_last_tracked(), data)

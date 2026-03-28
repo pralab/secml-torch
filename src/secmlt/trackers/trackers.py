@@ -253,6 +253,52 @@ class PredictionTracker(Tracker):
         self.tracked.append(scores.data.argmax(dim=1))
 
 
+class SampleTracker(Tracker):
+    """Generic tracker for adversarial samples."""
+
+    def __init__(self, tracker_type: str = SCALAR) -> None:
+        """
+        Create sample tracker.
+
+        Parameters
+        ----------
+        tracker_type : str, optional
+            Tracked value type used by integrations (e.g. tensorboard),
+            by default SCALAR.
+        """
+        super().__init__("Sample", tracker_type)
+        self.tracked = []
+
+    def track(
+        self,
+        iteration: int,
+        loss: torch.Tensor,
+        scores: torch.Tensor,
+        x_adv: torch.Tensor,
+        delta: torch.Tensor,
+        grad: torch.Tensor,
+    ) -> None:
+        """
+        Track adversarial examples at the current iteration.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.Tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
+        self.tracked.append(x_adv)
+
+
 class PerturbationNormTracker(Tracker):
     """Tracker for perturbation norm."""
 
