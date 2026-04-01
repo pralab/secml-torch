@@ -96,6 +96,29 @@ def test_init_end_reset_and_get(dummy_data):
     assert tracker.get_last_tracked() is None
 
 
+def test_get_last_tracked_uses_finalized_batches(dummy_data):
+    data, loss_values, output_values = dummy_data
+    tracker = LossTracker()
+
+    tracker.track(0, loss_values, output_values, data, data, data)
+    tracker.track(1, loss_values + 1, output_values, data, data, data)
+    tracker.end_tracking()
+
+    assert torch.allclose(tracker.get_last_tracked(), loss_values + 1)
+
+
+def test_loss_and_gradient_norm_trackers_ignore_none_inputs(dummy_data):
+    data, _, scores = dummy_data
+    loss_tracker = LossTracker()
+    grad_norm_tracker = GradientNormTracker()
+
+    loss_tracker.track(0, None, scores, data, data, data)
+    grad_norm_tracker.track(0, None, scores, data, data, None)
+
+    assert loss_tracker.get().numel() == 0
+    assert grad_norm_tracker.get().numel() == 0
+
+
 def test_scores_tracker_behavior(dummy_data):
     data, loss_values, scores = dummy_data
 
@@ -279,6 +302,29 @@ def test_model_tracker_tracks_gradients_on_backward(mock_model):
     tracked = grad_tracker.get()
     assert tracked.shape == (4, 1)
     assert torch.isfinite(tracked).all()
+
+
+def test_model_tracker_grad_tracker_no_requires_grad_input(mock_model):
+    """Gradient trackers should not update when input has no grad."""
+    grad_tracker = GradientNormTracker()
+    tracked_model = ModelTracker(mock_model, trackers=[grad_tracker])
+
+    x = torch.randn(4, 3, 32, 32, requires_grad=False)
+    tracked_model.init_tracking(x_orig=x)
+    tracked_model.decision_function(x)
+    tracked_model.end_tracking()
+
+    assert grad_tracker.get().numel() == 0
+
+
+def test_model_tracker_del_detaches_hook(mock_model):
+    """__del__ should be safe and release the forward hook handle."""
+    tracked_model = ModelTracker(mock_model, trackers=[PredictionTracker()])
+    assert tracked_model._hook_handle is not None
+
+    tracked_model.__del__()
+
+    assert tracked_model._hook_handle is None
 
 
 def test_model_tracker_from_raw_nn_module():
