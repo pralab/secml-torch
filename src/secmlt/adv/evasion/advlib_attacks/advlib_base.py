@@ -5,14 +5,16 @@ from __future__ import annotations  # noqa: I001
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.trackers.model_tracker import ModelTracker
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from secmlt.models.base_model import BaseModel
+    from secmlt.trackers.trackers import Tracker
 
 
 class BaseAdvLibEvasionAttack(BaseEvasionAttack):
@@ -25,7 +27,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: type[TRACKER_TYPE] | None = None,
+        trackers: list[Tracker] | Tracker | None = None,
         **kwargs,
     ) -> None:
         """
@@ -47,7 +49,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
         trackers : type[TRACKER_TYPE] | None, optional
-            Trackers for the attack (unallowed in Adversarial Library), by default None.
+            Trackers for the attack, by default None.
         """
         self.advlib_attack = advlib_attack
         self.lb = lb
@@ -59,8 +61,8 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         super().__init__()
 
     @classmethod
-    def _trackers_allowed(cls) -> Literal[False]:
-        return False
+    def _trackers_allowed(cls) -> Literal[True]:
+        return True
 
     def _run(
         self,
@@ -71,13 +73,20 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         if not isinstance(model, BasePyTorchClassifier):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
+        targets = (
+            torch.ones_like(labels) * self.y_target
+            if self.y_target is not None
+            else labels
+        )
+        # Wrap model with ModelTracker if trackers are set
+        model_tracker = None
+        if self._trackers:
+            model_tracker = ModelTracker(model, trackers=self._trackers)
+            model_tracker.init_tracking(x_orig=samples, y=targets)
+            model = model_tracker
         device = model._get_device()
         samples = samples.to(device)
-        if self.y_target is not None:
-            targets = torch.ones_like(labels) * self.y_target
-        else:
-            labels = labels.to(device)
-            targets = labels
+        targets = targets.to(device)
         if self.epsilon < float(torch.inf):
             self.kwargs.update({"ε": self.epsilon})
         advx = self.advlib_attack(
@@ -87,6 +96,9 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             targeted=(self.y_target is not None),
             **self.kwargs,
         )
+        if model_tracker is not None:
+            model_tracker.end_tracking()
+            model_tracker.detach()
 
         delta = advx - samples
         return advx, delta

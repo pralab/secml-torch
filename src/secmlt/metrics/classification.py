@@ -11,17 +11,6 @@ if TYPE_CHECKING:
     from torch.utils.data import DataLoader
 
 
-def _ensure_model(model: BaseModel | torch.nn.Module) -> BaseModel:
-    if isinstance(model, BaseModel):
-        return model
-    if isinstance(model, torch.nn.Module):
-        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-
-        return BasePyTorchClassifier(model=model)
-    msg = f"Unsupported model type: {type(model)}"
-    raise TypeError(msg)
-
-
 def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
     """
     Compute the accuracy on a batch of predictions and targets.
@@ -69,9 +58,8 @@ class Accuracy:
         torch.Tensor
             The metric computed on the given dataloader.
         """
-        model = _ensure_model(model)
         for _, (x, y) in enumerate(dataloader):
-            y_pred = model.predict(x).cpu().detach()
+            y_pred = model(x).argmax(dim=1).cpu().detach()
             self._accumulate(y_pred, y)
         return self._compute()
 
@@ -134,11 +122,10 @@ class AccuracyEnsemble(Accuracy):
         torch.Tensor
             The metric computed across multiple attack runs.
         """
-        model = _ensure_model(model)
         for advs in zip(*dataloaders):  # noqa: B905
             y_pred = []
             for x, y in advs:
-                y_pred.append(model.predict(x).cpu().detach())
+                y_pred.append(model(x).argmax(dim=1).cpu().detach())
                 # verify that the samples order correspond
                 assert (y - advs[0][1]).sum() == 0
             y_pred = torch.vstack(y_pred)
