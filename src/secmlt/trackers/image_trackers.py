@@ -51,6 +51,7 @@ class GradientsTracker(Tracker):
         super().__init__(name="Grad", tracker_type=IMAGE)
 
         self.tracked = []
+        self.requires_grad = True
 
     def track(
         self,
