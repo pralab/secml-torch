@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 
 import torch
-from secmlt.models.base_model import BaseModel
 
 if TYPE_CHECKING:
+    from secmlt.models.base_model import BaseModel
     from torch.utils.data import DataLoader
 
 
