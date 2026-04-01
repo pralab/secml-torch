@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 
 import torch
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from secmlt.models.base_model import BaseModel
@@ -48,7 +49,9 @@ class Accuracy:
         Parameters
         ----------
         model : BaseModel | torch.nn.Module
-            Model to use for prediction. Raw ``nn.Module`` is auto-wrapped.
+            Model used for prediction. Raw ``nn.Module`` inputs are wrapped
+            into ``BasePyTorchClassifier`` so predictions go through the same
+            preprocessing/postprocessing and device handling as ``BaseModel``.
         dataloader : DataLoader
             A dataloader, can be the result of an attack or a generic
             test dataloader.
@@ -58,10 +61,23 @@ class Accuracy:
         torch.Tensor
             The metric computed on the given dataloader.
         """
+        model = self._ensure_wrapped(model)
         for _, (x, y) in enumerate(dataloader):
-            y_pred = model(x).argmax(dim=1).cpu().detach()
+            y_pred = model.predict(x).cpu().detach()
             self._accumulate(y_pred, y)
         return self._compute()
+
+    @staticmethod
+    def _ensure_wrapped(model: BaseModel | torch.nn.Module) -> BasePyTorchClassifier:
+        """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
+        from secmlt.models.base_model import BaseModel
+
+        if isinstance(model, BaseModel):
+            return model
+        if isinstance(model, torch.nn.Module):
+            return BasePyTorchClassifier(model=model)
+        msg = f"Unsupported model type: {type(model)}"
+        raise TypeError(msg)
 
     def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         self._num_samples += y_true.shape[0]
@@ -113,7 +129,9 @@ class AccuracyEnsemble(Accuracy):
         Parameters
         ----------
         model : BaseModel | torch.nn.Module
-            Model to use for prediction. Raw ``nn.Module`` is auto-wrapped.
+            Model used for prediction. Raw ``nn.Module`` inputs are wrapped
+            into ``BasePyTorchClassifier`` so predictions go through the same
+            preprocessing/postprocessing and device handling as ``BaseModel``.
         dataloaders : list[DataLoader]
             List of loaders returned from multiple attack runs.
 
@@ -122,10 +140,11 @@ class AccuracyEnsemble(Accuracy):
         torch.Tensor
             The metric computed across multiple attack runs.
         """
+        model = self._ensure_wrapped(model)
         for advs in zip(*dataloaders):  # noqa: B905
             y_pred = []
             for x, y in advs:
-                y_pred.append(model(x).argmax(dim=1).cpu().detach())
+                y_pred.append(model.predict(x).cpu().detach())
                 # verify that the samples order correspond
                 assert (y - advs[0][1]).sum() == 0
             y_pred = torch.vstack(y_pred)
