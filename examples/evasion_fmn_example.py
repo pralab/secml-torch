@@ -1,37 +1,43 @@
+import importlib.util
+
 import torch
 from loaders.get_loaders import get_mnist_loader
 from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.optimization.losses import LogitDifferenceLoss
 from secmlt.trackers.trackers import (
+    GradientNormTracker,
     LossTracker,
     PerturbationNormTracker,
+    PredictionTracker,
 )
+
+HAS_FOOLBOX = importlib.util.find_spec("foolbox") is not None
+HAS_ADVLIB = importlib.util.find_spec("adv_lib") is not None
 
 device = "cpu"
 dataset_path = "example_data/datasets/"
-net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="student")
+net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="teacher")
 net.eval()
 test_loader = get_mnist_loader(dataset_path)
 
-# Wrap model
-model = BasePyTorchClassifier(net)
-
 # Test accuracy on original data
-accuracy = Accuracy()(model, test_loader)
+accuracy = Accuracy()(net, test_loader)
 print(f"test accuracy: {accuracy.item():.2f}")
 
 # Create and run attack
-num_steps = 100
-step_size = 0.3
+num_steps = 200
+step_size = 0.05
 perturbation_model = LpPerturbationModels.LINF
 y_target = None
 
 trackers = [
-    LossTracker(),
+    LossTracker(loss_fn=LogitDifferenceLoss()),
+    PredictionTracker(),
     PerturbationNormTracker(perturbation_model),
+    GradientNormTracker(),
 ]
 
 native_attack = FMN(
@@ -43,48 +49,53 @@ native_attack = FMN(
     trackers=trackers,
 )
 
-native_adv_ds = native_attack(model, test_loader)
+native_adv_ds = native_attack(net, test_loader)
+
 
 # Test accuracy on adversarial examples
-n_robust_accuracy = Accuracy()(model, native_adv_ds)
+n_robust_accuracy = Accuracy()(net, native_adv_ds)
 print("robust accuracy native: ", n_robust_accuracy)
 
-# Create and run attack
-foolbox_attack = FMN(
-    perturbation_model=perturbation_model,
-    num_steps=num_steps,
-    step_size=step_size,
-    y_target=y_target,
-    backend=Backends.FOOLBOX,
-)
-f_adv_ds = foolbox_attack(model, test_loader)
+# Trackers are now also supported for Foolbox and AdvLib backends
+if HAS_FOOLBOX:
+    foolbox_trackers = [
+        LossTracker(loss_fn=LogitDifferenceLoss()),
+        PredictionTracker(),
+        PerturbationNormTracker(perturbation_model),
+        GradientNormTracker(),
+    ]
+    foolbox_attack = FMN(
+        perturbation_model=perturbation_model,
+        num_steps=num_steps,
+        step_size=step_size,
+        y_target=y_target,
+        backend=Backends.FOOLBOX,
+        trackers=foolbox_trackers,
+    )
+    f_adv_ds = foolbox_attack(net, test_loader)
 
-advlib_attack = FMN(
-    perturbation_model=perturbation_model,
-    num_steps=num_steps,
-    step_size=step_size,
-    y_target=y_target,
-    backend=Backends.ADVLIB,
-)
-al_adv_ds = advlib_attack(model, test_loader)
+    # Test accuracy on foolbox
+    f_robust_accuracy = Accuracy()(net, f_adv_ds)
+    print("robust accuracy foolbox: ", f_robust_accuracy)
 
-# Test accuracy on foolbox
-f_robust_accuracy = Accuracy()(model, f_adv_ds)
-print("robust accuracy foolbox: ", f_robust_accuracy)
+if HAS_ADVLIB:
+    advlib_trackers = [
+        LossTracker(loss_fn=LogitDifferenceLoss()),
+        PredictionTracker(),
+        PerturbationNormTracker(perturbation_model),
+        GradientNormTracker(),
+    ]
+    advlib_attack = FMN(
+        perturbation_model=perturbation_model,
+        num_steps=num_steps,
+        step_size=step_size,
+        y_target=y_target,
+        backend=Backends.ADVLIB,
+        trackers=advlib_trackers,
+    )
+    al_adv_ds = advlib_attack(net, test_loader)
 
-# Test accuracy on adv lib
-al_robust_accuracy = Accuracy()(model, al_adv_ds)
-print("robust accuracy AdvLib: ", al_robust_accuracy)
+    # Test accuracy on adv lib
+    al_robust_accuracy = Accuracy()(net, al_adv_ds)
+    print("robust accuracy AdvLib: ", al_robust_accuracy)
 
-native_data, native_labels = next(iter(native_adv_ds))
-f_data, f_labels = next(iter(f_adv_ds))
-adv_lib_data, advlib_labels = next(iter(al_adv_ds))
-real_data, real_labels = next(iter(test_loader))
-
-p = LpPerturbationModels.get_p(perturbation_model)
-distances_native = (real_data - native_data).flatten(start_dim=1).norm(p=p, dim=-1)
-distances_foolbox = (real_data - f_data).flatten(start_dim=1).norm(p=p, dim=-1)
-distances_advlib = (real_data - adv_lib_data).flatten(start_dim=1).norm(p=p, dim=-1)
-print("Native distances: ", distances_native)
-print("Foolbox distances: ", distances_foolbox)
-print("AdvLib distances: ", distances_advlib)

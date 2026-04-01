@@ -4,7 +4,6 @@ from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 device = "cpu"
 dataset_path = "example_data/datasets/"
@@ -12,11 +11,8 @@ net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="stud
 net.eval()
 test_loader = get_mnist_loader(dataset_path)
 
-# Wrap model
-model = BasePyTorchClassifier(net)
-
 # Test accuracy on original data
-accuracy = Accuracy()(model, test_loader)
+accuracy = Accuracy()(net, test_loader)
 print(f"test accuracy: {accuracy.item():.2f}")
 
 
@@ -49,9 +45,9 @@ attack_2 = PGD(
 attack_2.initializer = attack_1
 
 
-adv_ds = attack_2(model, test_loader)
+adv_ds = attack_2(net, test_loader)
 
 
 # Test accuracy on adversarial examples
-n_robust_accuracy = Accuracy()(model, adv_ds)
+n_robust_accuracy = Accuracy()(net, adv_ds)
 print("robust accuracy: ", n_robust_accuracy.item())
