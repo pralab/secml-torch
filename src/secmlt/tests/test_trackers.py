@@ -1,6 +1,7 @@
 import pytest
 import torch
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
+from secmlt.models.base_model import BaseModel
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
 from secmlt.trackers.image_trackers import (
@@ -329,11 +330,10 @@ def test_model_tracker_del_detaches_hook(mock_model):
 
 
 def test_model_tracker_from_raw_nn_module():
-    """ModelTracker should accept a raw nn.Module via BasePyTorchClassifier."""
+    """ModelTracker should accept a raw nn.Module directly."""
     raw_module = MockModel()
-    wrapped = BasePyTorchClassifier(model=raw_module)
     tracker = PredictionTracker()
-    tracked_model = ModelTracker(wrapped, trackers=[tracker])
+    tracked_model = ModelTracker(raw_module, trackers=[tracker])
 
     x = torch.randn(4, 3, 32, 32)
     tracked_model.init_tracking(x_orig=x)
@@ -341,6 +341,21 @@ def test_model_tracker_from_raw_nn_module():
     tracked_model.end_tracking()
 
     assert tracker.get().shape == (4, 1)
+
+
+def test_model_tracker_raises_on_unsupported_basemodel_subtype():
+    class DummyBaseModel(BaseModel):
+        def predict(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+            return torch.zeros(x.shape[0], dtype=torch.long)
+
+        def _decision_function(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
+            return torch.zeros(x.shape[0], 2)
+
+        def train(self, dataloader):
+            return self
+
+    with pytest.raises(TypeError, match="BasePyTorchClassifier"):
+        ModelTracker(DummyBaseModel(), trackers=[PredictionTracker()])
 
 
 def test_attack_auto_wraps_nn_module():

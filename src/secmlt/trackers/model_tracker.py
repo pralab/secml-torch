@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import torch
+from secmlt.models.base_model import BaseModel
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
@@ -29,15 +30,17 @@ class ModelTracker(BasePyTorchClassifier):
 
     def __init__(
         self,
-        model: BasePyTorchClassifier,
+        model: BaseModel | torch.nn.Module,
         trackers: list[Tracker] | Tracker | None = None,
     ) -> None:
         """Create a model tracker."""
+        self._hook_handle = None
+        wrapped_model = self._ensure_wrapped(model)
         super().__init__(
-            model=model._model,
-            preprocessing=model._preprocessing,
-            postprocessing=model._postprocessing,
-            trainer=getattr(model, "_trainer", None),
+            model=wrapped_model.model,
+            preprocessing=wrapped_model._preprocessing,
+            postprocessing=wrapped_model._postprocessing,
+            trainer=getattr(wrapped_model, "_trainer", None),
         )
         if trackers is None:
             trackers = []
@@ -50,6 +53,22 @@ class ModelTracker(BasePyTorchClassifier):
         self._y: torch.Tensor | None = None
         self._tracking: bool = False
         self._hook_handle = self._model.register_forward_hook(self._forward_hook)
+
+    @staticmethod
+    def _ensure_wrapped(model: BaseModel | torch.nn.Module) -> BasePyTorchClassifier:
+        """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
+        if isinstance(model, BasePyTorchClassifier):
+            return model
+        if isinstance(model, torch.nn.Module):
+            return BasePyTorchClassifier(model=model)
+        if isinstance(model, BaseModel):
+            msg = (
+                "ModelTracker requires a BasePyTorchClassifier or torch.nn.Module. "
+                f"Received unsupported BaseModel subtype: {type(model)}"
+            )
+            raise TypeError(msg)
+        msg = f"Unsupported model type: {type(model)}"
+        raise TypeError(msg)
 
     @property
     def trackers(self) -> list[Tracker]:
@@ -198,8 +217,9 @@ class ModelTracker(BasePyTorchClassifier):
 
     def detach(self) -> None:
         """Remove the forward hook from the model."""
-        if self._hook_handle is not None:
-            self._hook_handle.remove()
+        hook_handle = getattr(self, "_hook_handle", None)
+        if hook_handle is not None:
+            hook_handle.remove()
             self._hook_handle = None
 
     def __del__(self) -> None:

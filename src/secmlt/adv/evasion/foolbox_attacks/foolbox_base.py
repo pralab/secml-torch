@@ -44,7 +44,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             Lower bound of the input space, by default 0.0.
         ub : float, optional
             Upper bound of the input space, by default 1.0.
-        trackers : type[TRACKER_TYPE] | None, optional
+        trackers : list[Tracker] | Tracker | None, optional
             Trackers for the attack, by default None.
         """
         self.foolbox_attack = foolbox_attack

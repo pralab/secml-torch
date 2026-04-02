@@ -173,8 +173,12 @@ class LossTracker(Tracker):
         ----------
         iteration : int
             The attack iteration number.
-        loss : torch.Tensor
+        loss : torch.Tensor | None
             The value of the (per-sample) loss of the attack.
+            The model can optionally pass None for the loss,
+            in which case this tracker will attempt to compute
+            the loss using the provided loss_fn.
+            If loss_fn is not provided, it will skip tracking for that iteration.
         scores : torch.Tensor
             The output scores from the model.
         x_adv : torch.tensor
@@ -366,8 +370,10 @@ class GradientsTracker(Tracker):
             The adversarial examples at the current iteration.
         delta : torch.Tensor
             The adversarial perturbations at the current iteration.
-        grad : torch.Tensor
+        grad : torch.Tensor | None
             The gradient of delta at the given iteration.
+            The model can optionally pass None for the gradient,
+            in which case this tracker will simply skip tracking for that iteration.
         """
         if self.tracked_type == SCALAR and grad.ndim > 1:
             msg = (
