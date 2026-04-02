@@ -1,5 +1,6 @@
 import pytest
 import torch
+from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
 from secmlt.trackers.image_trackers import (
@@ -357,6 +358,101 @@ def test_attack_auto_wraps_nn_module():
     # Unsupported type should raise
     with pytest.raises(TypeError):
         BaseEvasionAttack._ensure_wrapped("not a model")
+
+
+def test_advlib_base_always_cleans_up_model_tracker_on_exception(mock_model):
+    class DummyTracker:
+        def __init__(self):
+            self.init_called = False
+            self.end_called = False
+
+        def init_tracking(self):
+            self.init_called = True
+
+        def end_tracking(self):
+            self.end_called = True
+
+        def reset(self):
+            return None
+
+        def track(self, *args, **kwargs):
+            return None
+
+    tracker = DummyTracker()
+    attack = BaseAdvLibEvasionAttack(
+        advlib_attack=lambda **_: (_ for _ in ()).throw(RuntimeError("boom")),
+        trackers=[tracker],
+    )
+    x = torch.randn(4, 3, 32, 32)
+    y = torch.randint(0, 10, (4,))
+    hook_count_before = len(mock_model.model._forward_hooks)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        attack._run(model=mock_model, samples=x, labels=y)
+
+    hook_count_after = len(mock_model.model._forward_hooks)
+    assert tracker.init_called is True
+    assert tracker.end_called is True
+    assert hook_count_after == hook_count_before
+
+
+def test_foolbox_base_always_cleans_up_model_tracker_on_exception(
+    mock_model, monkeypatch):
+    pytest.importorskip("foolbox")
+    from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+
+    class DummyTracker:
+        def __init__(self):
+            self.init_called = False
+            self.end_called = False
+
+        def init_tracking(self):
+            self.init_called = True
+
+        def end_tracking(self):
+            self.end_called = True
+
+        def reset(self):
+            return None
+
+        def track(self, *args, **kwargs):
+            return None
+
+    class DummyPyTorchModel:
+        def __init__(self, model, bounds, device):
+            self.model = model
+            self.bounds = bounds
+            self.device = device
+
+    class DummyMisclassification:
+        def __init__(self, labels):
+            self.labels = labels
+
+    monkeypatch.setattr(
+        "secmlt.adv.evasion.foolbox_attacks.foolbox_base.PyTorchModel",
+        DummyPyTorchModel,
+    )
+    monkeypatch.setattr(
+        "secmlt.adv.evasion.foolbox_attacks.foolbox_base.Misclassification",
+        DummyMisclassification,
+    )
+
+    tracker = DummyTracker()
+    attack = BaseFoolboxEvasionAttack(
+        foolbox_attack=lambda **_: (_ for _ in ()).throw(RuntimeError("boom")),
+        trackers=[tracker],
+    )
+    x = torch.randn(4, 3, 32, 32)
+    y = torch.randint(0, 10, (4,))
+    hook_count_before = len(mock_model.model._forward_hooks)
+
+    with pytest.raises(RuntimeError, match="boom"):
+        attack._run(model=mock_model, samples=x, labels=y)
+
+    hook_count_after = len(mock_model.model._forward_hooks)
+    assert tracker.init_called is True
+    assert tracker.end_called is True
+    assert hook_count_after == hook_count_before
 
 
 def test_generic_and_image_sample_tracker_types(dummy_data):

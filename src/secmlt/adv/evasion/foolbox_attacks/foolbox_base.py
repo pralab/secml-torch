@@ -88,15 +88,17 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             target = target.to(device)
             criterion = TargetedMisclassification(target)
 
-        _, advx, _ = self.foolbox_attack(
-            model=foolbox_model,
-            inputs=samples,
-            criterion=criterion,
-            epsilons=self.epsilon,
-        )
-        if model_tracker is not None:
-            model_tracker.end_tracking()
-            model_tracker.detach()
+        try:
+            _, advx, _ = self.foolbox_attack(
+                model=foolbox_model,
+                inputs=samples,
+                criterion=criterion,
+                epsilons=self.epsilon,
+            )
+        finally:
+            if model_tracker is not None:
+                model_tracker.end_tracking()
+                model_tracker.detach()
         # foolbox deals only with additive perturbations
         delta = advx - samples
         return advx, delta

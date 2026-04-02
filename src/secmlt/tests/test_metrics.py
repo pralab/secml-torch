@@ -1,11 +1,11 @@
 import torch
-from secmlt.models.base_model import BaseModel
 from secmlt.metrics.classification import (
     Accuracy,
     AccuracyEnsemble,
     AttackSuccessRate,
     EnsembleSuccessRate,
 )
+from secmlt.models.base_model import BaseModel
 from torch.utils.data import DataLoader, TensorDataset
 
 

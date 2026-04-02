@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 
 import torch
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from secmlt.models.base_model import BaseModel
+    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
     from torch.utils.data import DataLoader
 
 
@@ -68,9 +68,12 @@ class Accuracy:
         return self._compute()
 
     @staticmethod
-    def _ensure_wrapped(model: BaseModel | torch.nn.Module) -> BasePyTorchClassifier:
+    def _ensure_wrapped(
+        model: BaseModel | torch.nn.Module,
+    ) -> BaseModel | BasePyTorchClassifier:
         """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
         from secmlt.models.base_model import BaseModel
+        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
         if isinstance(model, BaseModel):
             return model

@@ -48,7 +48,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
-        trackers : type[TRACKER_TYPE] | None, optional
+        trackers : list[Tracker] | Tracker | None, optional
             Trackers for the attack, by default None.
         """
         self.advlib_attack = advlib_attack
@@ -89,16 +89,18 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         targets = targets.to(device)
         if self.epsilon < float(torch.inf):
             self.kwargs.update({"ε": self.epsilon})
-        advx = self.advlib_attack(
-            model=model,
-            inputs=samples,
-            labels=targets,
-            targeted=(self.y_target is not None),
-            **self.kwargs,
-        )
-        if model_tracker is not None:
-            model_tracker.end_tracking()
-            model_tracker.detach()
+        try:
+            advx = self.advlib_attack(
+                model=model,
+                inputs=samples,
+                labels=targets,
+                targeted=(self.y_target is not None),
+                **self.kwargs,
+            )
+        finally:
+            if model_tracker is not None:
+                model_tracker.end_tracking()
+                model_tracker.detach()
 
         delta = advx - samples
         return advx, delta

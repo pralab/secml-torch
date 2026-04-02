@@ -19,7 +19,7 @@ from secmlt.trackers.trackers import (
     PredictionTracker,
 )
 
-device = "cpu"
+device = "mps"
 dataset_path = "example_data/datasets/"
 net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model", weights="teacher")
 net.eval()
