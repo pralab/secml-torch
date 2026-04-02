@@ -517,3 +517,62 @@ def test_gradients_tracker_scalar_type_rejects_non_scalar_samples(dummy_data):
         match="GradientsTracker with tracker_type='scalar'",
     ):
         tracker.track(0, loss_values, scores, data, data, data)
+
+
+def test_perturbation_norm_tracker_skips_when_delta_is_none(dummy_data):
+    """PerturbationNormTracker must not crash when delta is None (x_orig not set)."""
+    data, loss_values, scores = dummy_data
+    tracker = PerturbationNormTracker()
+
+    # Should not raise, and should not append anything
+    tracker.track(0, loss_values, scores, data, None, None)
+
+    assert len(tracker.tracked) == 0
+
+
+def test_model_tracker_perturbation_norm_without_x_orig(mock_model):
+    """ModelTracker with PerturbationNormTracker must not crash when x_orig omitted."""
+    tracker = PerturbationNormTracker()
+    tracked_model = ModelTracker(mock_model, trackers=[tracker])
+
+    x = torch.randn(4, 6)
+    # init_tracking without x_orig → delta will be None inside the forward hook
+    tracked_model.init_tracking()
+    tracked_model.decision_function(x)
+    tracked_model.end_tracking()
+
+    # Nothing should have been appended (delta=None silently skips)
+    assert len(tracker.tracked) == 0
+
+
+def test_tensorboard_tracker_requires_grad_reflects_sub_trackers(tmp_path):
+    """TensorboardTracker.requires_grad is true when a grad sub-tracker exists."""
+    pytest.importorskip("tensorboard")
+    from secmlt.trackers.tensorboard_tracker import TensorboardTracker
+
+    tb_only_loss = TensorboardTracker(logdir=str(tmp_path), trackers=[LossTracker()])
+    assert tb_only_loss.requires_grad is False
+
+    tb_with_grad = TensorboardTracker(
+        logdir=str(tmp_path),
+        trackers=[LossTracker(), GradientNormTracker()],
+    )
+    assert tb_with_grad.requires_grad is True
+
+
+def test_tensorboard_tracker_loss_fn_propagated_from_sub_tracker(tmp_path):
+    """TensorboardTracker.loss_fn must expose the sub-LossTracker's loss_fn."""
+    pytest.importorskip("tensorboard")
+    from secmlt.trackers.tensorboard_tracker import TensorboardTracker
+
+    loss_tracker = LossTracker()
+    tb = TensorboardTracker(
+        logdir=str(tmp_path),
+        trackers=[loss_tracker, ScoresTracker()],
+    )
+
+    assert tb.loss_fn is loss_tracker.loss_fn
+
+    # TensorboardTracker with no LossTracker should return None
+    tb_no_loss = TensorboardTracker(logdir=str(tmp_path), trackers=[ScoresTracker()])
+    assert tb_no_loss.loss_fn is None

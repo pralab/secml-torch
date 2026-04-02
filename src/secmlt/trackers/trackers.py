@@ -429,6 +429,8 @@ class PerturbationNormTracker(Tracker):
         grad : torch.Tensor
             The gradient of delta at the given iteration.
         """
+        if delta is None:
+            return
         self.tracked.append(delta.flatten(start_dim=1).norm(p=self.p, dim=-1))
 
 
