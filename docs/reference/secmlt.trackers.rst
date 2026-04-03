@@ -12,6 +12,14 @@ secmlt.trackers.image\_trackers module
    :undoc-members:
    :show-inheritance:
 
+secmlt.trackers.model\_tracker module
+-------------------------------------
+
+.. automodule:: secmlt.trackers.model_tracker
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.trackers.tensorboard\_tracker module
 -------------------------------------------
 

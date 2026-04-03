@@ -90,25 +90,6 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def gradient(self, x: torch.Tensor, y: int, *args, **kwargs) -> torch.Tensor:
-        """
-        Compute gradients of the score y w.r.t. x.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input samples.
-        y : int
-            Target score.
-
-        Returns
-        -------
-        torch.Tensor
-            Input gradients of the target score y.
-        """
-        ...
-
-    @abstractmethod
     def train(self, dataloader: DataLoader) -> "BaseModel":
         """
         Train the model with the given dataloader.

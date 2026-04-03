@@ -12,13 +12,14 @@ from torch.utils.data import DataLoader, TensorDataset
 
 if TYPE_CHECKING:
     from secmlt.models.base_model import BaseModel
+    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 # lazy evaluation to avoid circular imports
 TRACKER_TYPE = "secmlt.trackers.tracker.Tracker"
 
 
 class BaseEvasionAttackCreator:
-    """Generic creator for attacks."""
+    """Generic creator for evasion attacks."""
 
     @classmethod
     def get_implementation(cls, backend: str) -> BaseEvasionAttack:
@@ -148,14 +149,17 @@ class BaseEvasionAttackCreator:
 class BaseEvasionAttack:
     """Base class for evasion attacks."""
 
-    def __call__(self, model: BaseModel, data_loader: DataLoader) -> DataLoader:
+    def __call__(
+        self, model: BasePyTorchClassifier | torch.nn.Module,
+        data_loader: DataLoader) -> DataLoader:
         """
         Compute the attack against the model, using the input data.
 
         Parameters
         ----------
-        model : BaseModel
-            Model to test.
+        model : BasePyTorchClassifier | torch.nn.Module
+            Model to test. If a raw ``torch.nn.Module`` is passed, it is
+            automatically wrapped in ``BasePyTorchClassifier``.
         data_loader : DataLoader
             Test dataloader.
 
@@ -164,6 +168,7 @@ class BaseEvasionAttack:
         DataLoader
             Dataloader with adversarial examples and original labels.
         """
+        model = self._ensure_wrapped(model)
         adversarials = []
         original_labels = []
         for samples, labels in data_loader:
@@ -222,6 +227,18 @@ class BaseEvasionAttack:
     def _trackers_allowed(cls) -> Literal[False]:
         return False
 
+    @staticmethod
+    def _ensure_wrapped(model: BaseModel | torch.nn.Module) -> BasePyTorchClassifier:
+        """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
+        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+
+        if isinstance(model, BasePyTorchClassifier):
+            return model
+        if isinstance(model, torch.nn.Module):
+            return BasePyTorchClassifier(model=model)
+        msg = f"Unsupported model type: {type(model)}"
+        raise TypeError(msg)
+
     @classmethod
     def check_perturbation_model_available(cls, perturbation_model: str) -> bool:
         """
@@ -269,7 +286,7 @@ class BaseEvasionAttack:
     @abstractmethod
     def _run(
         self,
-        model: BaseModel,
+        model: BasePyTorchClassifier | torch.nn.Module,
         samples: torch.Tensor,
         labels: torch.Tensor,
     ) -> torch.Tensor: ...

@@ -60,7 +60,7 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
         perturbation_models = {
             LpPerturbationModels.LINF: pgd_linf,
         }
-        losses = ["ce", "dl", "dlr"]
+        losses: list[str] = ["ce", "dl", "dlr"]
         if isinstance(loss_function, str):
             if loss_function not in losses:
                 msg = f"PGD AdvLib supports only these losses: {losses}"
@@ -84,6 +84,7 @@ class PGDAdvLib(BaseAdvLibEvasionAttack):
             y_target=y_target,
             lb=lb,
             ub=ub,
+            **kwargs,
         )
 
     @staticmethod

@@ -1,9 +1,11 @@
 import pytest
 import torch
+from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fmn import FMN, FMNNative
+from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
     CE_LOSS,
@@ -44,6 +46,112 @@ class DummyModularAttack(ModularEvasionAttack):
 
 def no_scheduler(*args, **kwargs):
     return None
+
+
+def test_advlib_base_trackers_allowed():
+    assert BaseAdvLibEvasionAttack._trackers_allowed() is True
+
+
+def test_foolbox_base_trackers_allowed():
+    assert BaseFoolboxEvasionAttack._trackers_allowed() is True
+
+
+def test_advlib_base_raises_on_unsupported_model(data_loader):
+    attack = BaseAdvLibEvasionAttack(advlib_attack=lambda **kwargs: kwargs["inputs"])
+    samples, labels = next(iter(data_loader))
+
+    with pytest.raises(NotImplementedError, match="Model type not supported"):
+        attack._run(model=object(), samples=samples, labels=labels)
+
+
+def test_foolbox_base_raises_on_unsupported_model(data_loader):
+    attack = BaseFoolboxEvasionAttack(
+        foolbox_attack=lambda **kwargs: (None, kwargs["inputs"], None),
+    )
+    samples, labels = next(iter(data_loader))
+
+    with pytest.raises(NotImplementedError, match="Model type not supported"):
+        attack._run(model=object(), samples=samples, labels=labels)
+
+
+def test_advlib_base_targeted_and_epsilon_kwargs(model, data_loader):
+    calls = {}
+
+    def _fake_advlib_attack(**kwargs):
+        calls.update(kwargs)
+        return kwargs["inputs"] + 0.1
+
+    attack = BaseAdvLibEvasionAttack(
+        advlib_attack=_fake_advlib_attack,
+        epsilon=0.2,
+        y_target=3,
+    )
+    samples, labels = next(iter(data_loader))
+
+    advx, delta = attack._run(model=model, samples=samples, labels=labels)
+
+    assert calls["targeted"] is True
+    assert torch.equal(calls["labels"], torch.full_like(labels, 3))
+    assert calls["ε"] == pytest.approx(0.2)
+    assert torch.allclose(delta, advx - samples.to(advx.device))
+
+
+def test_foolbox_base_untargeted_and_targeted_criteria(monkeypatch, model, data_loader):
+    class _Criterion:
+        def __init__(self, labels):
+            self.labels = labels
+
+    class _TargetedCriterion:
+        def __init__(self, labels):
+            self.labels = labels
+
+    class _DummyFBModel:
+        def __init__(self, wrapped_model, bounds, device):
+            self.wrapped_model = wrapped_model
+            self.bounds = bounds
+            self.device = device
+
+    monkeypatch.setattr(
+        "secmlt.adv.evasion.foolbox_attacks.foolbox_base.Misclassification",
+        _Criterion,
+    )
+    monkeypatch.setattr(
+        "secmlt.adv.evasion.foolbox_attacks.foolbox_base.TargetedMisclassification",
+        _TargetedCriterion,
+    )
+    monkeypatch.setattr(
+        "secmlt.adv.evasion.foolbox_attacks.foolbox_base.PyTorchModel",
+        _DummyFBModel,
+    )
+
+    calls = []
+
+    def _fake_foolbox_attack(**kwargs):
+        calls.append(kwargs)
+        return None, kwargs["inputs"] + 0.25, None
+
+    samples, labels = next(iter(data_loader))
+
+    untargeted = BaseFoolboxEvasionAttack(
+        foolbox_attack=_fake_foolbox_attack,
+        epsilon=0.5,
+        y_target=None,
+    )
+    advx_u, delta_u = untargeted._run(model=model, samples=samples, labels=labels)
+    assert isinstance(calls[-1]["criterion"], _Criterion)
+    assert torch.equal(calls[-1]["criterion"].labels, labels.to(model._get_device()))
+    assert calls[-1]["epsilons"] == pytest.approx(0.5)
+    assert torch.allclose(delta_u, advx_u - samples.to(advx_u.device))
+
+    targeted = BaseFoolboxEvasionAttack(
+        foolbox_attack=_fake_foolbox_attack,
+        epsilon=0.3,
+        y_target=2,
+    )
+    advx_t, delta_t = targeted._run(model=model, samples=samples, labels=labels)
+    assert isinstance(calls[-1]["criterion"], _TargetedCriterion)
+    assert torch.equal(calls[-1]["criterion"].labels, torch.full_like(labels, 2))
+    assert torch.allclose(delta_t, advx_t - samples.to(advx_t.device))
 
 
 @pytest.mark.parametrize(

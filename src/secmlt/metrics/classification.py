@@ -1,10 +1,15 @@
 """Classification metrics for machine-learning models and for attack performance."""
 
-from typing import Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Union
 
 import torch
-from secmlt.models.base_model import BaseModel
-from torch.utils.data import DataLoader
+
+if TYPE_CHECKING:
+    from secmlt.models.base_model import BaseModel
+    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+    from torch.utils.data import DataLoader
 
 
 def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
@@ -34,14 +39,19 @@ class Accuracy:
         self._num_samples = 0
         self._accumulated_accuracy = 0.0
 
-    def __call__(self, model: BaseModel, dataloader: DataLoader) -> torch.Tensor:
+    def __call__(
+        self,
+        model: BaseModel | torch.nn.Module,
+        dataloader: DataLoader) -> torch.Tensor:
         """
         Compute the metric on a single attack run or a dataloader.
 
         Parameters
         ----------
-        model : BaseModel
-            Model to use for prediction.
+        model : BaseModel | torch.nn.Module
+            Model used for prediction. Raw ``nn.Module`` inputs are wrapped
+            into ``BasePyTorchClassifier`` so predictions go through the same
+            preprocessing/postprocessing and device handling as ``BaseModel``.
         dataloader : DataLoader
             A dataloader, can be the result of an attack or a generic
             test dataloader.
@@ -51,10 +61,26 @@ class Accuracy:
         torch.Tensor
             The metric computed on the given dataloader.
         """
+        model = self._ensure_wrapped(model)
         for _, (x, y) in enumerate(dataloader):
             y_pred = model.predict(x).cpu().detach()
             self._accumulate(y_pred, y)
         return self._compute()
+
+    @staticmethod
+    def _ensure_wrapped(
+        model: BaseModel | torch.nn.Module,
+    ) -> BaseModel | BasePyTorchClassifier:
+        """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
+        from secmlt.models.base_model import BaseModel
+        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+
+        if isinstance(model, BaseModel):
+            return model
+        if isinstance(model, torch.nn.Module):
+            return BasePyTorchClassifier(model=model)
+        msg = f"Unsupported model type: {type(model)}"
+        raise TypeError(msg)
 
     def _accumulate(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> None:
         self._num_samples += y_true.shape[0]
@@ -96,14 +122,19 @@ class AttackSuccessRate(Accuracy):
 class AccuracyEnsemble(Accuracy):
     """Robust accuracy of a model on multiple attack runs."""
 
-    def __call__(self, model: BaseModel, dataloaders: list[DataLoader]) -> torch.Tensor:
+    def __call__(
+        self,
+        model: BaseModel | torch.nn.Module,
+        dataloaders: list[DataLoader]) -> torch.Tensor:
         """
         Compute the metric on an ensemble of attacks from their results.
 
         Parameters
         ----------
-        model : BaseModel
-            Model to use for prediction.
+        model : BaseModel | torch.nn.Module
+            Model used for prediction. Raw ``nn.Module`` inputs are wrapped
+            into ``BasePyTorchClassifier`` so predictions go through the same
+            preprocessing/postprocessing and device handling as ``BaseModel``.
         dataloaders : list[DataLoader]
             List of loaders returned from multiple attack runs.
 
@@ -112,6 +143,7 @@ class AccuracyEnsemble(Accuracy):
         torch.Tensor
             The metric computed across multiple attack runs.
         """
+        model = self._ensure_wrapped(model)
         for advs in zip(*dataloaders):  # noqa: B905
             y_pred = []
             for x, y in advs:
