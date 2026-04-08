@@ -7,12 +7,13 @@ from typing import Literal, TYPE_CHECKING
 import torch
 from foolbox.criteria import Misclassification, TargetedMisclassification
 from foolbox.models.pytorch import PyTorchModel
-from secmlt.adv.evasion.base_evasion_attack import TRACKER_TYPE, BaseEvasionAttack
+from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import Attack
     from secmlt.models.base_model import BaseModel
+    from secmlt.trackers.trackers import Tracker
 
 
 class BaseFoolboxEvasionAttack(BaseEvasionAttack):
@@ -25,7 +26,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: type[TRACKER_TYPE] | None = None,
+        trackers: Tracker | list[Tracker] | None = None,
     ) -> None:
         """
         Wrap Foolbox attacks.
@@ -42,7 +43,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             Lower bound of the input space, by default 0.0.
         ub : float, optional
             Upper bound of the input space, by default 1.0.
-        trackers : type[TRACKER_TYPE] | None, optional
+        trackers : Tracker | list[Tracker] | None, optional
             Trackers for the attack (unallowed in Foolbox), by default None.
         """
         self.foolbox_attack = foolbox_attack
