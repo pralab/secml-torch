@@ -33,8 +33,8 @@ training_dataset = torchvision.datasets.CIFAR10(
     root=dataset_path,
     download=True,
 )
-training_dataset = torch.utils.data.Subset(training_dataset, range(100))
-training_data_loader = DataLoader(training_dataset, batch_size=64, shuffle=False)
+training_dataset = torch.utils.data.Subset(training_dataset, range(1000))
+training_data_loader = DataLoader(training_dataset, batch_size=64, shuffle=True)
 test_dataset = torchvision.datasets.CIFAR10(
     transform=torchvision.transforms.ToTensor(),
     train=False,
@@ -44,11 +44,20 @@ test_dataset = torchvision.datasets.CIFAR10(
 test_data_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Inizialize the PGD attack
-attack = PGDNative(
+attack_train = PGDNative(
     perturbation_model=LpPerturbationModels.LINF,
-    epsilon=0.3,
+    epsilon=0.05,
     num_steps=3,
-    step_size=0.1,
+    step_size=0.01,
+    random_start=False,
+    y_target=None,
+)
+
+attack_eval = PGDNative(
+    perturbation_model=LpPerturbationModels.LINF,
+    epsilon=0.01,
+    num_steps=3,
+    step_size=0.01,
     random_start=False,
     y_target=None,
 )
@@ -57,18 +66,18 @@ attack = PGDNative(
 accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)
 print("Accuracy before training: ", accuracy)
 # Evaluate the model on the test set with adversarial examples before training
-adv_loader = attack(BasePyTorchClassifier(model), test_data_loader)
+adv_loader = attack_eval(BasePyTorchClassifier(model), test_data_loader)
 adv_accuracy = Accuracy()(BasePyTorchClassifier(model), adv_loader)
 print("Robust Accuracy before training: ", adv_accuracy)
 
 # Training CIFAR10 model
 trainer = AdversarialTrainer(optimizer, epochs=10)
-trainer.train(model, training_data_loader, attack)
+trainer.train(model, training_data_loader, attack_train)
 
 # Evaluate the model on the test set after training
 accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)
 print("Accuracy after training: ", accuracy)
 # Evaluate the model on the test set with adversarial examples after training
-adv_loader = attack(BasePyTorchClassifier(model), test_data_loader)
+adv_loader = attack_eval(BasePyTorchClassifier(model), test_data_loader)
 adv_accuracy = Accuracy()(BasePyTorchClassifier(model), adv_loader)
 print("Robust Accuracy after training: ", adv_accuracy)
