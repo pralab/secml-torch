@@ -54,7 +54,7 @@ class AdversarialTrainer(BasePyTorchTrainer):
                 if isinstance(model, BasePyTorchClassifier)
                 else BasePyTorchClassifier(model)
             )
-            adv_data = attack(classifier, dataloader)
+            adv_data = attack(classifier, dataloader, stream=True)
 
             # Combine the original and adversarial dataloaders
             combined_data = self.collect_data(dataloader, adv_data, combining_mode)
