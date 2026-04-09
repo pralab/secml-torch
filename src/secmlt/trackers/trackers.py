@@ -253,6 +253,114 @@ class PredictionTracker(Tracker):
         self.tracked.append(scores.data.argmax(dim=1))
 
 
+class SampleTracker(Tracker):
+    """Generic tracker for adversarial samples."""
+
+    def __init__(self, tracker_type: str = MULTI_SCALAR) -> None:
+        """
+        Create sample tracker.
+
+        Parameters
+        ----------
+        tracker_type : str, optional
+            Tracked value type used by integrations (e.g. tensorboard),
+            by default MULTI_SCALAR.
+        """
+        super().__init__("Sample", tracker_type)
+        self.tracked = []
+
+    def track(
+        self,
+        iteration: int,
+        loss: torch.Tensor,
+        scores: torch.Tensor,
+        x_adv: torch.Tensor,
+        delta: torch.Tensor,
+        grad: torch.Tensor,
+    ) -> None:
+        """
+        Track adversarial examples at the current iteration.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.Tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
+        if self.tracked_type == SCALAR and x_adv.ndim > 1:
+            msg = (
+                "SampleTracker with tracker_type='scalar' expects per-sample "
+                "0D tensors. Received non-scalar sample values. Use "
+                "tracker_type='multiple_scalars' for vectors or "
+                "ImageSampleTracker/tracker_type='image' for images."
+            )
+            raise ValueError(msg)
+        self.tracked.append(x_adv)
+
+
+class GradientsTracker(Tracker):
+    """Generic tracker for gradients."""
+
+    def __init__(self, tracker_type: str = MULTI_SCALAR) -> None:
+        """
+        Create gradients tracker.
+
+        Parameters
+        ----------
+        tracker_type : str, optional
+            Tracked value type used by integrations (e.g. tensorboard),
+            by default MULTI_SCALAR.
+        """
+        super().__init__(name="Grad", tracker_type=tracker_type)
+        self.tracked = []
+
+    def track(
+        self,
+        iteration: int,
+        loss: torch.Tensor,
+        scores: torch.Tensor,
+        x_adv: torch.Tensor,
+        delta: torch.Tensor,
+        grad: torch.Tensor,
+    ) -> None:
+        """
+        Track the gradients at the current iteration.
+
+        Parameters
+        ----------
+        iteration : int
+            The attack iteration number.
+        loss : torch.Tensor
+            The value of the (per-sample) loss of the attack.
+        scores : torch.Tensor
+            The output scores from the model.
+        x_adv : torch.Tensor
+            The adversarial examples at the current iteration.
+        delta : torch.Tensor
+            The adversarial perturbations at the current iteration.
+        grad : torch.Tensor
+            The gradient of delta at the given iteration.
+        """
+        if self.tracked_type == SCALAR and grad.ndim > 1:
+            msg = (
+                "GradientsTracker with tracker_type='scalar' expects per-sample "
+                "0D tensors. Received non-scalar sample values. Use "
+                "tracker_type='multiple_scalars' for vectors or "
+                "ImageGradientsTracker/tracker_type='image' for images."
+            )
+            raise ValueError(msg)
+        self.tracked.append(grad)
+
+
 class PerturbationNormTracker(Tracker):
     """Tracker for perturbation norm."""
 
