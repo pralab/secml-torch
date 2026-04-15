@@ -6,7 +6,7 @@ examples with a given attack, and the outer minimization is solved by training t
 (only) on adversarial examples.
 """
 
-from typing import Literal
+from typing import Iterator, Literal, Union
 
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
@@ -22,7 +22,7 @@ class AdversarialTrainer(BasePyTorchTrainer):
 
     def train(
         self,
-        model: Module,
+        model: Union[BasePyTorchClassifier, Module],
         dataloader: DataLoader,
         attack: BaseEvasionAttack,
         combining_mode: COMBINING_MODE = "adv",
@@ -31,8 +31,9 @@ class AdversarialTrainer(BasePyTorchTrainer):
 
         Parameters
         ----------
-        model : Module
-            Model to train.
+        model : BasePyTorchClassifier or Module
+            Model to train. Can be a raw ``torch.nn.Module`` or a
+            ``BasePyTorchClassifier`` wrapper.
         dataloader : DataLoader
             Training dataloader.
         attack : BaseEvasionAttack
@@ -45,39 +46,41 @@ class AdversarialTrainer(BasePyTorchTrainer):
         Returns
         -------
         Module
-            The trained model.
+            The trained underlying ``torch.nn.Module``.
         """
+        if isinstance(model, BasePyTorchClassifier):
+            classifier = model
+            nn_model = model.model
+        else:
+            nn_model = model
+            classifier = BasePyTorchClassifier(nn_model)
+
         for _ in range(self._epochs):
             # Generate adversarial examples using the attack and the dataloader
-            classifier = (
-                model
-                if isinstance(model, BasePyTorchClassifier)
-                else BasePyTorchClassifier(model)
-            )
             adv_data = attack(classifier, dataloader, stream=True)
 
             # Combine the original and adversarial dataloaders
             combined_data = self.collect_data(dataloader, adv_data, combining_mode)
 
             # Train the model using the combined dataloader
-            model = model.train()
-            model = self.train_epoch(model, combined_data)
+            nn_model = nn_model.train()
+            nn_model = self.train_epoch(nn_model, combined_data)
             if self._scheduler is not None:
                 self._scheduler.step()
-        return model
+        return nn_model
 
     def collect_data(
         self,
         clean_data: DataLoader,
-        adv_data: DataLoader,
+        adv_data: Iterator,
         combining_strategy: COMBINING_MODE,
-    ) -> DataLoader:
-        r"""Combine two dataloaders into one.
+    ) -> Iterator:
+        r"""Combine two data sources into one.
 
         Parameters
         ----------
         clean_data : DataLoader
-        adv_data : DataLoader
+        adv_data : Iterator
         combining_strategy : COMBINING_MODE
             Strategy to combine the dataloaders. Options are:
             - "adv": Use only adversarial examples.
@@ -85,12 +88,16 @@ class AdversarialTrainer(BasePyTorchTrainer):
 
         Returns
         -------
-        DataLoader
-            Combined dataloader containing samples from both input dataloaders.
+        Iterator
+            Combined data source containing samples from both input data sources.
         """
         if combining_strategy == "adv":
             return adv_data
         if combining_strategy == "mix":
             err_msg = "Mixing strategy not implemented yet."
             raise NotImplementedError(err_msg)
-        return None
+        err_msg = (
+            f"Invalid combining_strategy: {combining_strategy}. "
+            "Supported values are 'adv' and 'mix'."
+        )
+        raise ValueError(err_msg)

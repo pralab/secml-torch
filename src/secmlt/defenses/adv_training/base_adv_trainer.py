@@ -11,9 +11,12 @@ class BaseAdvTrainer(metaclass=ABCMeta):
     """Abstract class for model trainers."""
 
     @abstractmethod
-    def train(self, model: BaseModel,
-              dataloader: DataLoader,
-              attack: BaseEvasionAttack) -> BaseModel:
+    def train(
+        self,
+        model: BaseModel,
+        dataloader: DataLoader,
+        attack: BaseEvasionAttack,
+    ) -> BaseModel:
         """
         Train a model with the given dataloader.
 
@@ -23,7 +26,7 @@ class BaseAdvTrainer(metaclass=ABCMeta):
             Model to train.
         dataloader : DataLoader
             Training dataloader.
-        attack : BaseAttack
+        attack : BaseEvasionAttack
             Adversarial attack to use for adversarial training.
 
         Returns
