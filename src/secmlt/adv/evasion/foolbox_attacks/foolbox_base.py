@@ -27,7 +27,7 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: list[Tracker] | Tracker | None = None,
+        trackers: Tracker | list[Tracker] | None = None,
     ) -> None:
         """
         Wrap Foolbox attacks.
@@ -44,8 +44,8 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
             Lower bound of the input space, by default 0.0.
         ub : float, optional
             Upper bound of the input space, by default 1.0.
-        trackers : list[Tracker] | Tracker | None, optional
-            Trackers for the attack, by default None.
+        trackers : Tracker | list[Tracker] | None, optional
+            Trackers for the attack (unallowed in Foolbox), by default None.
         """
         self.foolbox_attack = foolbox_attack
         self.lb = lb

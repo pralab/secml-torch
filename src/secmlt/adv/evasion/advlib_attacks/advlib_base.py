@@ -27,7 +27,7 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
         y_target: int | None = None,
         lb: float = 0.0,
         ub: float = 1.0,
-        trackers: list[Tracker] | Tracker | None = None,
+        trackers: Tracker | list[Tracker] | None = None,
         **kwargs,
     ) -> None:
         """
@@ -48,8 +48,8 @@ class BaseAdvLibEvasionAttack(BaseEvasionAttack):
             The lower bound for the perturbation. The default value is 0.0.
         ub : float, optional
             The upper bound for the perturbation. The default value is 1.0.
-        trackers : list[Tracker] | Tracker | None, optional
-            Trackers for the attack, by default None.
+        trackers : Tracker | list[Tracker] | None, optional
+            Trackers for the attack (unallowed in Adversarial Library), by default None.
         """
         self.advlib_attack = advlib_attack
         self.lb = lb
