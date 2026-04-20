@@ -207,6 +207,7 @@ class BaseEvasionAttack:
             Materialized dataloader with adversarial examples and original
             labels, or a lazy iterator over attacked batches.
         """
+        model = self._ensure_wrapped(model)
         attacked_batches = self._run_batches(model, data_loader)
         if stream:
             trackers = getattr(self, "_trackers", None)
