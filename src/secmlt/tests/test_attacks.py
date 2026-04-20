@@ -374,6 +374,28 @@ def test_attack_warns_when_streaming_with_trackers(model, data_loader):
     assert first_batch_adv.shape[0] == first_batch_labels.shape[0]
 
 
+def test_attack_accepts_raw_nn_module(data_loader):
+    """Raw nn.Module (no decision_function) must be auto-wrapped by __call__."""
+
+    class RawModel(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.fc = torch.nn.Linear(3 * 32 * 32, 10)
+
+        def forward(self, x):
+            return self.fc(x.flatten(1))
+
+    attack = PGD(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=0.3,
+        num_steps=3,
+        step_size=0.1,
+        random_start=False,
+        backend="native",
+    )
+    assert isinstance(attack(RawModel(), data_loader), DataLoader)
+
+
 @pytest.mark.parametrize("attack_class", [PGD, FMN])
 def test_invalid_perturbation_models(attack_class):
     """Test that an error is raised for invalid perturbation models."""
