@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from secmlt.models.base_model import BaseModel
+    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
     from secmlt.trackers.trackers import Tracker
 
 
