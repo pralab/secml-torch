@@ -14,7 +14,7 @@ def flip_label(label):
 
 dataset_path = "example_data/datasets/"
 device = "cpu"
-net = torch.hub.load("maurapintor/distilled_mnist", "mnist_model")
+net = torch.hub.load("maurapintor/mnist_examples", "mnist_model")
 net.to(device)
 
 optimizer = Adam(lr=1e-3, params=net.parameters())
