@@ -6,7 +6,8 @@ examples with a given attack, and the outer minimization is solved by training t
 (only) on adversarial examples.
 """
 
-from typing import Iterator, Literal, Union
+from collections.abc import Iterator
+from typing import Literal, Union
 
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
