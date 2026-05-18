@@ -67,14 +67,9 @@ Here's a brief example of using SecMLT to evaluate the robustness of a trained c
 ```python
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-
 
 model = ...
 torch_data_loader = ...
-
-# Wrap model
-model = BasePyTorchClassifier(model)
 
 # create and run attack
 attack = PGD(

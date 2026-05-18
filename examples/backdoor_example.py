@@ -2,7 +2,6 @@ import torch
 import torchvision.datasets
 from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
 from secmlt.metrics.classification import Accuracy, AttackSuccessRate
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -42,11 +41,10 @@ test_dataset = torchvision.datasets.MNIST(
 test_data_loader = DataLoader(test_dataset, batch_size=20, shuffle=False)
 
 trainer = BasePyTorchTrainer(optimizer, epochs=5)
-model = BasePyTorchClassifier(net, trainer=trainer)
-model.train(training_data_loader)
+trainer.train(net, training_data_loader)
 
 # test accuracy without backdoor
-accuracy = Accuracy()(model, test_data_loader)
+accuracy = Accuracy()(net, test_data_loader)
 print("test accuracy: ", accuracy)
 
 # test accuracy on backdoored dataset
@@ -55,5 +53,5 @@ backdoored_test_set = BackdoorDatasetPyTorch(
 )
 backdoored_loader = DataLoader(backdoored_test_set, batch_size=20, shuffle=False)
 
-asr = AttackSuccessRate(y_target=target_label)(model, backdoored_loader)
+asr = AttackSuccessRate(y_target=target_label)(net, backdoored_loader)
 print(f"asr: {asr}")

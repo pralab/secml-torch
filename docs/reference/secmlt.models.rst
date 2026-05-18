@@ -8,10 +8,19 @@ Subpackages
    :maxdepth: 4
 
    secmlt.models.data_processing
+   secmlt.models.hugging_face
    secmlt.models.pytorch
 
 Submodules
 ----------
+
+secmlt.models.base\_language\_model module
+------------------------------------------
+
+.. automodule:: secmlt.models.base_language_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 secmlt.models.base\_model module
 --------------------------------

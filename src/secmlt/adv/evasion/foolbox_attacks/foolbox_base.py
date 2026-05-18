@@ -9,6 +9,7 @@ from foolbox.criteria import Misclassification, TargetedMisclassification
 from foolbox.models.pytorch import PyTorchModel
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.trackers.model_tracker import ModelTracker
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import Attack
@@ -55,8 +56,8 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         super().__init__()
 
     @classmethod
-    def _trackers_allowed(cls) -> Literal[False]:
-        return False
+    def _trackers_allowed(cls) -> Literal[True]:
+        return True
 
     def _run(
         self,
@@ -67,6 +68,16 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         if not isinstance(model, BasePyTorchClassifier):
             msg = "Model type not supported."
             raise NotImplementedError(msg)
+        target = None
+        if self.y_target is not None:
+            target = (torch.zeros_like(labels) + self.y_target).type(labels.dtype)
+        tracking_labels = labels if target is None else target
+        # Wrap model with ModelTracker if trackers are set
+        model_tracker = None
+        if self._trackers:
+            model_tracker = ModelTracker(model, trackers=self._trackers)
+            model_tracker.init_tracking(x_orig=samples, y=tracking_labels)
+            model = model_tracker
         device = model._get_device()
         samples = samples.to(device)
         labels = labels.to(device)
@@ -74,20 +85,20 @@ class BaseFoolboxEvasionAttack(BaseEvasionAttack):
         if self.y_target is None:
             criterion = Misclassification(labels)
         else:
-            target = (
-                torch.zeros_like(labels) + self.y_target
-                if self.y_target is not None
-                else labels
-            ).type(labels.dtype)
             target = target.to(device)
             criterion = TargetedMisclassification(target)
 
-        _, advx, _ = self.foolbox_attack(
-            model=foolbox_model,
-            inputs=samples,
-            criterion=criterion,
-            epsilons=self.epsilon,
-        )
+        try:
+            _, advx, _ = self.foolbox_attack(
+                model=foolbox_model,
+                inputs=samples,
+                criterion=criterion,
+                epsilons=self.epsilon,
+            )
+        finally:
+            if model_tracker is not None:
+                model_tracker.end_tracking()
+                model_tracker.detach()
         # foolbox deals only with additive perturbations
         delta = advx - samples
         return advx, delta

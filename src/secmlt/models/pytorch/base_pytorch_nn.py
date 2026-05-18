@@ -84,30 +84,6 @@ class BasePyTorchClassifier(BaseModel):
         x = x.to(device=self._get_device())
         return self._model(x)
 
-    def gradient(self, x: torch.Tensor, y: int) -> torch.Tensor:
-        """
-        Compute batch gradients of class y w.r.t. x.
-
-        Parameters
-        ----------
-        x : torch.Tensor
-            Input samples.
-        y : int
-            Class label.
-
-        Returns
-        -------
-        torch.Tensor
-            Gradient of class y w.r.t. input x.
-        """
-        x = x.clone().requires_grad_()
-        if x.grad is not None:
-            x.grad.zero_()
-        output = self.decision_function(x)
-        output = output[:, y].sum()
-        output.backward()
-        return x.grad
-
     def train(self, dataloader: DataLoader) -> torch.nn.Module:
         """
         Train the model with given dataloader, if trainer is set.
