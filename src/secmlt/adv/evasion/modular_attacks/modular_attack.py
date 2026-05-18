@@ -234,10 +234,13 @@ class ModularEvasionAttack(BaseEvasionAttack):
 
         # Forward: get scores and per-sample losses
         scores, losses = self.forward_loss(model=model, x=x_adv, target=target)
-        losses = losses * multiplier  # keep same convention as before
+        losses = losses * multiplier
 
         # Backward on summed loss -> populates delta.grad
-        loss_sum = losses.sum()
+        # With the inverted multiplier convention (untargeted: +loss,
+        # targeted: -loss), we maximize the transformed objective by
+        # minimizing its negation.
+        loss_sum = (-losses).sum()
         loss_sum.backward()
 
         # At this point delta.grad is the gradient of loss_sum w.r.t. delta
@@ -250,7 +253,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
         labels: torch.Tensor,
         init_deltas: torch.Tensor = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        multiplier = 1 if self.y_target is not None else -1
+        multiplier = 1 if self.y_target is None else -1
         target = (
             torch.zeros_like(labels) + self.y_target
             if self.y_target is not None

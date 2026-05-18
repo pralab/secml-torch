@@ -121,7 +121,7 @@ class ModularEvasionAttackMinDistance(ModularEvasionAttack):
             )
             is_adv = (
                 scores.argmax(dim=1) == target
-                if multiplier == 1
+                if multiplier == -1
                 else scores.argmax(dim=1) != target
             )
             distances = torch.norm(

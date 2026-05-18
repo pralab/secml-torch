@@ -1,6 +1,7 @@
 """Trackers for attack metrics."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import Union
 
 import torch
@@ -30,6 +31,7 @@ class Tracker(ABC):
         self.tracked = None
         self.tracked_type = tracker_type
         self._batches = []
+        self.requires_grad = False
 
     @abstractmethod
     def track(
@@ -135,10 +137,25 @@ class Tracker(ABC):
 class LossTracker(Tracker):
     """Tracker for attack loss."""
 
-    def __init__(self) -> None:
-        """Create loss tracker."""
+    def __init__(self, loss_fn: Callable | None = None) -> None:
+        """Create loss tracker.
+
+        Parameters
+        ----------
+        loss_fn : callable | None, optional
+            Per-sample loss function accepting ``(scores, labels)``.
+            When this tracker is used with ``ModelTracker`` and no loss
+            is provided by the attack loop, this function is used to
+            compute losses from model outputs. By default a per-sample
+            cross-entropy is used.
+        """
         super().__init__("Loss")
         self.tracked = []
+        self.loss_fn = (
+            loss_fn
+            if loss_fn is not None
+            else torch.nn.CrossEntropyLoss(reduction="none")
+        )
 
     def track(
         self,
@@ -156,8 +173,12 @@ class LossTracker(Tracker):
         ----------
         iteration : int
             The attack iteration number.
-        loss : torch.Tensor
+        loss : torch.Tensor | None
             The value of the (per-sample) loss of the attack.
+            The model can optionally pass None for the loss,
+            in which case this tracker will attempt to compute
+            the loss using the provided loss_fn.
+            If loss_fn is not provided, it will skip tracking for that iteration.
         scores : torch.Tensor
             The output scores from the model.
         x_adv : torch.tensor
@@ -167,6 +188,8 @@ class LossTracker(Tracker):
         grad : torch.Tensor
             The gradient of delta at the given iteration.
         """
+        if loss is None:
+            return
         self.tracked.append(loss.data)
 
 
@@ -347,8 +370,10 @@ class GradientsTracker(Tracker):
             The adversarial examples at the current iteration.
         delta : torch.Tensor
             The adversarial perturbations at the current iteration.
-        grad : torch.Tensor
+        grad : torch.Tensor | None
             The gradient of delta at the given iteration.
+            The model can optionally pass None for the gradient,
+            in which case this tracker will simply skip tracking for that iteration.
         """
         if self.tracked_type == SCALAR and grad.ndim > 1:
             msg = (
@@ -404,6 +429,8 @@ class PerturbationNormTracker(Tracker):
         grad : torch.Tensor
             The gradient of delta at the given iteration.
         """
+        if delta is None:
+            return
         self.tracked.append(delta.flatten(start_dim=1).norm(p=self.p, dim=-1))
 
 
@@ -423,6 +450,7 @@ class GradientNormTracker(Tracker):
 
         self.p = LpPerturbationModels.get_p(p)
         self.tracked = []
+        self.requires_grad = True
 
     def track(
         self,
@@ -451,5 +479,7 @@ class GradientNormTracker(Tracker):
         grad : torch.Tensor
             The gradient of delta at the given iteration.
         """
+        if grad is None:
+            return
         norm = grad.data.flatten(start_dim=1).norm(p=self.p, dim=1)
         self.tracked.append(norm)

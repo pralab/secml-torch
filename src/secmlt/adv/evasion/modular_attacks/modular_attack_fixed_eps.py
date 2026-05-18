@@ -86,7 +86,9 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
         multiplier: int,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         x_adv, delta = self.manipulation_function(samples, delta)
-        best_losses = torch.zeros(samples.shape[0]).fill_(torch.inf)
+        # We keep the perturbation that maximizes the transformed objective
+        # (untargeted: +loss, targeted: -loss), so initialize at -inf.
+        best_losses = torch.zeros(samples.shape[0]).fill_(-torch.inf)
         best_delta = torch.zeros_like(samples)
         grad_before_processing = torch.zeros_like(delta)
 
@@ -105,14 +107,14 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
                 target=target,
                 multiplier=multiplier,
             )
-            # keep perturbation with best loss
+            # keep perturbation with best transformed objective value
             best_delta.data = torch.where(
-                atleast_kd(losses.detach().cpu() < best_losses, len(samples.shape)),
+                atleast_kd(losses.detach().cpu() > best_losses, len(samples.shape)),
                 delta_before_processing.data,
                 best_delta.data,
             )
             best_losses.data = torch.where(
-                losses.detach().cpu() < best_losses,
+                losses.detach().cpu() > best_losses,
                 losses.detach().cpu(),
                 best_losses.data,
             )

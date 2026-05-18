@@ -2,7 +2,6 @@
 
 from __future__ import annotations  # noqa: I001
 
-
 from secmlt.trackers.trackers import (
     IMAGE,
     MULTI_SCALAR,
@@ -41,6 +40,25 @@ class TensorboardTracker(Tracker):
         self.writer = SummaryWriter(log_dir=logdir)
         self.trackers = trackers
         self._global_sample_offset = 0
+
+    @property
+    def requires_grad(self) -> bool:
+        """True when any sub-tracker needs gradients."""
+        return any(getattr(t, "requires_grad", False) for t in self.trackers)
+
+    @requires_grad.setter
+    def requires_grad(self, value: bool) -> None:
+        del value
+        # computed dynamically; ignore assignments from Tracker.__init__
+
+    @property
+    def loss_fn(self) -> object | None:
+        """Return the first sub-tracker loss function, if any."""
+        for tracker in self.trackers:
+            lf = getattr(tracker, "loss_fn", None)
+            if lf is not None:
+                return lf
+        return None
 
     def init_tracking(self) -> None:
         """Initialize tracking for a new batch."""

@@ -6,4 +6,5 @@ if importlib.util.find_spec("tensorboard", None) is not None:
     from .tensorboard_tracker import TensorboardTracker  # noqa: F401
 
 from .image_trackers import *  # noqa: F403
+from .model_tracker import ModelTracker  # noqa: F401
 from .trackers import *  # noqa: F403

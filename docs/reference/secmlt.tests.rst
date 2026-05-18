@@ -20,6 +20,14 @@ secmlt.tests.mocks module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.mocks\_lm module
+-----------------------------
+
+.. automodule:: secmlt.tests.mocks_lm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_aggregators module
 -------------------------------------
 
@@ -76,6 +84,14 @@ secmlt.tests.test\_imports module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.test\_lm module
+----------------------------
+
+.. automodule:: secmlt.tests.test_lm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_manipulations module
 ---------------------------------------
 
@@ -104,6 +120,14 @@ secmlt.tests.test\_schedulers module
 ------------------------------------
 
 .. automodule:: secmlt.tests.test_schedulers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.tests.test\_tensorboard\_tracker module
+----------------------------------------------
+
+.. automodule:: secmlt.tests.test_tensorboard_tracker
    :members:
    :undoc-members:
    :show-inheritance:

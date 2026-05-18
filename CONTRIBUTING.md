@@ -32,7 +32,7 @@ copy of the SecMLT repository under your GitHub account.
 
 1. Create a new branch for your feature, bug fix, or documentation update:
    ```bash
-   git checkout -c <new_branch_name>
+   git checkout -b <new_branch_name>
    ```
 2. Make the necessary changes to the codebase (add features, fix bugs, improve documentation, etc.). Be sure to write clear and descriptive commit messages.
 3. Test your changes locally using appropriate testing frameworks and tools.
