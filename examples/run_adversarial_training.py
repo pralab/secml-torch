@@ -8,7 +8,7 @@ from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-dataset_path = "example_data/datasets/"
+dataset_path = "examples/example_data/datasets/"
 
 REPO_LINK = "chenyaofo/pytorch-cifar-models"
 if torch.cuda.is_available():
@@ -24,9 +24,23 @@ STD = (0.2023, 0.1994, 0.2010)
 # define model
 model = torch.hub.load(REPO_LINK, "cifar10_resnet20", pretrained=True)
 
+# Fixed input normalization, implemented as a BatchNorm layer with the
+# CIFAR-10 mean/std baked into its running statistics.
 bn = torch.nn.BatchNorm2d(3, affine=False)
 bn.running_mean = torch.tensor(MEAN)
 bn.running_var = torch.tensor([std**2 for std in STD])
+bn.eval()
+
+
+def _keep_frozen(mode=True):
+    # Keep the normalization layer permanently in eval mode. Without this,
+    # model.train() (called during adversarial training) would switch it to
+    # batch-statistics mode and overwrite running_mean/running_var, silently
+    # destroying the normalization and corrupting every later measurement.
+    return bn
+
+
+bn.train = _keep_frozen
 model = torch.nn.Sequential(bn, model)
 model.to(DEVICE)
 
@@ -67,6 +81,10 @@ attack_eval = PGDNative(
     y_target=None,
 )
 
+# Switch to eval mode: BatchNorm must use running statistics (not per-batch
+# statistics) for the accuracy and robustness measurements to be meaningful.
+model.eval()
+
 # Evauate the model on the test set before training
 accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)
 print("Accuracy before training: ", accuracy)
@@ -78,6 +96,9 @@ print("Robust Accuracy before training: ", adv_accuracy)
 # Training CIFAR10 model
 trainer = AdversarialTrainer(optimizer, epochs=10)
 trainer.train(model, training_data_loader, attack_train)
+
+# Back to eval mode for the post-training measurements.
+model.eval()
 
 # Evaluate the model on the test set after training
 accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)

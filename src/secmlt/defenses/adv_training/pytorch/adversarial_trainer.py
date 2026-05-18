@@ -47,7 +47,7 @@ class AdversarialTrainer(BasePyTorchTrainer):
         Returns
         -------
         Module
-            The trained underlying ``torch.nn.Module``.
+            The trained underlying ``torch.nn.Module``, set to eval mode.
         """
         if isinstance(model, BasePyTorchClassifier):
             classifier = model
@@ -68,7 +68,9 @@ class AdversarialTrainer(BasePyTorchTrainer):
             nn_model = self.train_epoch(nn_model, combined_data)
             if self._scheduler is not None:
                 self._scheduler.step()
-        return nn_model
+        # Restore eval mode so the returned model is ready for inference and
+        # its BatchNorm layers use running statistics instead of batch ones.
+        return nn_model.eval()
 
     def collect_data(
         self,
