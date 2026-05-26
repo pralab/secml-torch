@@ -1,10 +1,14 @@
 """Classification metrics for machine-learning models and for attack performance."""
 
-from typing import Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Union
 
 import torch
 from secmlt.models.base_model import BaseModel
 from torch.utils.data import DataLoader
+
+if TYPE_CHECKING:
+    from secmlt.models.base_language_model import BaseLanguageModel
 
 
 def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
@@ -23,7 +27,7 @@ def accuracy(y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
     torch.Tensor
         The percentage of predictions that match the targets.
     """
-    return (y_pred.type(y_true.dtype) == y_true).mean()
+    return (y_pred.type(y_true.dtype) == y_true).float().mean()
 
 
 class Accuracy:
@@ -164,3 +168,70 @@ class EnsembleSuccessRate(AccuracyEnsemble):
         if self.y_target is None:
             return 1 - super()._compute()
         return super()._compute()
+
+
+class JailbreakAccuracy(Accuracy):
+    """Accuracy of a jailbreak success criterion."""
+
+    def __init__(
+        self,
+        is_jailbreak: Callable[
+            ["BaseLanguageModel", dict[str, Any], str, dict[str, Any]],
+            bool,
+        ],
+    ) -> None:
+        """
+        Create a jailbreak accuracy metric.
+
+        Parameters
+        ----------
+        is_jailbreak : callable
+            Function returning True when an adversarial prompt is a jailbreak.
+            This can wrap a judge model, string matcher, logit probe, or
+            latent-space probe.
+        """
+        super().__init__()
+        self.is_jailbreak = is_jailbreak
+
+    def __call__(
+        self,
+        model: "BaseLanguageModel",
+        behaviors: list[dict[str, Any]],
+        attack_results: list[tuple[str, dict[str, Any]]],
+    ) -> torch.Tensor:
+        """
+        Compute jailbreak accuracy on a batch of attack results.
+
+        Parameters
+        ----------
+        model : BaseLanguageModel
+            Victim language model.
+        behaviors : list of dict
+            Original behavior specifications.
+        attack_results : list of tuples
+            List of (adv_prompt, logs) pairs returned by a jailbreak attack.
+
+        Returns
+        -------
+        torch.Tensor
+            Fraction of prompts judged as successful jailbreaks.
+        """
+        if len(behaviors) != len(attack_results):
+            msg = "Behaviors and attack results must have the same length."
+            raise ValueError(msg)
+        if len(behaviors) == 0:
+            msg = "Cannot compute jailbreak accuracy on an empty batch."
+            raise ValueError(msg)
+
+        y_pred = torch.tensor(
+            [
+                self.is_jailbreak(model, behavior, adv_prompt, logs)
+                for behavior, (adv_prompt, logs) in zip(
+                    behaviors, attack_results, strict=True
+                )
+            ],
+            dtype=torch.bool,
+        )
+        y_true = torch.ones_like(y_pred)
+        self._accumulate(y_pred, y_true)
+        return self._compute()
