@@ -5,6 +5,7 @@ from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.cw import CW
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
@@ -544,3 +545,32 @@ def test_modular_attack_accepts_custom_loss_instance():
 
     assert attack.loss_function is custom_loss
     assert attack.loss_function.reduction == "mean"
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
+@pytest.mark.parametrize(
+    ("backend",),
+    [
+        ("foolbox",),
+        ("advlib",),
+    ],
+)
+def test_cw_attack(
+    backend,
+    y_target,
+    model,
+    data_loader,
+) -> None:
+    attack = CW(
+        binary_search_steps=2,
+        num_steps=10,
+        step_size=0.01,
+        confidence=0.0,
+        initial_const=0.001,
+        y_target=y_target,
+        backend=backend,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
