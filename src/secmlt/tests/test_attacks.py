@@ -1,15 +1,18 @@
 import pytest
 import torch
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
+from secmlt.adv.evasion.advlib_attacks.advlib_deepfool import DeepFoolAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.cw import CW
 from secmlt.adv.evasion.ddn import DDN
+from secmlt.adv.evasion.deepfool import DeepFool
 from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+from secmlt.adv.evasion.foolbox_attacks.foolbox_deepfool import DeepFoolFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
@@ -571,6 +574,26 @@ def test_cw_attack(
         confidence=0.0,
         initial_const=0.001,
         y_target=y_target,
+        backend=backend,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    ("backend",),
+    [
+        ("foolbox",),
+        ("advlib",),
+    ],
+)
+def test_deepfool_attack(
+    backend,
+    model,
+    data_loader,
+) -> None:
+    attack = DeepFool(
+        num_steps=10,
+        overshoot=0.02,
         backend=backend,
     )
     assert isinstance(attack(model, data_loader), DataLoader)
