@@ -36,6 +36,7 @@ from torch.utils.data import DataLoader
 
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
 
+
 def _adv_lib_gte(major: int, minor: int, patch: int) -> bool:
     try:
         version_str = importlib.metadata.version("adv-lib")
