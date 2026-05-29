@@ -17,8 +17,10 @@ from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAt
 from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
+from secmlt.adv.evasion.hopskipjump import HopSkipJump
 from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
     CE_LOSS,
@@ -668,3 +670,47 @@ def test_boundary_attack_only_foolbox_backend() -> None:
         NotImplementedError, match="Unsupported or not-implemented backend"
     ):
         BoundaryAttack(steps=100, backend="native")
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize(
+    "perturbation_model",
+    [LpPerturbationModels.L2, LpPerturbationModels.LINF],
+)
+def test_hopskipjump_foolbox(
+    y_target, perturbation_model, deterministic_model, data_loader
+) -> None:
+    attack = HopSkipJumpFoolbox(
+        perturbation_model=perturbation_model,
+        steps=5,
+        initial_gradient_eval_steps=10,
+        max_gradient_eval_steps=20,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize(
+    "perturbation_model",
+    [LpPerturbationModels.L2, LpPerturbationModels.LINF],
+)
+def test_hopskipjump_attack(
+    y_target, perturbation_model, deterministic_model, data_loader
+) -> None:
+    attack = HopSkipJump(
+        perturbation_model=perturbation_model,
+        steps=5,
+        initial_gradient_eval_steps=10,
+        max_gradient_eval_steps=20,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_hopskipjump_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        HopSkipJump(steps=5, backend="native")
