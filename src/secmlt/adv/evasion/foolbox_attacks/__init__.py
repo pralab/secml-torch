@@ -3,6 +3,7 @@
 import importlib.util
 
 if importlib.util.find_spec("foolbox", None) is not None:
+    from .foolbox_boundary import *  # noqa: F403
     from .foolbox_cw import *  # noqa: F403
     from .foolbox_ddn import *  # noqa: F403
     from .foolbox_deepfool import *  # noqa: F403

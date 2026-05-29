@@ -5,12 +5,14 @@ from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.boundary_attack import BoundaryAttack
 from secmlt.adv.evasion.cw import CW
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.deepfool import DeepFool
 from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
@@ -24,6 +26,7 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD, PGDNative
 from secmlt.adv.evasion.vat import VAT
 from secmlt.manipulations.manipulation import AdditiveManipulation
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
 from secmlt.trackers.trackers import LossTracker
@@ -605,3 +608,42 @@ def test_vat_foolbox_attack(model, data_loader) -> None:
 def test_vat_attack(model, data_loader) -> None:
     attack = VAT(epsilon=0.1, steps=1, backend="foolbox")
     assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.fixture
+def deterministic_model() -> BasePyTorchClassifier:
+    """Simple deterministic model for decision-based attack tests."""
+    torch.manual_seed(0)
+    net = torch.nn.Sequential(
+        torch.nn.Flatten(),
+        torch.nn.Linear(3 * 32 * 32, 10),
+    )
+    net.eval()
+    return BasePyTorchClassifier(model=net)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    # y_target=2 chosen because class 2 dominates uniform-noise predictions for
+    # the deterministic_model fixture, making init_attack reliable.
+    [None, 2],
+)
+def test_boundary_attack_foolbox(y_target, deterministic_model, data_loader) -> None:
+    attack = BoundaryAttackFoolbox(steps=100, y_target=y_target)
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 2],
+)
+def test_boundary_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = BoundaryAttack(steps=100, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_boundary_attack_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        BoundaryAttack(steps=100, backend="native")
