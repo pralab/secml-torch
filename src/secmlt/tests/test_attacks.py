@@ -1,7 +1,6 @@
 import pytest
 import torch
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
-from secmlt.adv.evasion.advlib_attacks.advlib_deepfool import DeepFoolAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
@@ -12,10 +11,10 @@ from secmlt.adv.evasion.deepfool import DeepFool
 from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.adv.evasion.foolbox_attacks.foolbox_deepfool import DeepFoolFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
 from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
     CE_LOSS,
@@ -23,6 +22,7 @@ from secmlt.adv.evasion.modular_attacks.modular_attack import (
 )
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD, PGDNative
+from secmlt.adv.evasion.vat import VAT
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
@@ -430,9 +430,7 @@ def test_attack_can_return_generator(model, data_loader):
     total_attacked_samples = sum(
         batch_adv.shape[0] for batch_adv, _ in attacked_batches
     )
-    total_labels = sum(
-        batch_labels.shape[0] for _, batch_labels in attacked_batches
-    )
+    total_labels = sum(batch_labels.shape[0] for _, batch_labels in attacked_batches)
     assert total_attacked_samples == len(data_loader.dataset)
     assert total_labels == len(data_loader.dataset)
 
@@ -596,4 +594,14 @@ def test_deepfool_attack(
         overshoot=0.02,
         backend=backend,
     )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_vat_foolbox_attack(model, data_loader) -> None:
+    attack = VATFoolbox(epsilon=0.1, steps=1)
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_vat_attack(model, data_loader) -> None:
+    attack = VAT(epsilon=0.1, steps=1, backend="foolbox")
     assert isinstance(attack(model, data_loader), DataLoader)
