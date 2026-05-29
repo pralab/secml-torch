@@ -19,6 +19,7 @@ from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_spatial import SpatialAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
 from secmlt.adv.evasion.hopskipjump import HopSkipJump
 from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
@@ -28,6 +29,7 @@ from secmlt.adv.evasion.modular_attacks.modular_attack import (
 )
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD, PGDNative
+from secmlt.adv.evasion.spatial_attack import SpatialAttack
 from secmlt.adv.evasion.vat import VAT
 from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
@@ -714,3 +716,44 @@ def test_hopskipjump_only_foolbox_backend() -> None:
         NotImplementedError, match="Unsupported or not-implemented backend"
     ):
         HopSkipJump(steps=5, backend="native")
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize("grid_search", [True, False])
+def test_spatial_attack_foolbox(
+    y_target, grid_search, deterministic_model, data_loader
+) -> None:
+    attack = SpatialAttackFoolbox(
+        max_translation=2,
+        max_rotation=15,
+        num_translations=3,
+        num_rotations=3,
+        grid_search=grid_search,
+        random_steps=5,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_spatial_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = SpatialAttack(
+        max_translation=2,
+        max_rotation=15,
+        num_translations=3,
+        num_rotations=3,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_spatial_attack_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        SpatialAttack(backend="native")
+
+
+def test_spatial_attack_no_lp_perturbation_models() -> None:
+    assert SpatialAttackFoolbox.get_perturbation_models() == set()
