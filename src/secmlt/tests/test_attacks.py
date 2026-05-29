@@ -1,3 +1,5 @@
+import importlib.metadata
+
 import pytest
 import torch
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
@@ -33,6 +35,18 @@ from secmlt.trackers.trackers import LossTracker
 from torch.utils.data import DataLoader
 
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
+
+def _adv_lib_gte(major: int, minor: int, patch: int) -> bool:
+    try:
+        version_str = importlib.metadata.version("adv-lib")
+    except importlib.metadata.PackageNotFoundError:
+        return False
+    else:
+        parts = tuple(int(x) for x in version_str.split(".")[:3])
+        return parts >= (major, minor, patch)
+
+
+adv_lib_gte_023 = _adv_lib_gte(0, 2, 3)
 
 
 class IdentityGradientProcessingMock(GradientProcessing):
@@ -584,7 +598,13 @@ def test_cw_attack(
     ("backend",),
     [
         ("foolbox",),
-        ("advlib",),
+        pytest.param(
+            "advlib",
+            marks=pytest.mark.skipif(
+                not adv_lib_gte_023,
+                reason="adv_lib >= 0.2.3 required for DeepFool advlib backend",
+            ),
+        ),
     ],
 )
 def test_deepfool_attack(
