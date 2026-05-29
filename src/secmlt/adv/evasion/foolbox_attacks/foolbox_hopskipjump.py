@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from foolbox.attacks.hop_skip_jump import HopSkipJumpAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
@@ -43,7 +43,7 @@ class HopSkipJumpFoolbox(BaseFoolboxEvasionAttack):
         Upper bound for the input domain. Default is 1.0.
     """
 
-    _CONSTRAINT_MAP = {
+    _CONSTRAINT_MAP: ClassVar[dict[str, str]] = {
         LpPerturbationModels.L2: "l2",
         LpPerturbationModels.LINF: "linf",
     }
