@@ -9,6 +9,7 @@ from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.adv.evasion.boundary_attack import BoundaryAttack
+from secmlt.adv.evasion.contrast_reduction import ContrastReduction
 from secmlt.adv.evasion.cw import CW
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.deepfool import DeepFool
@@ -19,8 +20,12 @@ from secmlt.adv.evasion.foolbox_attacks.foolbox_additive_noise import (
 )
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_contrast_reduction import (
+    ContrastReductionFoolbox,
+)
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_gaussian_blur import GaussianBlurFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_saltandpepper import (
@@ -28,6 +33,7 @@ from secmlt.adv.evasion.foolbox_attacks.foolbox_saltandpepper import (
 )
 from secmlt.adv.evasion.foolbox_attacks.foolbox_spatial import SpatialAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
+from secmlt.adv.evasion.gaussian_blur import GaussianBlur
 from secmlt.adv.evasion.hopskipjump import HopSkipJump
 from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
@@ -863,5 +869,55 @@ def test_saltandpepper_only_foolbox_backend() -> None:
 
 def test_saltandpepper_perturbation_models() -> None:
     assert SaltAndPepperNoiseFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
+    }
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_gaussian_blur_foolbox(y_target, deterministic_model, data_loader) -> None:
+    attack = GaussianBlurFoolbox(steps=20, y_target=y_target)
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_gaussian_blur_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = GaussianBlur(steps=20, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_gaussian_blur_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        GaussianBlur(steps=20, backend="native")
+
+
+def test_gaussian_blur_perturbation_models() -> None:
+    assert GaussianBlurFoolbox.get_perturbation_models() == {LpPerturbationModels.L2}
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+def test_contrast_reduction_foolbox(y_target, model, data_loader) -> None:
+    attack = ContrastReductionFoolbox(epsilon=0.5, target=0.5, y_target=y_target)
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+def test_contrast_reduction_attack(y_target, model, data_loader) -> None:
+    attack = ContrastReduction(
+        epsilon=0.5, target=0.5, y_target=y_target, backend="foolbox"
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_contrast_reduction_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        ContrastReduction(epsilon=0.5, backend="native")
+
+
+def test_contrast_reduction_perturbation_models() -> None:
+    assert ContrastReductionFoolbox.get_perturbation_models() == {
         LpPerturbationModels.L2,
     }
