@@ -23,6 +23,9 @@ from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_saltandpepper import (
+    SaltAndPepperNoiseFoolbox,
+)
 from secmlt.adv.evasion.foolbox_attacks.foolbox_spatial import SpatialAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
 from secmlt.adv.evasion.hopskipjump import HopSkipJump
@@ -33,6 +36,7 @@ from secmlt.adv.evasion.modular_attacks.modular_attack import (
 )
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD, PGDNative
+from secmlt.adv.evasion.saltandpepper import SaltAndPepperNoise
 from secmlt.adv.evasion.spatial_attack import SpatialAttack
 from secmlt.adv.evasion.vat import VAT
 from secmlt.manipulations.manipulation import AdditiveManipulation
@@ -828,4 +832,36 @@ def test_additive_noise_perturbation_models() -> None:
     assert AdditiveNoiseFoolbox.get_perturbation_models() == {
         LpPerturbationModels.L2,
         LpPerturbationModels.LINF,
+    }
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize("across_channels", [True, False])
+def test_saltandpepper_foolbox(
+    y_target, across_channels, deterministic_model, data_loader
+) -> None:
+    attack = SaltAndPepperNoiseFoolbox(
+        steps=10,
+        across_channels=across_channels,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_saltandpepper_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = SaltAndPepperNoise(steps=10, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_saltandpepper_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        SaltAndPepperNoise(steps=10, backend="native")
+
+
+def test_saltandpepper_perturbation_models() -> None:
+    assert SaltAndPepperNoiseFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
     }
