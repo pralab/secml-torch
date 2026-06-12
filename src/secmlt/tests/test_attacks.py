@@ -2,6 +2,7 @@ import importlib.metadata
 
 import pytest
 import torch
+from secmlt.adv.evasion.additive_noise import AdditiveNoise
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
 from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
@@ -13,6 +14,9 @@ from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.deepfool import DeepFool
 from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
+from secmlt.adv.evasion.foolbox_attacks.foolbox_additive_noise import (
+    AdditiveNoiseFoolbox,
+)
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
@@ -757,3 +761,71 @@ def test_spatial_attack_only_foolbox_backend() -> None:
 
 def test_spatial_attack_no_lp_perturbation_models() -> None:
     assert SpatialAttackFoolbox.get_perturbation_models() == set()
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+@pytest.mark.parametrize(
+    ("perturbation_model", "noise_type"),
+    [
+        (LpPerturbationModels.L2, "gaussian"),
+        (LpPerturbationModels.L2, "uniform"),
+        (LpPerturbationModels.LINF, "uniform"),
+    ],
+)
+def test_additive_noise_foolbox(
+    y_target, perturbation_model, noise_type, model, data_loader
+) -> None:
+    attack = AdditiveNoiseFoolbox(
+        epsilon=0.5,
+        perturbation_model=perturbation_model,
+        noise_type=noise_type,
+        y_target=y_target,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+@pytest.mark.parametrize(
+    ("perturbation_model", "noise_type"),
+    [
+        (LpPerturbationModels.L2, "gaussian"),
+        (LpPerturbationModels.L2, "uniform"),
+        (LpPerturbationModels.LINF, "uniform"),
+    ],
+)
+def test_additive_noise_attack(
+    y_target, perturbation_model, noise_type, model, data_loader
+) -> None:
+    attack = AdditiveNoise(
+        epsilon=0.5,
+        perturbation_model=perturbation_model,
+        noise_type=noise_type,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_additive_noise_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        AdditiveNoise(epsilon=0.5, backend="native")
+
+
+def test_additive_noise_unsupported_combination() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported combination of perturbation model"
+    ):
+        AdditiveNoiseFoolbox(
+            epsilon=0.5,
+            perturbation_model=LpPerturbationModels.LINF,
+            noise_type="gaussian",
+        )
+
+
+def test_additive_noise_perturbation_models() -> None:
+    assert AdditiveNoiseFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
+        LpPerturbationModels.LINF,
+    }
