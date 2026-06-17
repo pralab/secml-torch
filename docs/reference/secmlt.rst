@@ -9,6 +9,7 @@ Subpackages
 
    secmlt.adv
    secmlt.data
+   secmlt.defenses
    secmlt.manipulations
    secmlt.metrics
    secmlt.models

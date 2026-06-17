@@ -159,24 +159,16 @@ class BaseEvasionAttack:
         """Run the attack on each batch and yield adversarials with labels."""
         for samples, labels in data_loader:
             trackers = getattr(self, "_trackers", None)
-            # Initialize tracking for new batch
             if trackers is not None:
-                if isinstance(trackers, list):
-                    for tracker in trackers:
-                        tracker.init_tracking()
-                else:
-                    trackers.init_tracking()
+                for tracker in trackers:
+                    tracker.init_tracking()
 
             try:
                 x_adv, _ = self._run(model, samples, labels)
             finally:
-                # End tracking for current batch
                 if trackers is not None:
-                    if isinstance(trackers, list):
-                        for tracker in trackers:
-                            tracker.end_tracking()
-                    else:
-                        trackers.end_tracking()
+                    for tracker in trackers:
+                        tracker.end_tracking()
 
             yield x_adv, labels
 

@@ -1,8 +1,9 @@
 """Wrappers for PyTorch models."""
 
+from collections.abc import Callable
+
 import torch
 from secmlt.models.base_model import BaseModel
-from secmlt.models.data_processing.data_processing import DataProcessing
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.utils.data import DataLoader
 
@@ -13,8 +14,8 @@ class BasePyTorchClassifier(BaseModel):
     def __init__(
         self,
         model: torch.nn.Module,
-        preprocessing: DataProcessing = None,
-        postprocessing: DataProcessing = None,
+        preprocessing: Callable | None = None,
+        postprocessing: Callable | None = None,
         trainer: BasePyTorchTrainer = None,
     ) -> None:
         """
@@ -24,10 +25,12 @@ class BasePyTorchClassifier(BaseModel):
         ----------
         model : torch.nn.Module
             PyTorch model.
-        preprocessing : DataProcessing, optional
-            Preprocessing to apply before the forward., by default None.
-        postprocessing : DataProcessing, optional
-            Postprocessing to apply after the forward, by default None.
+        preprocessing : callable, optional
+            Callable applied to inputs before the forward pass, by default None.
+            Accepts any callable: a ``DataProcessing`` subclass,
+            a ``torchvision.transforms`` transform, or any ``torch.nn.Module``.
+        postprocessing : callable, optional
+            Callable applied to outputs after the forward pass, by default None.
         trainer : BasePyTorchTrainer, optional
             Trainer object to train the model, by default None.
         """

@@ -28,6 +28,14 @@ secmlt.tests.mocks\_lm module
    :undoc-members:
    :show-inheritance:
 
+secmlt.tests.test\_adversarial\_trainer module
+----------------------------------------------
+
+.. automodule:: secmlt.tests.test_adversarial_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.tests.test\_aggregators module
 -------------------------------------
 
