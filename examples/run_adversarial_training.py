@@ -24,24 +24,16 @@ STD = (0.2023, 0.1994, 0.2010)
 # define model
 model = torch.hub.load(REPO_LINK, "cifar10_resnet20", pretrained=True)
 
-# Fixed input normalization, implemented as a BatchNorm layer with the
-# CIFAR-10 mean/std baked into its running statistics.
-bn = torch.nn.BatchNorm2d(3, affine=False)
-bn.running_mean = torch.tensor(MEAN)
-bn.running_var = torch.tensor([std**2 for std in STD])
-bn.eval()
+
+# The model was trained on normalized images, so we need to renormalize the input
+class Normalize(torch.nn.Module):
+    def forward(self, x):
+        mean = torch.tensor(MEAN, device=x.device)
+        std = torch.tensor(STD, device=x.device)
+        return (x - mean[None, :, None, None]) / std[None, :, None, None]
 
 
-def _keep_frozen(mode=True):
-    # Keep the normalization layer permanently in eval mode. Without this,
-    # model.train() (called during adversarial training) would switch it to
-    # batch-statistics mode and overwrite running_mean/running_var, silently
-    # destroying the normalization and corrupting every later measurement.
-    return bn
-
-
-bn.train = _keep_frozen
-model = torch.nn.Sequential(bn, model)
+model = torch.nn.Sequential(Normalize(), model)
 model.to(DEVICE)
 
 
