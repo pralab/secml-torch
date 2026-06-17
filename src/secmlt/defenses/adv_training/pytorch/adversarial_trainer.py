@@ -9,6 +9,7 @@ examples with a given attack, and the outer minimization is solved by training t
 from collections.abc import Iterator
 from typing import Literal, Union
 
+import torch
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
@@ -49,28 +50,39 @@ class AdversarialTrainer(BasePyTorchTrainer):
         Module
             The trained underlying ``torch.nn.Module``, set to eval mode.
         """
-        if isinstance(model, BasePyTorchClassifier):
-            classifier = model
-            nn_model = model.model
-        else:
-            nn_model = model
-            classifier = BasePyTorchClassifier(nn_model)
+        if not isinstance(model, BasePyTorchClassifier):
+            model = BasePyTorchClassifier(model)
 
         for _ in range(self._epochs):
             # Generate adversarial examples using the attack and the dataloader
-            adv_data = attack(classifier, dataloader, stream=True)
+            adv_data = attack(model, dataloader, stream=True)
 
             # Combine the original and adversarial dataloaders
             combined_data = self.collect_data(dataloader, adv_data, combining_mode)
 
-            # Train the model using the combined dataloader
-            nn_model = nn_model.train()
-            nn_model = self.train_epoch(nn_model, combined_data)
+            # Train through the full classifier so preprocessing (e.g. input
+            # normalization) is applied consistently with the attack step.
+            model.model.train()
+            self._train_epoch_clf(model, combined_data)
             if self._scheduler is not None:
                 self._scheduler.step()
         # Restore eval mode so the returned model is ready for inference and
         # its BatchNorm layers use running statistics instead of batch ones.
-        return nn_model.eval()
+        return model.model.eval()
+
+    def _train_epoch_clf(
+        self, classifier: BasePyTorchClassifier, dataloader: DataLoader
+    ) -> None:
+        """Run one training epoch using the full classifier forward pass."""
+        param = next(iter(classifier.model.parameters()), None)
+        device = param.device if param is not None else torch.device("cpu")
+        for x, y in dataloader:
+            x, y = x.to(device), y.to(device)
+            self._optimizer.zero_grad()
+            outputs = classifier.decision_function(x)
+            loss = self._loss(outputs, y)
+            loss.backward()
+            self._optimizer.step()
 
     def collect_data(
         self,

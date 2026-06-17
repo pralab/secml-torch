@@ -1,9 +1,11 @@
 import torch
 import torchvision.datasets
+import torchvision.transforms
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGDNative
 from secmlt.defenses.adv_training.pytorch.adversarial_trainer import AdversarialTrainer
 from secmlt.metrics.classification import Accuracy
+from secmlt.models.data_processing import MeanStdNormalization
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from torch.optim import Adam
 from torch.utils.data import DataLoader
@@ -23,19 +25,11 @@ STD = (0.2023, 0.1994, 0.2010)
 
 # define model
 model = torch.hub.load(REPO_LINK, "cifar10_resnet20", pretrained=True)
-
-
-# The model was trained on normalized images, so we need to renormalize the input
-class Normalize(torch.nn.Module):
-    def forward(self, x):
-        mean = torch.tensor(MEAN, device=x.device)
-        std = torch.tensor(STD, device=x.device)
-        return (x - mean[None, :, None, None]) / std[None, :, None, None]
-
-
-model = torch.nn.Sequential(Normalize(), model)
 model.to(DEVICE)
 
+# The model was trained on normalized images, so we need to renormalize the input
+clf = BasePyTorchClassifier(
+    model, preprocessing=MeanStdNormalization(mean=MEAN, std=STD))
 
 optimizer = Adam(lr=1e-3, params=model.parameters())
 training_dataset = torchvision.datasets.CIFAR10(
@@ -54,12 +48,12 @@ test_dataset = torchvision.datasets.CIFAR10(
 )
 test_data_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-# Inizialize the PGD attack
+# Initialize the PGD attack
 attack_train = PGDNative(
     perturbation_model=LpPerturbationModels.LINF,
-    epsilon=0.05,
+    epsilon=0.01,
     num_steps=3,
-    step_size=0.01,
+    step_size=0.005,
     random_start=False,
     y_target=None,
 )
@@ -68,34 +62,32 @@ attack_eval = PGDNative(
     perturbation_model=LpPerturbationModels.LINF,
     epsilon=0.01,
     num_steps=3,
-    step_size=0.01,
+    step_size=0.005,
     random_start=False,
     y_target=None,
 )
 
-# Switch to eval mode: BatchNorm must use running statistics (not per-batch
-# statistics) for the accuracy and robustness measurements to be meaningful.
 model.eval()
 
-# Evauate the model on the test set before training
-accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)
+# Evaluate the model on the test set before training
+accuracy = Accuracy()(clf, test_data_loader)
 print("Accuracy before training: ", accuracy)
 # Evaluate the model on the test set with adversarial examples before training
-adv_loader = attack_eval(BasePyTorchClassifier(model), test_data_loader)
-adv_accuracy = Accuracy()(BasePyTorchClassifier(model), adv_loader)
+adv_loader = attack_eval(clf, test_data_loader)
+adv_accuracy = Accuracy()(clf, adv_loader)
 print("Robust Accuracy before training: ", adv_accuracy)
 
 # Training CIFAR10 model
 trainer = AdversarialTrainer(optimizer, epochs=10)
-trainer.train(model, training_data_loader, attack_train)
+trainer.train(clf, training_data_loader, attack_train)
 
-# Back to eval mode for the post-training measurements.
+# Back to eval mode for the post-training measurements
 model.eval()
 
 # Evaluate the model on the test set after training
-accuracy = Accuracy()(BasePyTorchClassifier(model), test_data_loader)
+accuracy = Accuracy()(clf, test_data_loader)
 print("Accuracy after training: ", accuracy)
 # Evaluate the model on the test set with adversarial examples after training
-adv_loader = attack_eval(BasePyTorchClassifier(model), test_data_loader)
-adv_accuracy = Accuracy()(BasePyTorchClassifier(model), adv_loader)
+adv_loader = attack_eval(clf, test_data_loader)
+adv_accuracy = Accuracy()(clf, adv_loader)
 print("Robust Accuracy after training: ", adv_accuracy)

@@ -1,9 +1,9 @@
 """Basic wrapper for generic model."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 import torch
-from secmlt.models.data_processing.data_processing import DataProcessing
 from secmlt.models.data_processing.identity_data_processing import (
     IdentityDataProcessing,
 )
@@ -15,18 +15,20 @@ class BaseModel(ABC):
 
     def __init__(
         self,
-        preprocessing: DataProcessing = None,
-        postprocessing: DataProcessing = None,
+        preprocessing: Callable | None = None,
+        postprocessing: Callable | None = None,
     ) -> None:
         """
         Create base model.
 
         Parameters
         ----------
-        preprocessing : DataProcessing, optional
-            Preprocessing to apply before the forward, by default None.
-        postprocessing : DataProcessing, optional
-            Postprocessing to apply after the forward, by default None.
+        preprocessing : callable, optional
+            Callable applied to inputs before the forward pass, by default None.
+            Accepts any callable: a ``DataProcessing`` subclass,
+            a ``torchvision.transforms`` transform, or any ``torch.nn.Module``.
+        postprocessing : callable, optional
+            Callable applied to outputs after the forward pass, by default None.
         """
         self._preprocessing = (
             preprocessing if preprocessing is not None else IdentityDataProcessing()

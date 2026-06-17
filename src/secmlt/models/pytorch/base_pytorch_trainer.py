@@ -36,7 +36,9 @@ class BasePyTorchTrainer(BaseTrainer):
         self._scheduler = scheduler
 
     def train_epoch(
-        self, model: torch.nn.Module, dataloader: DataLoader
+        self,
+        model: torch.nn.Module,
+        dataloader: DataLoader,
     ) -> torch.nn.Module:
         """
         Train model for one epoch with given loader.
@@ -53,8 +55,9 @@ class BasePyTorchTrainer(BaseTrainer):
         torch.nn.Module
             Trained model.
         """
-        device = next(model.parameters()).device
-        for _, (x, y) in enumerate(dataloader):
+        param = next(iter(model.parameters()), None)
+        device = param.device if param is not None else torch.device("cpu")
+        for x, y in dataloader:
             x, y = x.to(device), y.to(device)
             self._optimizer.zero_grad()
             outputs = model(x)
@@ -79,9 +82,9 @@ class BasePyTorchTrainer(BaseTrainer):
         torch.nn.Module
             Trained model.
         """
-        model = model.train()
+        model.train()
         for _ in range(self._epochs):
             model = self.train_epoch(model, dataloader)
             if self._scheduler is not None:
                 self._scheduler.step()
-        return model
+        return model.eval()
