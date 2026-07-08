@@ -1,0 +1,72 @@
+"""Wrapper of the FGSM attack implemented in Foolbox."""
+
+from __future__ import annotations
+
+from foolbox.attacks.projected_gradient_descent import (
+    LinfProjectedGradientDescentAttack,
+)
+from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+
+
+class FGSMFoolbox(BaseFoolboxEvasionAttack):
+    """Wrapper of the Foolbox implementation of the FGSM attack."""
+
+    def __init__(
+        self,
+        perturbation_model: str,
+        epsilon: float,
+        y_target: int | None = None,
+        lb: float = 0.0,
+        ub: float = 1.0,
+        **kwargs,
+    ) -> None:
+        """
+        Create FGSM attack with Foolbox backend.
+
+        Parameters
+        ----------
+        perturbation_model : str
+            Perturbation model for the attack.
+        epsilon : float
+            Maximum perturbation allowed.
+        y_target : int | None, optional
+            Target label for the attack, None for untargeted, by default None.
+        lb : float, optional
+            Lower bound of the input space, by default 0.0.
+        ub : float, optional
+            Upper bound of the input space, by default 1.0.
+        """
+        perturbation_models = {
+            LpPerturbationModels.LINF: LinfProjectedGradientDescentAttack,
+        }
+        foolbox_attack_cls = perturbation_models.get(perturbation_model)
+
+        foolbox_attack = foolbox_attack_cls(
+            abs_stepsize=epsilon,
+            steps=1,
+            random_start=False,
+        )
+
+        super().__init__(
+            foolbox_attack=foolbox_attack,
+            epsilon=epsilon,
+            y_target=y_target,
+            lb=lb,
+            ub=ub,
+            **kwargs,
+        )
+
+    @staticmethod
+    def get_perturbation_models() -> set[str]:
+        """
+        Check the perturbation models implemented for this attack.
+
+        Returns
+        -------
+        set[str]
+            The list of perturbation models implemented for this attack.
+        """
+        return {
+            LpPerturbationModels.LINF,
+        }

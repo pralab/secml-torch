@@ -12,10 +12,34 @@ secmlt.adv.evasion.advlib\_attacks.advlib\_base module
    :undoc-members:
    :show-inheritance:
 
+secmlt.adv.evasion.advlib\_attacks.advlib\_cw module
+----------------------------------------------------
+
+.. automodule:: secmlt.adv.evasion.advlib_attacks.advlib_cw
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 secmlt.adv.evasion.advlib\_attacks.advlib\_ddn module
 -----------------------------------------------------
 
 .. automodule:: secmlt.adv.evasion.advlib_attacks.advlib_ddn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.adv.evasion.advlib\_attacks.advlib\_deepfool module
+----------------------------------------------------------
+
+.. automodule:: secmlt.adv.evasion.advlib_attacks.advlib_deepfool
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+secmlt.adv.evasion.advlib\_attacks.advlib\_fgsm module
+------------------------------------------------------
+
+.. automodule:: secmlt.adv.evasion.advlib_attacks.advlib_fgsm
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,30 +1,57 @@
+
 import pytest
 import torch
+from secmlt.adv.evasion.additive_noise import AdditiveNoise
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
+from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
+from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
 from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
 from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion.boundary_attack import BoundaryAttack
+from secmlt.adv.evasion.contrast_reduction import ContrastReduction
+from secmlt.adv.evasion.cw import CW
 from secmlt.adv.evasion.ddn import DDN
+from secmlt.adv.evasion.deepfool import DeepFool
+from secmlt.adv.evasion.fgsm import FGSM
 from secmlt.adv.evasion.fmn import FMN, FMNNative
+from secmlt.adv.evasion.foolbox_attacks.foolbox_additive_noise import (
+    AdditiveNoiseFoolbox,
+)
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_contrast_reduction import (
+    ContrastReductionFoolbox,
+)
+from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_gaussian_blur import GaussianBlurFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
 from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_saltandpepper import (
+    SaltAndPepperNoiseFoolbox,
+)
+from secmlt.adv.evasion.foolbox_attacks.foolbox_spatial import SpatialAttackFoolbox
+from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
+from secmlt.adv.evasion.gaussian_blur import GaussianBlur
+from secmlt.adv.evasion.hopskipjump import HopSkipJump
+from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
 from secmlt.adv.evasion.modular_attacks.modular_attack import (
     CE_LOSS,
     ModularEvasionAttack,
 )
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD, PGDNative
+from secmlt.adv.evasion.saltandpepper import SaltAndPepperNoise
+from secmlt.adv.evasion.spatial_attack import SpatialAttack
+from secmlt.adv.evasion.vat import VAT
 from secmlt.manipulations.manipulation import AdditiveManipulation
+from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
 from secmlt.trackers.trackers import LossTracker
 from torch.utils.data import DataLoader
 
-from src.secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
-from src.secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
-from src.secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
-
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
-
 
 class IdentityGradientProcessingMock(GradientProcessing):
     def __call__(self, grad: torch.Tensor) -> torch.Tensor:
@@ -304,6 +331,82 @@ def test_fmn_attack(
     "y_target",
     [None, 1],
 )
+def test_fgsm_foolbox_attack(
+    y_target,
+    model,
+    data_loader,
+) -> None:
+    for perturbation_model in LpPerturbationModels.pert_models:
+        if perturbation_model in FGSMFoolbox.get_perturbation_models():
+            attack = FGSMFoolbox(
+                perturbation_model=perturbation_model,
+                epsilon=0.1,
+                y_target=y_target,
+            )
+            assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
+def test_fgsm_advlib_attack(
+    y_target,
+    model,
+    data_loader,
+) -> None:
+    for perturbation_model in LpPerturbationModels.pert_models:
+        if perturbation_model in FGSMAdvLib.get_perturbation_models():
+            attack = FGSMAdvLib(
+                perturbation_model=perturbation_model,
+                epsilon=0.1,
+                y_target=y_target,
+            )
+            assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_fgsm_advlib_raises_on_invalid_loss():
+    with pytest.raises(ValueError, match="FGSM AdvLib supports only these losses"):
+        FGSMAdvLib(
+            perturbation_model=LpPerturbationModels.LINF,
+            epsilon=0.1,
+            loss_function="unknown",
+        )
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
+@pytest.mark.parametrize(
+    ("backend", "perturbation_models_fgsm"),
+    [
+        ("foolbox", FGSMFoolbox.get_perturbation_models()),
+        ("advlib", FGSMAdvLib.get_perturbation_models()),
+    ],
+)
+def test_fgsm_attack(
+    backend,
+    perturbation_models_fgsm,
+    y_target,
+    model,
+    data_loader,
+) -> None:
+    for perturbation_model in LpPerturbationModels.pert_models:
+        if perturbation_model in perturbation_models_fgsm:
+            attack = FGSM(
+                perturbation_model=perturbation_model,
+                epsilon=0.1,
+                y_target=y_target,
+                backend=backend,
+            )
+            assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
 @pytest.mark.parametrize(
     ("backend",),
     [
@@ -348,9 +451,7 @@ def test_attack_can_return_generator(model, data_loader):
     total_attacked_samples = sum(
         batch_adv.shape[0] for batch_adv, _ in attacked_batches
     )
-    total_labels = sum(
-        batch_labels.shape[0] for _, batch_labels in attacked_batches
-    )
+    total_labels = sum(batch_labels.shape[0] for _, batch_labels in attacked_batches)
     assert total_attacked_samples == len(data_loader.dataset)
     assert total_labels == len(data_loader.dataset)
 
@@ -466,3 +567,336 @@ def test_modular_attack_accepts_custom_loss_instance():
 
     assert attack.loss_function is custom_loss
     assert attack.loss_function.reduction == "mean"
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 1],
+)
+@pytest.mark.parametrize(
+    ("backend",),
+    [
+        ("foolbox",),
+        ("advlib",),
+    ],
+)
+def test_cw_attack(
+    backend,
+    y_target,
+    model,
+    data_loader,
+) -> None:
+    attack = CW(
+        binary_search_steps=2,
+        num_steps=10,
+        step_size=0.01,
+        confidence=0.0,
+        initial_const=0.001,
+        y_target=y_target,
+        backend=backend,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    ("backend",),
+    [
+        ("foolbox",),
+        ("advlib",),
+    ],
+)
+def test_deepfool_attack(
+    backend,
+    model,
+    data_loader,
+) -> None:
+    attack = DeepFool(
+        num_steps=10,
+        overshoot=0.02,
+        backend=backend,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_vat_foolbox_attack(model, data_loader) -> None:
+    attack = VATFoolbox(epsilon=0.1, steps=1)
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_vat_attack(model, data_loader) -> None:
+    attack = VAT(epsilon=0.1, steps=1, backend="foolbox")
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.fixture
+def deterministic_model() -> BasePyTorchClassifier:
+    """Simple deterministic model for decision-based attack tests."""
+    torch.manual_seed(0)
+    net = torch.nn.Sequential(
+        torch.nn.Flatten(),
+        torch.nn.Linear(3 * 32 * 32, 10),
+    )
+    net.eval()
+    return BasePyTorchClassifier(model=net)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    # y_target=2 chosen because class 2 dominates uniform-noise predictions for
+    # the deterministic_model fixture, making init_attack reliable.
+    [None, 2],
+)
+def test_boundary_attack_foolbox(y_target, deterministic_model, data_loader) -> None:
+    attack = BoundaryAttackFoolbox(steps=100, y_target=y_target)
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize(
+    "y_target",
+    [None, 2],
+)
+def test_boundary_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = BoundaryAttack(steps=100, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_boundary_attack_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        BoundaryAttack(steps=100, backend="native")
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize(
+    "perturbation_model",
+    [LpPerturbationModels.L2, LpPerturbationModels.LINF],
+)
+def test_hopskipjump_foolbox(
+    y_target, perturbation_model, deterministic_model, data_loader
+) -> None:
+    attack = HopSkipJumpFoolbox(
+        perturbation_model=perturbation_model,
+        steps=5,
+        initial_gradient_eval_steps=10,
+        max_gradient_eval_steps=20,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize(
+    "perturbation_model",
+    [LpPerturbationModels.L2, LpPerturbationModels.LINF],
+)
+def test_hopskipjump_attack(
+    y_target, perturbation_model, deterministic_model, data_loader
+) -> None:
+    attack = HopSkipJump(
+        perturbation_model=perturbation_model,
+        steps=5,
+        initial_gradient_eval_steps=10,
+        max_gradient_eval_steps=20,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_hopskipjump_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        HopSkipJump(steps=5, backend="native")
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize("grid_search", [True, False])
+def test_spatial_attack_foolbox(
+    y_target, grid_search, deterministic_model, data_loader
+) -> None:
+    attack = SpatialAttackFoolbox(
+        max_translation=2,
+        max_rotation=15,
+        num_translations=3,
+        num_rotations=3,
+        grid_search=grid_search,
+        random_steps=5,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_spatial_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = SpatialAttack(
+        max_translation=2,
+        max_rotation=15,
+        num_translations=3,
+        num_rotations=3,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_spatial_attack_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        SpatialAttack(backend="native")
+
+
+def test_spatial_attack_no_lp_perturbation_models() -> None:
+    assert SpatialAttackFoolbox.get_perturbation_models() == set()
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+@pytest.mark.parametrize(
+    ("perturbation_model", "noise_type"),
+    [
+        (LpPerturbationModels.L2, "gaussian"),
+        (LpPerturbationModels.L2, "uniform"),
+        (LpPerturbationModels.LINF, "uniform"),
+    ],
+)
+def test_additive_noise_foolbox(
+    y_target, perturbation_model, noise_type, model, data_loader
+) -> None:
+    attack = AdditiveNoiseFoolbox(
+        epsilon=0.5,
+        perturbation_model=perturbation_model,
+        noise_type=noise_type,
+        y_target=y_target,
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+@pytest.mark.parametrize(
+    ("perturbation_model", "noise_type"),
+    [
+        (LpPerturbationModels.L2, "gaussian"),
+        (LpPerturbationModels.L2, "uniform"),
+        (LpPerturbationModels.LINF, "uniform"),
+    ],
+)
+def test_additive_noise_attack(
+    y_target, perturbation_model, noise_type, model, data_loader
+) -> None:
+    attack = AdditiveNoise(
+        epsilon=0.5,
+        perturbation_model=perturbation_model,
+        noise_type=noise_type,
+        y_target=y_target,
+        backend="foolbox",
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_additive_noise_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        AdditiveNoise(epsilon=0.5, backend="native")
+
+
+def test_additive_noise_unsupported_combination() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported combination of perturbation model"
+    ):
+        AdditiveNoiseFoolbox(
+            epsilon=0.5,
+            perturbation_model=LpPerturbationModels.LINF,
+            noise_type="gaussian",
+        )
+
+
+def test_additive_noise_perturbation_models() -> None:
+    assert AdditiveNoiseFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
+        LpPerturbationModels.LINF,
+    }
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+@pytest.mark.parametrize("across_channels", [True, False])
+def test_saltandpepper_foolbox(
+    y_target, across_channels, deterministic_model, data_loader
+) -> None:
+    attack = SaltAndPepperNoiseFoolbox(
+        steps=10,
+        across_channels=across_channels,
+        y_target=y_target,
+    )
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_saltandpepper_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = SaltAndPepperNoise(steps=10, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_saltandpepper_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        SaltAndPepperNoise(steps=10, backend="native")
+
+
+def test_saltandpepper_perturbation_models() -> None:
+    assert SaltAndPepperNoiseFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
+    }
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_gaussian_blur_foolbox(y_target, deterministic_model, data_loader) -> None:
+    attack = GaussianBlurFoolbox(steps=20, y_target=y_target)
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 2])
+def test_gaussian_blur_attack(y_target, deterministic_model, data_loader) -> None:
+    attack = GaussianBlur(steps=20, y_target=y_target, backend="foolbox")
+    assert isinstance(attack(deterministic_model, data_loader), DataLoader)
+
+
+def test_gaussian_blur_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        GaussianBlur(steps=20, backend="native")
+
+
+def test_gaussian_blur_perturbation_models() -> None:
+    assert GaussianBlurFoolbox.get_perturbation_models() == {LpPerturbationModels.L2}
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+def test_contrast_reduction_foolbox(y_target, model, data_loader) -> None:
+    attack = ContrastReductionFoolbox(epsilon=0.5, target=0.5, y_target=y_target)
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+@pytest.mark.parametrize("y_target", [None, 1])
+def test_contrast_reduction_attack(y_target, model, data_loader) -> None:
+    attack = ContrastReduction(
+        epsilon=0.5, target=0.5, y_target=y_target, backend="foolbox"
+    )
+    assert isinstance(attack(model, data_loader), DataLoader)
+
+
+def test_contrast_reduction_only_foolbox_backend() -> None:
+    with pytest.raises(
+        NotImplementedError, match="Unsupported or not-implemented backend"
+    ):
+        ContrastReduction(epsilon=0.5, backend="native")
+
+
+def test_contrast_reduction_perturbation_models() -> None:
+    assert ContrastReductionFoolbox.get_perturbation_models() == {
+        LpPerturbationModels.L2,
+    }
