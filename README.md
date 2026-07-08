@@ -44,7 +44,7 @@ SecML-Torch (SecMLT) is a PyTorch-native toolkit for evaluating and improving ad
 - **Modular design to build adaptive/custom attacks** to swap losses, optimizers, perturbation models, and add EoT easily with a few lines of code.
 - **Attack ensembling modules** to obtain worst-case per-sample robustness evaluations.
 - **Robustness evaluation tools** including metrics, logging, and trackers to ensure reproducibility and easy reporting.
-- **Attacl debugging support** such as built-in hooks and TensorBoard integration to monitor and inspect attack behavior.
+- **Attack debugging support** such as built-in hooks and TensorBoard integration to monitor and inspect attack behavior.
 
 Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch in action.
 
@@ -54,7 +54,17 @@ Check out the [tutorials](https://secml-torch.readthedocs.io) to see SecML-Torch
 | Test time | **PGD (fixed-epsilon, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **FMN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
 | Test time | **DDN (minimum-norm, iterative attack)** | ✔ Native implementation | ✔ Also via backend wrappers (Foolbox, Adversarial Library). |
-| Test time | **Other Evasion Attacks** | Work in progress | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **FGSM (Fast Gradient Sign Method)** | - | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **CW (Carlini & Wagner L2)** | - | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **DeepFool** | - | ✔ Available via backend wrappers (Foolbox, Adversarial Library). |
+| Test time | **VAT (Virtual Adversarial Training)** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **HopSkipJump (black-box attack)** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Boundary Attack (black-box attack)** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Spatial Attack** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Additive Noise** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Salt & Pepper Noise** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Gaussian Blur** | - | ✔ Available via backend wrapper (Foolbox). |
+| Test time | **Contrast Reduction** | - | ✔ Available via backend wrapper (Foolbox). |
 | Training time | **Backdoor** | ✔ Native implementation | - |
 | Training time | **Label Flip Poisoning** | ✔ Native implementation | - |
 
