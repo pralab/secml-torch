@@ -49,7 +49,7 @@ from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
 from secmlt.trackers.trackers import LossTracker
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
 
@@ -241,6 +241,42 @@ def test_pgd_attack(
                     y_target=y_target,
                     backend=backend,
                 )
+
+
+@pytest.mark.parametrize("num_steps", [1, 2, 3])
+def test_pgd_native_applies_every_step(num_steps) -> None:
+    """Native PGD must return the result of all ``num_steps`` updates.
+
+    Regression test: the final optimizer step used to be discarded, so
+    ``num_steps=N`` applied only N-1 updates and ``num_steps=1`` returned the
+    input unchanged.
+
+    With a linear model, cross-entropy is convex in the input, so each signed
+    gradient step increases the untargeted loss and the best iterate is the
+    last one. Inputs are kept away from the [0, 1] bounds and epsilon is large,
+    so neither constraint is active: every sample must move by exactly
+    ``num_steps * step_size`` in L-inf norm.
+    """
+    torch.manual_seed(0)
+    step_size = 0.05
+    net = torch.nn.Sequential(torch.nn.Flatten(), torch.nn.Linear(3 * 8 * 8, 10))
+    clf = BasePyTorchClassifier(model=net)
+    data = torch.rand(20, 3, 8, 8) * 0.5 + 0.25
+    labels = net(data).argmax(dim=1)
+    loader = DataLoader(TensorDataset(data, labels), batch_size=10)
+
+    attack = PGDNative(
+        perturbation_model=LpPerturbationModels.LINF,
+        epsilon=1.0,
+        num_steps=num_steps,
+        step_size=step_size,
+        random_start=False,
+    )
+    adv_data = torch.cat([x for x, _ in attack(clf, loader)])
+
+    linf = (adv_data - data).flatten(start_dim=1).abs().amax(dim=1)
+    expected = torch.full_like(linf, num_steps * step_size)
+    assert torch.allclose(linf, expected, atol=1e-6)
 
 
 def test_eot_mixin(model, data_loader):
