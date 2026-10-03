@@ -135,6 +135,35 @@ class ModularEvasionAttackFixedEps(ModularEvasionAttack):
             optimizer.step()
             scheduler.step()
 
+        # The loop scores ``delta`` at the top of each iteration, i.e. before
+        # that iteration's optimizer step, so the perturbation produced by the
+        # last step has not been evaluated yet. Score it once more; otherwise
+        # only ``num_steps - 1`` updates can ever be returned, and with
+        # ``num_steps=1`` the attack returns its initialization unchanged.
+        if self.num_steps > 0:
+            x_adv.data, delta.data = self.manipulation_function(
+                samples.data,
+                delta.data,
+            )
+            optimizer.zero_grad()
+            _, losses = self._loss_and_grad(
+                model=model,
+                samples=samples,
+                delta=delta,
+                target=target,
+                multiplier=multiplier,
+            )
+            improved = losses.detach().cpu() > best_losses
+            best_delta.data = torch.where(
+                atleast_kd(improved, len(samples.shape)),
+                delta.detach().data,
+                best_delta.data,
+            )
+            best_losses.data = torch.where(
+                improved,
+                losses.detach().cpu(),
+                best_losses.data,
+            )
 
         x_adv, _ = self.manipulation_function(samples.data, best_delta.data)
         return x_adv, best_delta
