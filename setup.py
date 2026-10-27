@@ -65,6 +65,7 @@ setup(
         "tensorboard": ["tensorboard"],
         "adv_lib": ["adv_lib"],
         "llm": ["transformers", "accelerate"],
+        "examples": ["datasets"],
     },
     python_requires=">=3.7",
 )

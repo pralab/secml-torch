@@ -1,10 +1,10 @@
 import torch
-import torchvision.datasets
 from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
 from secmlt.metrics.classification import Accuracy, AttackSuccessRate
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+from loaders.get_loaders import get_mnist_dataset
 
 
 def apply_patch(x: torch.Tensor) -> torch.Tensor:
@@ -17,12 +17,7 @@ device = "cpu"
 net = torch.hub.load("maurapintor/mnist_examples", "mnist_model")
 net.to(device)
 optimizer = Adam(lr=1e-3, params=net.parameters())
-training_dataset = torchvision.datasets.MNIST(
-    transform=torchvision.transforms.ToTensor(),
-    train=True,
-    root=dataset_path,
-    download=True,
-)
+training_dataset = get_mnist_dataset(dataset_path, train=True)
 target_label = 1
 backdoored_mnist = BackdoorDatasetPyTorch(
     training_dataset,
@@ -32,12 +27,7 @@ backdoored_mnist = BackdoorDatasetPyTorch(
 )
 
 training_data_loader = DataLoader(backdoored_mnist, batch_size=20, shuffle=False)
-test_dataset = torchvision.datasets.MNIST(
-    transform=torchvision.transforms.ToTensor(),
-    train=False,
-    root=dataset_path,
-    download=True,
-)
+test_dataset = get_mnist_dataset(dataset_path, train=False)
 test_data_loader = DataLoader(test_dataset, batch_size=20, shuffle=False)
 
 trainer = BasePyTorchTrainer(optimizer, epochs=5)
