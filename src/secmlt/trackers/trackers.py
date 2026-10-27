@@ -112,7 +112,7 @@ class Tracker(ABC):
             return self._batches[0]
         return torch.cat(self._batches, dim=0)
 
-    def get_last_tracked(self) -> Union[None, torch.Tensor]:
+    def get_last_tracked(self) -> Union[torch.Tensor, None]:
         """
         Get last element tracked.
 
