@@ -1,4 +1,6 @@
 import torch
+import torchvision.datasets
+import torchvision.transforms
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGDNative
 from secmlt.defenses.adv_training.pytorch.adversarial_trainer import AdversarialTrainer
@@ -7,7 +9,6 @@ from secmlt.models.data_processing import MeanStdNormalization
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from loaders.get_loaders import get_cifar10_dataset
 
 dataset_path = "examples/example_data/datasets/"
 
@@ -31,10 +32,20 @@ clf = BasePyTorchClassifier(
     model, preprocessing=MeanStdNormalization(mean=MEAN, std=STD))
 
 optimizer = Adam(lr=1e-3, params=model.parameters())
-training_dataset = get_cifar10_dataset(dataset_path, train=True)
+training_dataset = torchvision.datasets.CIFAR10(
+    transform=torchvision.transforms.ToTensor(),
+    train=True,
+    root=dataset_path,
+    download=True,
+)
 training_dataset = torch.utils.data.Subset(training_dataset, range(1000))
 training_data_loader = DataLoader(training_dataset, batch_size=64, shuffle=True)
-test_dataset = get_cifar10_dataset(dataset_path, train=False)
+test_dataset = torchvision.datasets.CIFAR10(
+    transform=torchvision.transforms.ToTensor(),
+    train=False,
+    root=dataset_path,
+    download=True,
+)
 test_data_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 # Initialize the PGD attack

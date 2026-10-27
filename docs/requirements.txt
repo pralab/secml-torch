@@ -1,4 +1,4 @@
--e .[foolbox,tensorboard,llm,examples]
+-e .[foolbox,tensorboard,llm]
 sphinx
 sphinx_rtd_theme
 numpydoc
@@ -11,3 +11,5 @@ ipython
 jupyter-book<2.0
 matplotlib
 numpy
+datasets
+git+https://github.com/RobustBench/robustbench.git
