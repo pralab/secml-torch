@@ -26,7 +26,9 @@ ignore = [
     "UP007", # conflict non-pep8 annotations
     "S311",  # random generator not suitable for cryptographic purposes,
     "PLC0415",  # import should be at the top-level of a file
-    "A002"  # Function argument `input` is shadowing a Python builtin
+    "A002",  # Function argument `input` is shadowing a Python builtin,
+    "CPY001", # Missing copyright notice at top of file,
+    "PLR0917",  # Too many positional arguments (6 > 5)
     ]
 
 [lint.per-file-ignores]
