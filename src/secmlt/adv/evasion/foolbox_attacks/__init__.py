@@ -2,6 +2,8 @@
 
 import importlib.util
 
+__all__ = []
+
 if importlib.util.find_spec("foolbox", None) is not None:
     from .foolbox_additive_noise import *  # noqa: F403
     from .foolbox_boundary import *  # noqa: F403
@@ -16,3 +18,20 @@ if importlib.util.find_spec("foolbox", None) is not None:
     from .foolbox_saltandpepper import *  # noqa: F403
     from .foolbox_spatial import *  # noqa: F403
     from .foolbox_vat import *  # noqa: F403
+
+    __all__ = [
+        "AdditiveNoiseFoolbox",
+        "BoundaryAttackFoolbox",
+        "ContrastReductionFoolbox",
+        "CWFoolbox",
+        "DDNFoolbox",
+        "DeepFoolFoolbox",
+        "FGSMFoolbox",
+        "FMNFoolbox",
+        "GaussianBlurFoolbox",
+        "HopSkipJumpFoolbox",
+        "PGDFoolbox",
+        "SaltAndPepperNoiseFoolbox",
+        "SpatialAttackFoolbox",
+        "VATFoolbox",
+    ]

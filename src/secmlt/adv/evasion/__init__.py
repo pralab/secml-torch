@@ -4,6 +4,8 @@ import importlib.util
 import sys
 import types
 
+__all__ = []
+
 
 def _ensure_visdom_stub() -> None:
     """Provide a minimal visdom stub if visdom is unavailable."""
@@ -23,7 +25,13 @@ def _ensure_visdom_stub() -> None:
 
 if importlib.util.find_spec("foolbox", None) is not None:  # pragma: no cover
     from .foolbox_attacks import *  # noqa: F403
+    from .foolbox_attacks import __all__ as _foolbox_exports
+
+    __all__ += _foolbox_exports
 
 if importlib.util.find_spec("adv_lib", None) is not None:  # pragma: no cover
     _ensure_visdom_stub()
     from .advlib_attacks import *  # noqa: F403
+    from .advlib_attacks import __all__ as _advlib_exports
+
+    __all__ += _advlib_exports

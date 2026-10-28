@@ -1,9 +1,25 @@
 from unittest import mock
 
 import pytest
+import secmlt.trackers as trackers
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.pgd import PGD
+from secmlt.trackers import ImageGradientsTracker, ImageSampleTracker, Tracker
+
+
+def test_tracker_package_exports():
+    expected_exports = {
+        "ImageGradientsTracker",
+        "ImageSampleTracker",
+        "Tracker",
+    }
+
+    assert expected_exports <= set(trackers.__all__)
+    assert all(hasattr(trackers, name) for name in trackers.__all__)
+    assert trackers.ImageGradientsTracker is ImageGradientsTracker
+    assert trackers.ImageSampleTracker is ImageSampleTracker
+    assert trackers.Tracker is Tracker
 
 
 @pytest.mark.parametrize(
