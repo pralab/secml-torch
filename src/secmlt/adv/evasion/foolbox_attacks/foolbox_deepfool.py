@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Literal
 
 from foolbox.attacks.deepfool import L2DeepFoolAttack
+from secmlt.adv.evasion import LpPerturbationModels
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DeepFoolFoolbox(BaseFoolboxEvasionAttack):

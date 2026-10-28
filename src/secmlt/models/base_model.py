@@ -4,9 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 
 import torch
-from secmlt.models.data_processing.identity_data_processing import (
-    IdentityDataProcessing,
-)
+from secmlt.models.data_processing import IdentityDataProcessing
 from torch.utils.data import DataLoader
 
 

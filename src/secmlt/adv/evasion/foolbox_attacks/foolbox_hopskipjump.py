@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, Literal
 
 from foolbox.attacks.hop_skip_jump import HopSkipJumpAttack
+from secmlt.adv.evasion import LpPerturbationModels
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import MinimizationAttack

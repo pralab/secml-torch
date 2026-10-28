@@ -8,8 +8,8 @@ from foolbox.attacks.fast_minimum_norm import (
     L2FMNAttack,
     LInfFMNAttack,
 )
+from secmlt.adv.evasion import LpPerturbationModels
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class FMNFoolbox(BaseFoolboxEvasionAttack):

@@ -1,6 +1,6 @@
 import pytest
 import torch
-from secmlt.utils.tensor_utils import atleast_kd
+from secmlt.utils import atleast_kd
 
 
 @pytest.mark.parametrize(

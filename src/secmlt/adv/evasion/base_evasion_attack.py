@@ -8,16 +8,15 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from secmlt.adv.backends import Backends
+from secmlt.adv import Backends
 from torch.utils.data import DataLoader, TensorDataset
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from secmlt.models.base_model import BaseModel
-    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-    from secmlt.trackers.trackers import Tracker
-
+    from secmlt.models import BaseModel
+    from secmlt.models.pytorch import BasePyTorchClassifier
+    from secmlt.trackers import Tracker
 
 
 class BaseEvasionAttackCreator:
@@ -255,7 +254,7 @@ class BaseEvasionAttack:
     @staticmethod
     def _ensure_wrapped(model: BaseModel | torch.nn.Module) -> BasePyTorchClassifier:
         """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
-        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+        from secmlt.models.pytorch import BasePyTorchClassifier
 
         if isinstance(model, BasePyTorchClassifier):
             return model

@@ -1,6 +1,6 @@
 import pytest
 import torch
-from secmlt.optimization.scheduler_factory import (
+from secmlt.optimization import (
     COSINE_ANNEALING,
     NO_SCHEDULER,
     LRSchedulerFactory,

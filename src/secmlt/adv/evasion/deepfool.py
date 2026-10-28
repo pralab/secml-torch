@@ -5,14 +5,14 @@ from __future__ import annotations
 import importlib.util
 from typing import TYPE_CHECKING
 
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.base_evasion_attack import (
+from secmlt.adv import Backends
+from secmlt.adv.evasion import (
     BaseEvasionAttack,
     BaseEvasionAttackCreator,
 )
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class DeepFool(BaseEvasionAttackCreator):

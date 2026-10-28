@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 
 import torch
-from secmlt.optimization.constraints import Constraint
+from secmlt.optimization import Constraint
 
 
 class Manipulation(ABC):
@@ -119,7 +119,7 @@ class Manipulation(ABC):
             Perturbation obtained by inverting the manipulation.
             If the manipulation does not allow inversion, should return None.
         """
-        ... # pragma: no cover
+        ...  # pragma: no cover
 
     def __call__(
         self,
@@ -164,9 +164,6 @@ class AdditiveManipulation(Manipulation):
         return x + delta, delta
 
     def _invert_manipulation(
-        self,
-        x: torch.Tensor,
-        x_adv: torch.Tensor
-        ) -> torch.Tensor:
+        self, x: torch.Tensor, x_adv: torch.Tensor
+    ) -> torch.Tensor:
         return x_adv - x
-

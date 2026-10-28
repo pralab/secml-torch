@@ -4,15 +4,15 @@ from __future__ import annotations  # noqa: I001
 
 import importlib.util
 
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.base_evasion_attack import (
+from secmlt.adv import Backends
+from secmlt.adv.evasion import (
     BaseEvasionAttack,
     BaseEvasionAttackCreator,
 )
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class FGSM(BaseEvasionAttackCreator):

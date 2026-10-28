@@ -5,37 +5,35 @@ from __future__ import annotations  # noqa: I001
 import importlib.util
 import math
 
-from secmlt.optimization.losses import LogitDifferenceLoss
+from secmlt.optimization import LogitDifferenceLoss
 import torch
 
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.base_evasion_attack import (
+from secmlt.adv import Backends
+from secmlt.adv.evasion import (
     BaseEvasionAttack,
     BaseEvasionAttackCreator,
 )
-from secmlt.adv.evasion.modular_attacks.modular_attack import (
+from secmlt.adv.evasion.modular_attacks import (
     LOGIT_LOSS,
-)
-from secmlt.adv.evasion.modular_attacks.modular_attack_min_distance import (
     ModularEvasionAttackMinDistance,
 )
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.manipulations.manipulation import AdditiveManipulation
-from secmlt.optimization.constraints import (
+from secmlt.adv.evasion import LpPerturbationModels
+from secmlt.manipulations import AdditiveManipulation
+from secmlt.optimization import (
     ClipConstraint,
     L0Constraint,
     L1Constraint,
     L2Constraint,
     LInfConstraint,
+    LinearProjectionGradientProcessing,
+    Initializer,
+    OptimizerFactory,
+    LRSchedulerFactory,
 )
-from secmlt.optimization.gradient_processing import LinearProjectionGradientProcessing
-from secmlt.optimization.initializer import Initializer
-from secmlt.optimization.optimizer_factory import OptimizerFactory
-from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class FMN(BaseEvasionAttackCreator):

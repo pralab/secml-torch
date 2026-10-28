@@ -1,9 +1,9 @@
 import torch
 from foolbox.attacks.boundary_attack import BoundaryAttack
 from loaders.get_loaders import get_mnist_loader
-from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.metrics.classification import Accuracy
-from secmlt.trackers.trackers import (
+from secmlt.adv.evasion import BaseFoolboxEvasionAttack
+from secmlt.metrics import Accuracy
+from secmlt.trackers import (
     LossTracker,
     PerturbationNormTracker,
     PredictionTracker,
@@ -48,8 +48,6 @@ class BoundaryAttackFoolbox(BaseFoolboxEvasionAttack):
             ub=ub,
             **kwargs,
         )
-
-
 
 
 device = "cpu"

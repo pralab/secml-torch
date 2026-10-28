@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 
 import torch.linalg
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion import LpPerturbationModels
 from torch.nn.functional import normalize
 
 

@@ -1,8 +1,8 @@
 """Implementation of Lp uniform sampling."""
 
 import torch
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.data.distributions import GeneralizedNormal
+from secmlt.adv.evasion import LpPerturbationModels
+from secmlt.data import GeneralizedNormal
 from torch.distributions.exponential import Exponential
 
 
