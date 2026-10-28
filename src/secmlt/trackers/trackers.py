@@ -5,7 +5,7 @@ from collections.abc import Callable
 from typing import Union
 
 import torch
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion import LpPerturbationModels
 
 SCALAR = "scalar"
 IMAGE = "image"

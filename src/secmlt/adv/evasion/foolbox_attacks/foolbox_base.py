@@ -7,9 +7,9 @@ from typing import Literal, TYPE_CHECKING
 import torch
 from foolbox.criteria import Misclassification, TargetedMisclassification
 from foolbox.models.pytorch import PyTorchModel
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-from secmlt.trackers import ModelTracker
+from secmlt.adv.evasion import BaseEvasionAttack
+from secmlt.models.pytorch import BasePyTorchClassifier
+from secmlt.trackers.model_tracker import ModelTracker
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import Attack

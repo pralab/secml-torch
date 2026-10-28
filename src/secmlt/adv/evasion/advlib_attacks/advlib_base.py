@@ -5,10 +5,10 @@ from __future__ import annotations  # noqa: I001
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+from secmlt.adv.evasion import BaseEvasionAttack
 
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-from secmlt.trackers import ModelTracker
+from secmlt.models.pytorch import BasePyTorchClassifier
+from secmlt.trackers.model_tracker import ModelTracker
 
 if TYPE_CHECKING:
     from collections.abc import Callable

@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import torch
-from secmlt.models.base_model import BaseModel
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.models import BaseModel
+from secmlt.models.pytorch import BasePyTorchClassifier
 
 if TYPE_CHECKING:
     from secmlt.trackers.trackers import Tracker

@@ -5,7 +5,7 @@ from functools import partial
 
 from adv_lib.attacks import pgd_linf
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion import LpPerturbationModels
 
 
 class PGDAdvLib(BaseAdvLibEvasionAttack):

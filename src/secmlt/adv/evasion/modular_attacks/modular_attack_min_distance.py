@@ -5,8 +5,8 @@ from __future__ import annotations  # noqa: I001
 from typing import Union, TYPE_CHECKING
 import torch.nn
 from secmlt.adv.evasion.modular_attacks.modular_attack import ModularEvasionAttack
-from secmlt.manipulations.manipulation import Manipulation
-from secmlt.utils.tensor_utils import atleast_kd
+from secmlt.manipulations import Manipulation
+from secmlt.utils import atleast_kd
 
 
 if TYPE_CHECKING:

@@ -1,5 +1,5 @@
 import pytest
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv.evasion import LpPerturbationModels
 
 
 @pytest.mark.parametrize(

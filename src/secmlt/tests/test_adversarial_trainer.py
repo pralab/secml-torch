@@ -1,9 +1,8 @@
 import pytest
 import torch
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.adv.evasion.pgd import PGDNative
-from secmlt.defenses.adv_training.pytorch.adversarial_trainer import AdversarialTrainer
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.adv.evasion import LpPerturbationModels, PGDNative
+from secmlt.defenses.adv_training import AdversarialTrainer
+from secmlt.models.pytorch import BasePyTorchClassifier
 from secmlt.tests.mocks import MockLoss, MockModel
 from torch.optim import SGD
 from torch.utils.data import DataLoader, TensorDataset

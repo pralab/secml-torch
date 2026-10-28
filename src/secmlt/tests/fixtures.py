@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 import torch
-from secmlt.models.hugging_face.base_hf_lm import HFCausalLM
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.models.hugging_face import HFCausalLM
+from secmlt.models.pytorch import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
 from secmlt.tests.mocks_lm import MockHFModel, MockHFTokenizer
 from torch.utils.data import DataLoader, TensorDataset
@@ -127,11 +127,14 @@ def output_values() -> torch.Tensor:
 @pytest.fixture
 def mock_hf_lm() -> HFCausalLM:
     """Create a mock Hugging Face LM wrapper without loading real weights."""
-    with patch(
-        "secmlt.models.hugging_face.base_hf_lm.AutoTokenizer.from_pretrained",
-        return_value=MockHFTokenizer(),
-    ), patch(
-        "secmlt.models.hugging_face.base_hf_lm.AutoModelForCausalLM.from_pretrained",
-        return_value=MockHFModel(),
+    with (
+        patch(
+            "secmlt.models.hugging_face.base_hf_lm.AutoTokenizer.from_pretrained",
+            return_value=MockHFTokenizer(),
+        ),
+        patch(
+            "secmlt.models.hugging_face.base_hf_lm.AutoModelForCausalLM.from_pretrained",
+            return_value=MockHFModel(),
+        ),
     ):
         yield HFCausalLM(model_path="mock-model")

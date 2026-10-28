@@ -1,8 +1,8 @@
 import torch
 import torchvision.datasets
-from secmlt.adv.poisoning.base_data_poisoning import PoisoningDatasetPyTorch
-from secmlt.metrics.classification import Accuracy
-from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secmlt.adv.poisoning import PoisoningDatasetPyTorch
+from secmlt.metrics import Accuracy
+from secmlt.models.pytorch import BasePyTorchTrainer
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 

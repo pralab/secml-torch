@@ -1,8 +1,5 @@
 import torch
-from secmlt.adv.evasion.aggregators.ensemble import (
-    FixedEpsilonEnsemble,
-    MinDistanceEnsemble,
-)
+from secmlt.adv.evasion.aggregators import FixedEpsilonEnsemble, MinDistanceEnsemble
 
 
 def test_min_distance_ensemble(model, data_loader, adv_loaders) -> None:

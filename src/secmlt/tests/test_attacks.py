@@ -1,57 +1,54 @@
-
 import pytest
 import torch
-from secmlt.adv.evasion.additive_noise import AdditiveNoise
-from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
-from secmlt.adv.evasion.advlib_attacks.advlib_fgsm import FGSMAdvLib
-from secmlt.adv.evasion.advlib_attacks.advlib_fmn import FMNAdvLib
-from secmlt.adv.evasion.advlib_attacks.advlib_pgd import PGDAdvLib
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.adv.evasion.boundary_attack import BoundaryAttack
-from secmlt.adv.evasion.contrast_reduction import ContrastReduction
-from secmlt.adv.evasion.cw import CW
-from secmlt.adv.evasion.ddn import DDN
-from secmlt.adv.evasion.deepfool import DeepFool
-from secmlt.adv.evasion.fgsm import FGSM
-from secmlt.adv.evasion.fmn import FMN, FMNNative
-from secmlt.adv.evasion.foolbox_attacks.foolbox_additive_noise import (
+from secmlt.adv.evasion import (
+    CW,
+    DDN,
+    FGSM,
+    FMN,
+    PGD,
+    VAT,
+    AdditiveNoise,
     AdditiveNoiseFoolbox,
-)
-from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
-from secmlt.adv.evasion.foolbox_attacks.foolbox_boundary import BoundaryAttackFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_contrast_reduction import (
+    BaseAdvLibEvasionAttack,
+    BaseEvasionAttack,
+    BaseFoolboxEvasionAttack,
+    BoundaryAttack,
+    BoundaryAttackFoolbox,
+    ContrastReduction,
     ContrastReductionFoolbox,
-)
-from secmlt.adv.evasion.foolbox_attacks.foolbox_fgsm import FGSMFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_fmn import FMNFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_gaussian_blur import GaussianBlurFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_hopskipjump import HopSkipJumpFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_pgd import PGDFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_saltandpepper import (
+    DeepFool,
+    FGSMAdvLib,
+    FGSMFoolbox,
+    FMNAdvLib,
+    FMNFoolbox,
+    FMNNative,
+    GaussianBlur,
+    GaussianBlurFoolbox,
+    HopSkipJump,
+    HopSkipJumpFoolbox,
+    LpPerturbationModels,
+    PGDAdvLib,
+    PGDFoolbox,
+    PGDNative,
+    SaltAndPepperNoise,
     SaltAndPepperNoiseFoolbox,
+    SpatialAttack,
+    SpatialAttackFoolbox,
+    VATFoolbox,
 )
-from secmlt.adv.evasion.foolbox_attacks.foolbox_spatial import SpatialAttackFoolbox
-from secmlt.adv.evasion.foolbox_attacks.foolbox_vat import VATFoolbox
-from secmlt.adv.evasion.gaussian_blur import GaussianBlur
-from secmlt.adv.evasion.hopskipjump import HopSkipJump
-from secmlt.adv.evasion.modular_attacks.eot_gradient import EoTGradientMixin
-from secmlt.adv.evasion.modular_attacks.modular_attack import (
+from secmlt.adv.evasion.modular_attacks import (
     CE_LOSS,
+    EoTGradientMixin,
     ModularEvasionAttack,
 )
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.adv.evasion.pgd import PGD, PGDNative
-from secmlt.adv.evasion.saltandpepper import SaltAndPepperNoise
-from secmlt.adv.evasion.spatial_attack import SpatialAttack
-from secmlt.adv.evasion.vat import VAT
-from secmlt.manipulations.manipulation import AdditiveManipulation
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-from secmlt.optimization.gradient_processing import GradientProcessing
-from secmlt.optimization.initializer import Initializer
+from secmlt.manipulations import AdditiveManipulation
+from secmlt.models.pytorch import BasePyTorchClassifier
+from secmlt.optimization import GradientProcessing, Initializer
 from secmlt.trackers import LossTracker
 from torch.utils.data import DataLoader
 
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})
+
 
 class IdentityGradientProcessingMock(GradientProcessing):
     def __call__(self, grad: torch.Tensor) -> torch.Tensor:

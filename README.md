@@ -75,8 +75,8 @@ Check out what's cooking! Have a look at our [roadmap](https://github.com/orgs/p
 Here's a brief example of using SecMLT to evaluate the robustness of a trained classifier:
 
 ```python
-from secmlt.adv.evasion.pgd import PGD
-from secmlt.metrics.classification import Accuracy
+from secmlt.adv.evasion import PGD
+from secmlt.metrics import Accuracy
 
 model = ...
 torch_data_loader = ...

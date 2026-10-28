@@ -1,12 +1,11 @@
 import torch
 import torchvision.datasets
 import torchvision.transforms
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.adv.evasion.pgd import PGDNative
-from secmlt.defenses.adv_training.pytorch.adversarial_trainer import AdversarialTrainer
-from secmlt.metrics.classification import Accuracy
+from secmlt.adv.evasion import LpPerturbationModels, PGDNative
+from secmlt.defenses.adv_training import AdversarialTrainer
+from secmlt.metrics import Accuracy
 from secmlt.models.data_processing import MeanStdNormalization
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.models.pytorch import BasePyTorchClassifier
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
@@ -29,7 +28,8 @@ model.to(DEVICE)
 
 # The model was trained on normalized images, so we need to renormalize the input
 clf = BasePyTorchClassifier(
-    model, preprocessing=MeanStdNormalization(mean=MEAN, std=STD))
+    model, preprocessing=MeanStdNormalization(mean=MEAN, std=STD)
+)
 
 optimizer = Adam(lr=1e-3, params=model.parameters())
 training_dataset = torchvision.datasets.CIFAR10(

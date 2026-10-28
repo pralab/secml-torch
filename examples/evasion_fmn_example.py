@@ -2,11 +2,10 @@ import importlib.util
 
 import torch
 from loaders.get_loaders import get_mnist_loader
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.fmn import FMN
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.metrics.classification import Accuracy
-from secmlt.optimization.losses import LogitDifferenceLoss
+from secmlt.adv import Backends
+from secmlt.adv.evasion import FMN, LpPerturbationModels
+from secmlt.metrics import Accuracy
+from secmlt.optimization import LogitDifferenceLoss
 from secmlt.trackers import (
     GradientNormTracker,
     LossTracker,

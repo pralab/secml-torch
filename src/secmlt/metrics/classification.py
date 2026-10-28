@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Union
 import torch
 
 if TYPE_CHECKING:
-    from secmlt.models.base_model import BaseModel
-    from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+    from secmlt.models import BaseModel
+    from secmlt.models.pytorch import BasePyTorchClassifier
     from torch.utils.data import DataLoader
 
 
@@ -40,9 +40,8 @@ class Accuracy:
         self._accumulated_accuracy = 0.0
 
     def __call__(
-        self,
-        model: BaseModel | torch.nn.Module,
-        dataloader: DataLoader) -> torch.Tensor:
+        self, model: BaseModel | torch.nn.Module, dataloader: DataLoader
+    ) -> torch.Tensor:
         """
         Compute the metric on a single attack run or a dataloader.
 
@@ -72,8 +71,8 @@ class Accuracy:
         model: BaseModel | torch.nn.Module,
     ) -> BaseModel | BasePyTorchClassifier:
         """Wrap a raw nn.Module into BasePyTorchClassifier if needed."""
-        from secmlt.models.base_model import BaseModel
-        from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+        from secmlt.models import BaseModel
+        from secmlt.models.pytorch import BasePyTorchClassifier
 
         if isinstance(model, BaseModel):
             return model
@@ -123,9 +122,8 @@ class AccuracyEnsemble(Accuracy):
     """Robust accuracy of a model on multiple attack runs."""
 
     def __call__(
-        self,
-        model: BaseModel | torch.nn.Module,
-        dataloaders: list[DataLoader]) -> torch.Tensor:
+        self, model: BaseModel | torch.nn.Module, dataloaders: list[DataLoader]
+    ) -> torch.Tensor:
         """
         Compute the metric on an ensemble of attacks from their results.
 

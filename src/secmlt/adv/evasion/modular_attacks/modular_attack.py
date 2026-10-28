@@ -5,12 +5,14 @@ from __future__ import annotations  # noqa: I001
 from abc import abstractmethod
 from typing import Literal, Union, TYPE_CHECKING
 import torch.nn
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.manipulations.manipulation import Manipulation
+from secmlt.adv.evasion import BaseEvasionAttack
+from secmlt.manipulations import Manipulation
 from torch.nn import CrossEntropyLoss
-from secmlt.optimization.losses import LogitDifferenceLoss
-from secmlt.optimization.optimizer_factory import OptimizerFactory
-from secmlt.optimization.scheduler_factory import LRSchedulerFactory
+from secmlt.optimization import (
+    LogitDifferenceLoss,
+    OptimizerFactory,
+    LRSchedulerFactory,
+)
 from secmlt.trackers import Tracker
 
 
@@ -18,8 +20,8 @@ if TYPE_CHECKING:
     from functools import partial
 
     from secmlt.manipulations.manipulation import Manipulation
-    from secmlt.models.base_model import BaseModel
-    from secmlt.optimization.constraints import Constraint
+    from secmlt.models import BaseModel
+    from secmlt.optimization import Constraint
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
     from torch.optim import Optimizer, _LRScheduler
@@ -158,7 +160,7 @@ class ModularEvasionAttack(BaseEvasionAttack):
     def loss_function(self, loss_function: torch.nn.Module) -> None:
         """Set the loss function of the attack."""
         if isinstance(loss_function, type):
-                self._loss_function = loss_function(reduction="none")
+            self._loss_function = loss_function(reduction="none")
         else:
             self._loss_function = loss_function
 

@@ -6,14 +6,12 @@ from typing import Union, TYPE_CHECKING
 
 import torch
 
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.models.data_processing.identity_data_processing import (
-    IdentityDataProcessing,
-)
-from secmlt.utils.tensor_utils import atleast_kd
+from secmlt.adv.evasion import LpPerturbationModels
+from secmlt.models.data_processing import IdentityDataProcessing
+from secmlt.utils import atleast_kd
 
 if TYPE_CHECKING:
-    from secmlt.models.data_processing.data_processing import DataProcessing
+    from secmlt.models.data_processing import DataProcessing
 
 
 class Constraint(ABC):

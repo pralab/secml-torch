@@ -1,8 +1,8 @@
 import torch
 import torchvision.datasets
-from secmlt.adv.poisoning.backdoor import BackdoorDatasetPyTorch
-from secmlt.metrics.classification import Accuracy, AttackSuccessRate
-from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secmlt.adv.poisoning import BackdoorDatasetPyTorch
+from secmlt.metrics import Accuracy, AttackSuccessRate
+from secmlt.models.pytorch import BasePyTorchTrainer
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 

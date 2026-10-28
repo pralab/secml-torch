@@ -10,9 +10,8 @@ from collections.abc import Iterator
 from typing import Literal, Union
 
 import torch
-from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
+from secmlt.adv.evasion import BaseEvasionAttack
+from secmlt.models.pytorch import BasePyTorchClassifier, BasePyTorchTrainer
 from torch.nn import Module
 from torch.utils.data import DataLoader
 

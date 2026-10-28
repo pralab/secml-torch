@@ -1,9 +1,8 @@
 import torch
 from loaders.get_loaders import get_mnist_loader
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
-from secmlt.adv.evasion.pgd import PGD
-from secmlt.metrics.classification import Accuracy
+from secmlt.adv import Backends
+from secmlt.adv.evasion import PGD, LpPerturbationModels
+from secmlt.metrics import Accuracy
 
 device = "cpu"
 dataset_path = "example_data/datasets/"

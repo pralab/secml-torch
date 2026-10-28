@@ -3,7 +3,7 @@
 from collections.abc import Callable
 
 import torch
-from secmlt.models.base_model import BaseModel
+from secmlt.models import BaseModel
 from secmlt.models.pytorch.base_pytorch_trainer import BasePyTorchTrainer
 from torch.utils.data import DataLoader
 

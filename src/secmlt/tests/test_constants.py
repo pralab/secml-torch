@@ -1,5 +1,5 @@
-from secmlt.adv.backends import Backends
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
+from secmlt.adv import Backends
+from secmlt.adv.evasion import LpPerturbationModels
 
 
 def test_backends() -> None:

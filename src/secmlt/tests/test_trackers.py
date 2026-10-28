@@ -1,8 +1,8 @@
 import pytest
 import torch
-from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
-from secmlt.models.base_model import BaseModel
-from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
+from secmlt.adv.evasion import BaseAdvLibEvasionAttack
+from secmlt.models import BaseModel
+from secmlt.models.pytorch import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
 from secmlt.trackers import (
     IMAGE,
@@ -358,7 +358,7 @@ def test_model_tracker_raises_on_unsupported_basemodel_subtype():
 
 def test_attack_auto_wraps_nn_module():
     """BaseEvasionAttack._ensure_wrapped should wrap a raw nn.Module."""
-    from secmlt.adv.evasion.base_evasion_attack import BaseEvasionAttack
+    from secmlt.adv.evasion import BaseEvasionAttack
 
     raw = MockModel()
     wrapped = BaseEvasionAttack._ensure_wrapped(raw)
@@ -410,9 +410,10 @@ def test_advlib_base_always_cleans_up_model_tracker_on_exception(mock_model):
 
 
 def test_foolbox_base_always_cleans_up_model_tracker_on_exception(
-    mock_model, monkeypatch):
+    mock_model, monkeypatch
+):
     pytest.importorskip("foolbox")
-    from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
+    from secmlt.adv.evasion import BaseFoolboxEvasionAttack
 
     class DummyTracker:
         def __init__(self):

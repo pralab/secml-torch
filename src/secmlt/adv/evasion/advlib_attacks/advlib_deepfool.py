@@ -5,8 +5,8 @@ from __future__ import annotations
 from functools import partial
 
 from adv_lib.attacks.deepfool import df
+from secmlt.adv.evasion import LpPerturbationModels
 from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttack
-from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 
 class DeepFoolAdvLib(BaseAdvLibEvasionAttack):
