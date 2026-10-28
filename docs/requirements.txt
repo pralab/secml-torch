@@ -11,3 +11,6 @@ ipython
 jupyter-book<2.0
 matplotlib
 numpy
+datasets
+setuptools<82  # temporary: robustbench still imports pkg_resources
+git+https://github.com/RobustBench/robustbench.git
