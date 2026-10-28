@@ -28,7 +28,7 @@ from secmlt.optimization.scheduler_factory import LRSchedulerFactory
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class PGD(BaseEvasionAttackCreator):

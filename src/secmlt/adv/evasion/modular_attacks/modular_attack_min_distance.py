@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from secmlt.models.base_model import BaseModel
     from secmlt.optimization.gradient_processing import GradientProcessing
     from secmlt.optimization.initializer import Initializer
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
     from torch.optim import LRScheduler, Optimizer
 
 

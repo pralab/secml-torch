@@ -4,18 +4,16 @@ from secmlt.adv.evasion.advlib_attacks.advlib_base import BaseAdvLibEvasionAttac
 from secmlt.models.base_model import BaseModel
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.tests.mocks import MockModel
-from secmlt.trackers.image_trackers import (
-    ImageGradientsTracker,
-    ImageSampleTracker,
-)
-from secmlt.trackers.model_tracker import ModelTracker
-from secmlt.trackers.trackers import (
+from secmlt.trackers import (
     IMAGE,
     MULTI_SCALAR,
     SCALAR,
     GradientNormTracker,
     GradientsTracker,
+    ImageGradientsTracker,
+    ImageSampleTracker,
     LossTracker,
+    ModelTracker,
     PerturbationNormTracker,
     PredictionTracker,
     SampleTracker,

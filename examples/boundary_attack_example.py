@@ -3,7 +3,7 @@ from foolbox.attacks.boundary_attack import BoundaryAttack
 from loaders.get_loaders import get_mnist_loader
 from secmlt.adv.evasion.foolbox_attacks.foolbox_base import BaseFoolboxEvasionAttack
 from secmlt.metrics.classification import Accuracy
-from secmlt.trackers.trackers import (
+from secmlt.trackers import (
     LossTracker,
     PerturbationNormTracker,
     PredictionTracker,

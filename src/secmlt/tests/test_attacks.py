@@ -48,7 +48,7 @@ from secmlt.manipulations.manipulation import AdditiveManipulation
 from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
 from secmlt.optimization.gradient_processing import GradientProcessing
 from secmlt.optimization.initializer import Initializer
-from secmlt.trackers.trackers import LossTracker
+from secmlt.trackers import LossTracker
 from torch.utils.data import DataLoader
 
 PGDEoT = type("PGDEoT", (EoTGradientMixin, PGDNative), {})

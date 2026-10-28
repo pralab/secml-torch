@@ -6,7 +6,7 @@ from secmlt.adv.backends import Backends
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.adv.evasion.pgd import PGD
 from secmlt.metrics.classification import Accuracy
-from secmlt.trackers.trackers import (
+from secmlt.trackers import (
     GradientNormTracker,
     LossTracker,
     PerturbationNormTracker,
@@ -104,4 +104,3 @@ if HAS_ADVLIB:
     # Test accuracy on adv lib
     al_robust_accuracy = Accuracy()(net, al_adv_ds)
     print("robust accuracy AdvLib: ", al_robust_accuracy)
-

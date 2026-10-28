@@ -14,7 +14,7 @@ from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 if TYPE_CHECKING:
     from foolbox.attacks.base import MinimizationAttack
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class HopSkipJump(BaseEvasionAttackCreator):

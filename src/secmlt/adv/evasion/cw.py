@@ -12,7 +12,7 @@ from secmlt.adv.evasion.base_evasion_attack import (
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class CW(BaseEvasionAttackCreator):

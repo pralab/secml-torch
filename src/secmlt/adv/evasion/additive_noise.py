@@ -13,7 +13,7 @@ from secmlt.adv.evasion.base_evasion_attack import (
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class AdditiveNoise(BaseEvasionAttackCreator):

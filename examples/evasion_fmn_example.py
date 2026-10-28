@@ -7,7 +7,7 @@ from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.perturbation_models import LpPerturbationModels
 from secmlt.metrics.classification import Accuracy
 from secmlt.optimization.losses import LogitDifferenceLoss
-from secmlt.trackers.trackers import (
+from secmlt.trackers import (
     GradientNormTracker,
     LossTracker,
     PerturbationNormTracker,
@@ -98,4 +98,3 @@ if HAS_ADVLIB:
     # Test accuracy on adv lib
     al_robust_accuracy = Accuracy()(net, al_adv_ds)
     print("robust accuracy AdvLib: ", al_robust_accuracy)
-

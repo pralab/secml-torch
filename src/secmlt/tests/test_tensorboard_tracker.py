@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 import torch
-from secmlt.trackers.trackers import IMAGE, MULTI_SCALAR, SCALAR
+from secmlt.trackers import IMAGE, MULTI_SCALAR, SCALAR
 
 tb_module = pytest.importorskip("secmlt.trackers.tensorboard_tracker")
 TensorboardTracker = tb_module.TensorboardTracker

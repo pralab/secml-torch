@@ -12,7 +12,7 @@ from secmlt.adv.evasion.base_evasion_attack import (
 )
 
 if TYPE_CHECKING:
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 class SpatialAttack(BaseEvasionAttackCreator):

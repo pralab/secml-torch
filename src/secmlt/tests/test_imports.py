@@ -5,13 +5,23 @@ import secmlt.trackers as trackers
 from secmlt.adv.evasion.ddn import DDN
 from secmlt.adv.evasion.fmn import FMN
 from secmlt.adv.evasion.pgd import PGD
-from secmlt.trackers import ImageGradientsTracker, ImageSampleTracker, Tracker
+from secmlt.trackers import (
+    IMAGE,
+    MULTI_SCALAR,
+    SCALAR,
+    ImageGradientsTracker,
+    ImageSampleTracker,
+    Tracker,
+)
 
 
 def test_tracker_package_exports():
     expected_exports = {
         "ImageGradientsTracker",
         "ImageSampleTracker",
+        "IMAGE",
+        "MULTI_SCALAR",
+        "SCALAR",
         "Tracker",
     }
 

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from secmlt.models.base_model import BaseModel
     from secmlt.models.pytorch.base_pytorch_nn import BasePyTorchClassifier
-    from secmlt.trackers.trackers import Tracker
+    from secmlt.trackers import Tracker
 
 
 

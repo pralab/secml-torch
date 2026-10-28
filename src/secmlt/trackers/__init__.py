@@ -5,13 +5,16 @@ import importlib.util
 __all__ = [
     "GradientNormTracker",
     "GradientsTracker",
+    "IMAGE",
     "ImageGradientsTracker",
     "ImageSampleTracker",
     "LossTracker",
+    "MULTI_SCALAR",
     "ModelTracker",
     "PerturbationNormTracker",
     "PredictionTracker",
     "SampleTracker",
+    "SCALAR",
     "ScoresTracker",
     "Tracker",
 ]

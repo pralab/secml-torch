@@ -11,7 +11,7 @@ from torch.nn import CrossEntropyLoss
 from secmlt.optimization.losses import LogitDifferenceLoss
 from secmlt.optimization.optimizer_factory import OptimizerFactory
 from secmlt.optimization.scheduler_factory import LRSchedulerFactory
-from secmlt.trackers.trackers import Tracker
+from secmlt.trackers import Tracker
 
 
 if TYPE_CHECKING:
