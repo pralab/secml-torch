@@ -3,26 +3,39 @@
 import importlib.util
 
 __all__ = [
+    "IMAGE",
+    "MULTI_SCALAR",
+    "SCALAR",
     "GradientNormTracker",
     "GradientsTracker",
-    "IMAGE",
     "ImageGradientsTracker",
     "ImageSampleTracker",
     "LossTracker",
-    "MULTI_SCALAR",
     "ModelTracker",
     "PerturbationNormTracker",
     "PredictionTracker",
     "SampleTracker",
-    "SCALAR",
     "ScoresTracker",
     "Tracker",
 ]
 
 if importlib.util.find_spec("tensorboard", None) is not None:
-    from .tensorboard_tracker import TensorboardTracker  # noqa: F401
-    __all__.append("TensorboardTracker")
+    from .tensorboard_tracker import TensorboardTracker
 
-from .image_trackers import *  # noqa: F403
-from .model_tracker import ModelTracker  # noqa: F401
-from .trackers import *  # noqa: F403
+    __all__ += ["TensorboardTracker"]
+
+from .image_trackers import ImageGradientsTracker, ImageSampleTracker
+from .model_tracker import ModelTracker
+from .trackers import (
+    IMAGE,
+    MULTI_SCALAR,
+    SCALAR,
+    GradientNormTracker,
+    GradientsTracker,
+    LossTracker,
+    PerturbationNormTracker,
+    PredictionTracker,
+    SampleTracker,
+    ScoresTracker,
+    Tracker,
+)
