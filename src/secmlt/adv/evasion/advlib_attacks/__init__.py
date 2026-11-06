@@ -2,9 +2,12 @@
 
 import importlib.util
 
+from secmlt.adv.evasion import _ensure_visdom_stub
+
 __all__ = []
 
 if importlib.util.find_spec("adv_lib", None) is not None:
+    _ensure_visdom_stub()
     from .advlib_base import BaseAdvLibEvasionAttack
     from .advlib_cw import CWAdvLib
     from .advlib_ddn import DDNAdvLib
