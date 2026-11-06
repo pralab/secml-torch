@@ -16,6 +16,3 @@ Module contents
 ---------------
 
 .. automodule:: secmlt.manipulations
-   :members:
-   :undoc-members:
-   :show-inheritance:

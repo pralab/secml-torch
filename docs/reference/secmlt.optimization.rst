@@ -64,6 +64,3 @@ Module contents
 ---------------
 
 .. automodule:: secmlt.optimization
-   :members:
-   :undoc-members:
-   :show-inheritance:

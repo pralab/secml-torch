@@ -40,6 +40,3 @@ Module contents
 ---------------
 
 .. automodule:: secmlt.trackers
-   :members:
-   :undoc-members:
-   :show-inheritance:
