@@ -29,7 +29,6 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.autosectionlabel",
     "sphinx_copybutton",
-    "sphinxcontrib.bibtex",
     "myst_nb",
 ]
 
@@ -39,8 +38,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
 master_doc = "intro"  # Jupyter Book root document
 
 #  BibTeX 
-bibtex_bibfiles = ["references.bib"]
-bibtex_reference_style = "author_year"
 
 # autosectionlabel 
 autosectionlabel_prefix_document = True

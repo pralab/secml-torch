@@ -20,9 +20,6 @@ latex:
     author: "Maura Pintor, Luca Demetrio"
 
 
-# Add a bibtex file so that we can create citations
-bibtex_bibfiles:
-  - references.bib
 
 # Information about where the book exists on the web
 repository:
