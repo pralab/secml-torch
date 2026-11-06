@@ -61,6 +61,7 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
+    - build_timing  # logs per-document (notebook) read/execution time
   config:
     project: "SecML-Torch"
     bibtex_reference_style: author_year
