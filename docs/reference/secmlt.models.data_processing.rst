@@ -32,6 +32,3 @@ Module contents
 ---------------
 
 .. automodule:: secmlt.models.data_processing
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -20,9 +20,6 @@ latex:
     author: "Maura Pintor, Luca Demetrio"
 
 
-# Add a bibtex file so that we can create citations
-bibtex_bibfiles:
-  - references.bib
 
 # Information about where the book exists on the web
 repository:
@@ -61,6 +58,7 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
+    - build_timing  # logs per-document (notebook) read/execution time
   config:
     project: "SecML-Torch"
     bibtex_reference_style: author_year

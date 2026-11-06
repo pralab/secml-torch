@@ -24,6 +24,3 @@ Module contents
 ---------------
 
 .. automodule:: secmlt.models.pytorch
-   :members:
-   :undoc-members:
-   :show-inheritance:
