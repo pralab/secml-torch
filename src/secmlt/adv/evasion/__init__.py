@@ -4,6 +4,7 @@ import importlib.util
 import sys
 import types
 from importlib import import_module
+from importlib.machinery import ModuleSpec
 
 __all__ = [
     "CW",
@@ -66,12 +67,14 @@ def __getattr__(name: str) -> object:
 
 def _ensure_visdom_stub() -> None:
     """Provide a minimal visdom stub if visdom is unavailable."""
-    if importlib.util.find_spec("visdom", None) is not None:  # pragma: no cover
-        return
     if "visdom" in sys.modules:  # pragma: no cover
+        return
+    if importlib.util.find_spec("visdom", None) is not None:  # pragma: no cover
         return
 
     visdom_stub = types.ModuleType("visdom")  # pragma: no cover
+    # a module without a spec makes importlib.util.find_spec("visdom") raise
+    visdom_stub.__spec__ = ModuleSpec("visdom", None)  # pragma: no cover
 
     class Visdom:  # pragma: no cover
         def __init__(self, *args, **kwargs) -> None:  # pragma: no cover
