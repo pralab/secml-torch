@@ -324,11 +324,22 @@ def _accelerator():
     return None
 
 
+def _bucketize_supported(device):
+    # torch.bucketize is not implemented on MPS in older torch versions
+    try:
+        torch.bucketize(torch.zeros(1, device=device), torch.zeros(2, device=device))
+    except NotImplementedError:
+        return False
+    return True
+
+
 @pytest.mark.skipif(_accelerator() is None, reason="no cuda or mps device")
 @pytest.mark.parametrize("kwargs", [{"levels": 5}, {"bins": [0.0, 0.25, 1.0]}])
 def test_quantization_constraint_device(kwargs):
     # bins are moved to the input device
     x = torch.tensor([[0.1, 0.3, 0.9]], device=_accelerator())
+    if "bins" in kwargs and not _bucketize_supported(x.device):
+        pytest.skip(f"torch.bucketize is not implemented on {x.device.type}")
     projected = QuantizationConstraint(**kwargs)(x)
     assert projected.device == x.device
     assert torch.equal(projected.cpu(), QuantizationConstraint(**kwargs)(x.cpu()))

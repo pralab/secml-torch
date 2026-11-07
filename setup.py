@@ -59,12 +59,12 @@ setup(
     license="MIT",
     author="Maura Pintor, Luca Demetrio",
     author_email="maura.pintor@unica.it, luca.demetrio@unige.it",
-    install_requires=["torch>=1.4,!=1.5.*", "torchvision>=0.5,!=0.6.*"],
+    install_requires=["torch>=2.0", "torchvision>=0.15"],
     extras_require={
         "foolbox": ["foolbox>=3.3.0"],
         "tensorboard": ["tensorboard"],
         "adv_lib": ["adv_lib"],
         "llm": ["transformers", "accelerate"],
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
