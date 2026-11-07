@@ -18,7 +18,7 @@ build:
     pre_build:
       # Generate on-the-fly Sphinx configuration from Jupyter Book's _config.yml
       - "jupyter-book config sphinx docs/"
-      # make docs/build_timing.py (per-notebook timing log) importable from the generated conf.py
+      # make docs/build_timing.py and docs/api_reference.py importable from the generated conf.py
       - "echo \"import os, sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))\" >> docs/conf.py"
 
 sphinx:
