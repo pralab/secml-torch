@@ -66,5 +66,5 @@ setup(
         "adv_lib": ["adv_lib"],
         "llm": ["transformers", "accelerate"],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.10",
 )
