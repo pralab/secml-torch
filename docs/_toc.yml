@@ -27,4 +27,5 @@ parts:
 
   - caption: API Reference
     chapters:
-      - file: reference/secmlt
+      - file: reference/public
+      - file: reference/internal

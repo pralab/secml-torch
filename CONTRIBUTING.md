@@ -44,50 +44,32 @@ Ruff is a static code linter, while Pre-commit is a framework for defining pre-c
 
 ## Documentation
 
-When adding new functionalities, modules, or packages to SecMLT, it's essential to document them properly. This includes generating reStructuredText (RST) files, which are used by Sphinx to build the documentation.
+The API reference is generated from the package itself, so there are no reference files to write or update by hand.
 
-To generate documentation RST files for new modules, follow these steps:
+- **Public API** (`docs/reference/public.md`): one section per package that defines `__all__`, listing the names exported there in alphabetical order. To document a new class or function, export it in the `__all__` of its package.
+- **Internal reference** (`docs/reference/internal.md`): one section per module with everything it defines. New modules appear automatically.
 
-1. **Install the documentation requirements**: Ensure you have Sphinx and the docs dependencies installed. You can install it via pip:
+Both pages are built by the extension in `docs/api_reference.py`. To get a good result:
+
+1. **Install the documentation requirements**:
 
    ```bash
-   cd docs
-   pip install -r requirements.txt
+   pip install -r docs/requirements.txt
    ```
 
-2. **Write Docstrings**: Ensure your modules and functions/classes have docstrings following the reStructuredText format. This allows Sphinx to parse and generate documentation from your code. The following steps will find automatically the modules if they are properly documented.
+2. **Write docstrings** for every public class and function (reStructuredText / numpy style). Names with a leading underscore and the `tests` package are skipped.
 
-3. **Run Autodoc**: Use the `sphinx-apidoc` command to automatically generate RST files for your modules:
+3. **Export the name** in the `__all__` of its package, otherwise it only shows up in the internal reference.
+
+4. **Build the documentation** from the project root. This also runs the tutorial notebooks, so it can take a few minutes:
 
    ```bash
-   sphinx-apidoc -o <output_directory> <module_directory> -f
+   jupyter-book build docs
    ```
 
-   Replace `<output_directory>` with the directory where you want the RST files to be generated, and `<module_directory>` with the directory containing your modules. The `-f` parameter makes it rewrite existing files (so that the new functions are added).
+   The HTML is written to `docs/_build/html`.
 
-   Specifically, it's easy to do it from the docs folder:
-
-   ```bash
-    cd docs  # skip if you are already in the docs folder from the previous step
-    sphinx-apidoc -o ../docs/reference ../src/secmlt -f
-    ```
-
-4. **Build Documentation**: Finally, build the documentation using Sphinx:
-
-   ```bash
-   sphinx-build -b html <source_directory> <build_directory>
-   ```
-
-   Replace `<source_directory>` with the directory containing your Sphinx source files (including the generated RST files), and `<build_directory>` with the directory where you want the HTML documentation to be built.
-
-   Specifically, you can use:
-
-   ```bash
-    cd ..  # skip if you are already in the main project folder
-    sphinx-build -M html ./docs/reference ./docs/build
-    ```
-
-By following these steps, you can ensure that your new modules are properly documented and integrated into the SecMLT documentation. A preview will be generated when you create the pull request.
+A preview will be generated when you create the pull request.
 
 
 ### Using Ruff

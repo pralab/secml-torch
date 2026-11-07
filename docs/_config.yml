@@ -47,6 +47,9 @@ html_theme_options:
   use_repository_button: true
 
 sphinx:
+  local_extensions:  # modules living in docs/, resolved relative to this file
+    build_timing: .  # logs per-document (notebook) read/execution time
+    api_reference: .  # builds the API reference from the secmlt package tree
   extra_extensions:
     - sphinx.ext.autodoc
     - sphinx.ext.autosummary
@@ -58,10 +61,8 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.autosectionlabel
     - sphinx_copybutton
-    - build_timing  # logs per-document (notebook) read/execution time
   config:
     project: "SecML-Torch"
-    bibtex_reference_style: author_year
     autosectionlabel_prefix_document: true
     nb_execution_timeout: 1000
     latex_elements:
