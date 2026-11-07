@@ -98,8 +98,9 @@ def _public_blocks(packages):
             elif isinstance(obj, types.FunctionType):
                 lines.append(f".. autofunction:: {path}\n")
             else:
-                # plain data directive: autodata would render the docstring of dict/int/str
-                lines.append(f".. py:data:: {path}\n")
+                # plain data directive: autodata would render the docstring of dict/int/str;
+                # :module: avoids prefixing the module twice (automodule already set it)
+                lines.append(f".. py:data:: {attr}\n   :module: {name}\n")
         blocks.append("\n".join(lines))
     return blocks
 

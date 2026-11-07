@@ -1,6 +1,7 @@
 """Constraints for tensors and the corresponding batch-wise projections."""
 
 from __future__ import annotations  # noqa: I001
+import numbers
 from abc import ABC, abstractmethod
 from typing import Union, TYPE_CHECKING
 
@@ -405,55 +406,134 @@ class L0Constraint(LpConstraint):
 
 
 class QuantizationConstraint(InputSpaceConstraint):
-    """Constraint for ensuring quantized outputs into specified levels."""
+    """Constraint for ensuring quantized outputs into specified levels.
+
+    Each input value is replaced by the nearest allowed value. Values exactly
+    halfway between two allowed values go to the lower one.
+
+    Examples
+    --------
+    Equally spaced levels in [0, 1], the same for all features (default 255):
+
+    >>> QuantizationConstraint(levels=255)
+
+    Custom values, the same for all features:
+
+    >>> QuantizationConstraint(bins=[0.0, 0.1, 0.5, 1.0])
+
+    Custom values for each feature of inputs of shape ``(batch, 3)``:
+
+    >>> QuantizationConstraint(bins=torch.tensor([[0.0, 1.0], [0.0, 0.5], [0.2, 0.4]]))
+    """
 
     def __init__(
         self,
         preprocessing: DataProcessing = None,
-        levels: Union[list[float], torch.Tensor, int] = 255,
+        levels: Union[int, None] = None,
+        bins: Union[list[float], torch.Tensor, None] = None,
     ) -> None:
         """
         Create the QuantizationConstraint.
+
+        Pass either ``levels`` or ``bins``. If neither is passed, ``levels=255``.
 
         Parameters
         ----------
         preprocessing: DataProcessing
             Preprocessing to apply the constraint in the input space.
-        levels : int, list[float] | torch.Tensor
-            Number of levels or specified levels.
+        levels : int, optional
+            Number of equally spaced levels in [0, 1], at least 2, the same for
+            all features. Inputs outside [0, 1] go to the closest end level.
+        bins : list[float] | torch.Tensor, optional
+            Custom values the inputs are quantized to (not interval edges), at
+            least 2, in any order. Use shape ``(n_values,)`` to share them among
+            all features, or ``(*features, n_values)`` for one set of values per
+            feature, where ``features`` is the input shape without the batch
+            dimension.
+
+        Raises
+        ------
+        ValueError
+            If both ``levels`` and ``bins`` are passed, or if there are fewer
+            than 2 levels or values.
+        TypeError
+            If ``levels`` is not an integer.
         """
-        if isinstance(levels, (int | float)):
+        if levels is not None and bins is not None:
+            msg = "Pass either levels or bins, not both."
+            raise ValueError(msg)
+        if bins is None:
+            levels = 255 if levels is None else levels
+            if isinstance(levels, bool) or not isinstance(levels, numbers.Integral):
+                msg = (
+                    "levels must be an integer number of levels. "
+                    "Pass custom values with bins instead."
+                )
+                raise TypeError(msg)
             if levels < 2:  # noqa: PLR2004
                 msg = "Number of levels must be at least 2."
                 raise ValueError(msg)
-            if int(levels) != levels:
-                msg = "Pass an integer number of levels."
-                raise ValueError(msg)
-            # create uniform levels if an integer is provided
-            self.levels = torch.linspace(0, 1, int(levels))
-        elif isinstance(levels, list):
-            self.levels = torch.tensor(levels, dtype=torch.float32)
-        elif isinstance(levels, torch.Tensor):
-            self.levels = levels.type(torch.float32)
-            if len(self.levels) < 2:  # noqa: PLR2004
-                msg = "Number of custom levels must be at least 2."
-                raise ValueError(msg)
+            self.levels = int(levels)
+            self.bins = None
         else:
-            msg = "Levels must be an integer, list, or torch.Tensor."
-            raise TypeError(msg)
-        # sort levels to ensure they are in ascending order
-        self.levels, _ = torch.sort(self.levels)
+            bins = torch.as_tensor(bins, dtype=torch.float32)
+            if bins.ndim == 0 or bins.shape[-1] < 2:  # noqa: PLR2004
+                msg = "bins must contain at least 2 values along the last dimension."
+                raise ValueError(msg)
+            self.levels = None
+            # sort the values of each feature in ascending order
+            self.bins = torch.sort(bins, dim=-1).values.contiguous()
         super().__init__(preprocessing)
 
     def _apply_constraint(self, x: torch.Tensor) -> torch.Tensor:
-        # reshape x to facilitate broadcasting with custom levels
-        x_expanded = x.unsqueeze(-1)
-        # calculate the absolute difference between x and each custom level
-        distances = torch.abs(x_expanded - self.levels)
-        # find the index of the closest custom level
-        nearest_indices = torch.argmin(distances, dim=-1)
-        # quantize x to the nearest custom level
-        return self.levels[nearest_indices]
+        if not x.is_floating_point():
+            x = x.to(torch.float32)
+        if self.bins is None:
+            return self._quantize_uniform(x)
+        bins = self.bins.to(x)
+        if bins.ndim == 1:
+            return self._quantize_shared_bins(x, bins)
+        return self._quantize_per_feature_bins(x, bins)
+
+    def _quantize_uniform(self, x: torch.Tensor) -> torch.Tensor:
+        steps = self.levels - 1
+        # index of the nearest level, ties go to the lower one (ceil(v - 0.5))
+        index = torch.ceil(x.clamp(0, 1) * steps - 0.5).clamp(min=0)
+        # + 0.0 turns the -0.0 produced by ceil(-0.5) into 0.0
+        return index / steps + 0.0
+
+    @staticmethod
+    def _nearest_bin(
+        x: torch.Tensor, lower: torch.Tensor, upper: torch.Tensor
+    ) -> torch.Tensor:
+        # ties go to the lower value
+        return torch.where(x - lower <= upper - x, lower, upper)
+
+    def _quantize_shared_bins(
+        self, x: torch.Tensor, bins: torch.Tensor
+    ) -> torch.Tensor:
+        # index of the first value >= x, clamped so that both neighbors exist
+        upper = torch.bucketize(x, bins).clamp(1, bins.shape[-1] - 1)
+        return self._nearest_bin(x, bins[upper - 1], bins[upper])
+
+    def _quantize_per_feature_bins(
+        self, x: torch.Tensor, bins: torch.Tensor
+    ) -> torch.Tensor:
+        if bins.shape[:-1] != x.shape[1:]:
+            msg = (
+                f"bins of shape {tuple(bins.shape)} do not match the input features "
+                f"{tuple(x.shape[1:])}. Pass bins of shape (*features, n_values), "
+                "or of shape (n_values,) to share the values among all features."
+            )
+            raise ValueError(msg)
+        # move the batch dimension last, so that each feature is searched
+        # in its own sorted values
+        x_features = x.movedim(0, -1).contiguous()
+        upper = torch.searchsorted(bins, x_features).clamp(1, bins.shape[-1] - 1)
+        lower_values = bins.gather(-1, upper - 1)
+        upper_values = bins.gather(-1, upper)
+        quantized = self._nearest_bin(x_features, lower_values, upper_values)
+        return quantized.movedim(-1, 0).contiguous()
 
 
 class MaskConstraint(Constraint):
