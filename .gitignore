@@ -248,3 +248,4 @@ $RECYCLE.BIN/
 
 # Example models and datasets
 examples/example_data/*
+docs/tutorials/data/*
