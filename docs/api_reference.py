@@ -67,27 +67,41 @@ def _discover():
     return packages, sorted(modules)
 
 
-def _title(text):
-    return f"{text}\n{'-' * len(text)}\n"
+UNDERLINES = ["-", "~", "^", '"', "'"]  # one adornment per heading level
 
 
-def _public_block(package, exported):
-    """Document each exported name explicitly.
+def _title(text, depth=1):
+    """RST heading; ``depth`` 1 is the first level below the page title."""
+    return f"{text}\n{UNDERLINES[depth - 1] * len(text)}\n"
 
-    ``automodule :members:`` only sees names in ``dir(module)``, so it would miss
-    the names a package exports lazily through ``__getattr__``.
+
+def _public_blocks(packages):
+    """Nested sections that follow the package hierarchy.
+
+    Packages that export nothing themselves, but contain packages that do, get a
+    structural heading so the tree has no gaps.
     """
-    lines = [_title(package), f".. automodule:: {package}\n   :no-members:\n"]
-    for attr, obj in exported:
-        path = f"{package}.{attr}"
-        if isinstance(obj, type):
-            lines.append(f".. autoclass:: {path}\n   :members:\n   :show-inheritance:\n")
-        elif isinstance(obj, types.FunctionType):
-            lines.append(f".. autofunction:: {path}\n")
-        else:
-            # plain data directive: autodata would render the docstring of dict/int/str
-            lines.append(f".. py:data:: {path}\n")
-    return "\n".join(lines)
+    nodes = set()
+    for name in packages:
+        parts = name.split(".")
+        nodes.update(".".join(parts[:i]) for i in range(2, len(parts) + 1))
+
+    blocks = []
+    for name in sorted(nodes, key=lambda n: n.split(".")):
+        # headings drop the root prefix; the import path is stated in the body
+        lines = [_title(name.split(".", 1)[1], name.count(".")), f"Import path: ``{name}``\n"]
+        lines.append(f".. automodule:: {name}\n   :no-members:\n")
+        for attr, obj in packages.get(name, []):
+            path = f"{name}.{attr}"
+            if isinstance(obj, type):
+                lines.append(f".. autoclass:: {path}\n   :members:\n   :show-inheritance:\n")
+            elif isinstance(obj, types.FunctionType):
+                lines.append(f".. autofunction:: {path}\n")
+            else:
+                # plain data directive: autodata would render the docstring of dict/int/str
+                lines.append(f".. py:data:: {path}\n")
+        blocks.append("\n".join(lines))
+    return blocks
 
 
 class SecmltApi(SphinxDirective):
@@ -97,9 +111,7 @@ class SecmltApi(SphinxDirective):
         kind = self.arguments[0]
         packages, modules = _discover()
         if kind == "public":
-            blocks = [
-                _public_block(name, exported) for name, exported in packages.items()
-            ]
+            blocks = _public_blocks(packages)
         elif kind == "internal":
             blocks = [
                 f"{_title(name)}\n.. automodule:: {name}\n   :members:\n"
